@@ -33,7 +33,7 @@ public class mapbesichtigung extends EZPlugin implements PluginListener {
     return super.enable(); 
   }  
 
- @HookHandler
+  @HookHandler
   public void mapbesichtigen(ItemUseHook event) {
 
     Player player = event.getPlayer();
@@ -44,59 +44,34 @@ public class mapbesichtigung extends EZPlugin implements PluginListener {
     Location hub1vs1 = new Location(107, 151, 309);
     Location peitschendeweide = new Location(145, 157, 276);
 
-    if (player.getItemHeld().getType() == ItemType.GoldNugget && player.getItemHeld().getDisplayName().equalsIgnoreCase(ChatFormat.GREEN + "Quidditch-Map besichtigen") ) {
-     ItemFactory factory = Canary.factory().getItemFactory();
-     Item bowl = factory.newItem(ItemType.Bowl);
-     bowl.setDisplayName(ChatFormat.BLUE + "esse mich");
-     player.getInventory().setSlot(32, 2, 17, 6);
-      //player.getInventory().setSlot(ItemType.Bowl, 1, 6);
-      player.giveItem(bowl);
-      player.getInventory().removeItem(bowl);
-      player.giveItem(bowl);
-     
-      player.setModeId(1);
-
-      player.teleportTo(quidditchfeld);
-
+    if (player.getItemHeld().getType() == ItemType.GoldNugget && player.getItemHeld().getDisplayName().equalsIgnoreCase(ChatFormat.GREEN + "Quidditch-Map besichtigen") ) 
+    {
+     player.setModeId(1);
+     player.teleportTo(quidditchfeld);
     }
-
-    if (player.getItemHeld().getType() == ItemType.NetherWart && player.getItemHeld().getDisplayName().equalsIgnoreCase(ChatFormat.GREEN + "Nether-Map besichtigen") ) {
-
+    else if (player.getItemHeld().getType() == ItemType.NetherWart && player.getItemHeld().getDisplayName().equalsIgnoreCase(ChatFormat.GREEN + "Nether-Map besichtigen") ) 
+    {
       player.setModeId(1);
-
       player.teleportTo(nethermap);     
-
     }
-
-    if (player.getItemHeld().getType() == ItemType.SpruceSapling && player.getItemHeld().getDisplayName().equalsIgnoreCase(ChatFormat.GREEN + "Weihnachts-Map besichtigen") ) {
-
+    else if (player.getItemHeld().getType() == ItemType.SpruceSapling && player.getItemHeld().getDisplayName().equalsIgnoreCase(ChatFormat.GREEN + "Weihnachts-Map besichtigen") ) 
+    {
       player.setModeId(1);
-
       player.teleportTo(weihnachtsmap);     
-
     }
-
-    if (player.getItemHeld().getType() == ItemType.Feather && player.getItemHeld().getDisplayName().equalsIgnoreCase(ChatFormat.RED + "Besichtigung beenden!") ) {
-
-
+    else if (player.getItemHeld().getType() == ItemType.Feather && player.getItemHeld().getDisplayName().equalsIgnoreCase(ChatFormat.RED + "Besichtigung beenden!") ) 
+    {
       player.setModeId(2);
-
-      player.teleportTo(hub1vs1);   
-        
+      player.teleportTo(hub1vs1);     
     }
-
-    if(player.getItemHeld().getType() == ItemType.DarkOakSapling && player.getItemHeld().getDisplayName().equalsIgnoreCase(ChatFormat.GREEN + "Peitschende-Weide-Map besichtigen")){
-
+    else if(player.getItemHeld().getType() == ItemType.DarkOakSapling && player.getItemHeld().getDisplayName().equalsIgnoreCase(ChatFormat.GREEN + "Peitschende-Weide-Map besichtigen"))
+    {
       player.setModeId(1);
-
       player.teleportTo(peitschendeweide);
-
     }
-
   } 
  
    @HookHandler
-   
   public void telemitdruckplatte1vs1(RedstoneChangeHook event){
 
     Block druckplatte = event.getSourceBlock();

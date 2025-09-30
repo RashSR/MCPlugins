@@ -23,18 +23,14 @@ public class countdown extends EZPlugin {
       int zeit = Integer.valueOf(args[1]);
 
       if(istan == true){
-
         Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Countdown] " + ChatFormat.DARK_GREEN + "Es ist bereits ein Countdown in Gange!");
         return;
-
-                       }
+      }
       
       if(args.length < 2 || args.length > 3){
-
         Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Countdown] " + ChatFormat.DARK_GREEN + "Geben sie " + ChatFormat.GOLD + "zwei" + ChatFormat.DARK_GREEN + " Argumente ein!");
         return;
-
-                             }
+      }
 
       if(zeit > 0){
 

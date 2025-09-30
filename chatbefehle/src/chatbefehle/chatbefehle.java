@@ -17,6 +17,13 @@ import net.canarymod.api.PlayerReference;
 import net.canarymod.api.inventory.ItemType;
 import net.canarymod.api.factory.ItemFactory;
 import net.canarymod.api.inventory.Item;
+import net.canarymod.api.entity.living.humanoid.Player;
+import net.canarymod.api.world.World;
+import net.canarymod.api.world.blocks.Block;
+import net.canarymod.api.world.blocks.BlockType;
+import net.canarymod.api.world.position.Location;
+import java.util.ArrayList;
+import net.canarymod.api.world.position.Position;
 
 public class chatbefehle extends EZPlugin {
   
@@ -287,5 +294,42 @@ public void tell1vs1maps(){
 
   Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + komma + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + komma + ChatFormat.GOLD + msg5 + ChatFormat.DARK_GREEN + komma + ChatFormat.GOLD + msg6 + ChatFormat.DARK_GREEN + ".");
  }
+
+
+@Command(aliases = {"randblocks"},
+         description = "randblocks.",
+         permissions = {""},
+         toolTip = "/randblocks")
+
+  public void randblocks(MessageReceiver caller, String[] parameters) {
+    if (caller instanceof Player) {
+      Player player = (Player)caller;
+      Location loc = player.getLocation();
+      World world = player.getWorld();
+      int x = loc.getBlockX();
+      int y = loc.getBlockY() + 3; // start 2 blocks above head
+      int z = loc.getBlockZ();
+
+      for(int i = 0; i < 3; i++){
+        world.setBlockAt(x, y+i, z, BlockType.Dirt);
+        Block toChange = world.getBlockAt(x, y+i, z);
+        toChange.setData((short)i);
+        toChange.update();
+        //player.chat(toChange.toString());
+      }
+
+      //How to clone a block!
+      Position newPos = new Position(x, y+5, z);
+      Block toClone = world.getBlockAt(x, y+2, z);
+      player.chat(toClone.toString());
+      world.setBlockAt(newPos, toClone);
+      Block cloned = world.getBlockAt(newPos.getBlockX(), newPos.getBlockY(), newPos.getBlockZ());
+      if(toClone.getData() != 0){
+        cloned.setData(toClone.getData());
+        cloned.update();
+      }
+    }
+  }  
+
 }    
 

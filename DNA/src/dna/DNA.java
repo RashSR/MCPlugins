@@ -31,333 +31,258 @@ import net.canarymod.database.Database;
 import net.canarymod.database.DataAccess;
 import net.canarymod.database.exceptions.*;
 
-
 public class DNA extends EZPlugin implements PluginListener{
 
-  public static int levelhoehe;
-  public static boolean harrypotterevent; // vorsicht 0 fails werden nicht getriggert falls hier false!
+	public static int levelhoehe;
+  	public static boolean harrypotterevent; // vorsicht 0 fails werden nicht getriggert falls hier false!
 
-  int fails = 0;
-  int i = 0;
-  int zaeler = 1;
-  int hohe;
-  String msg1 = "[DNA] ";
-  int gespieltespiele = 0;
-  int nullfailrunden = 0;
-  int absolviertebloecke = 0;
-  int gesamtfails = 0;
+ 	int fails = 0;
+ 	int i = 0;
+ 	int zaeler = 1;
+ 	int hohe;
+	String msg1 = "[DNA] ";
+	int gespieltespiele = 0;
+ 	int nullfailrunden = 0;
+	int absolviertebloecke = 0;
+ 	int gesamtfails = 0;
 
-  BlockType luft = BlockType.Air;
-  public static BlockType zuspringenderblock = BlockType.AcaciaLeaves;
-  public static BlockType gesprungenerblock = BlockType.AcaciaLog; 
-  public static BlockType zielblock = BlockType.RedstoneBlock;
-
-  public static boolean an = false;
-  public static boolean luftblock = false;
-  public static boolean letzterblock = true;
-  public static List<Location> eachblock = new ArrayList<Location>();
-  public static boolean arrayan = false;
-  public static boolean viererb = false;
+ 	BlockType luft = BlockType.Air;
+ 	public static BlockType zuspringenderblock = BlockType.AcaciaLeaves;
+ 	public static BlockType gesprungenerblock = BlockType.AcaciaLog; 
+	public static BlockType zielblock = BlockType.RedstoneBlock;
+	public static boolean an = false;
+  	public static boolean luftblock = false;
+  	public static boolean letzterblock = true;
+  	public static List<Location> eachblock = new ArrayList<Location>();
+  	public static boolean arrayan = false;
+  	public static boolean viererb = false;
   
-
-  @Override 
-  public boolean enable() {
-
-    Canary.hooks().registerListener(this, this);
-    super.enable();
-    logger.info("Getting config data");
-    PropertiesFile config = getConfig();
-    levelhoehe = config.getInt("levelhoehe", 16);
-    harrypotterevent = config.getBoolean("harrypotter", false);
-    config.save();
-    return true;
-
-                          }
-
-     @Command(aliases = {"dna"},
-           description = "Teleportiert den Spieler zu DNA.",
-           permissions = {""},
-           toolTip = "/dna")
-
-  public void dna(MessageReceiver caller, String[] parameters){
-
-    if (caller instanceof Player){
-
-      Player player = (Player)caller;
-      playerteleportvorstart(player);
-      setglassanfang();
-      an = true;
-      fails = 0;
-      loadstats(player);
-    }
-  }
-
-  public static void setBlockType(BlockType jumpedBlock,BlockType jumpingBlock, BlockType finishBlock){
-    gesprungenerblock=jumpedBlock;
-    zuspringenderblock=jumpingBlock;
-    zielblock=finishBlock;
-  }
- @Command(aliases = {"statsdna"},
-          description = "Zeigt dem Spieler seine Stats",
-          permissions = {""},
-          toolTip = "/statsdna")
- public void statsdnaCommand(MessageReceiver caller, String[] args){
-
-    if(caller instanceof Player){
-
-    Player player = (Player)caller;
-    loadstats(player);
-    double durchschnitt = (double)gesamtfails/gespieltespiele;
-    durchschnitt = durchschnitt * 100;
-    durchschnitt = Math.round(durchschnitt);
-    durchschnitt = durchschnitt / 100;
-
-    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + "Das sind die Stats von " + ChatFormat.BLUE + player.getDisplayName() + ChatFormat.DARK_GREEN + ":");
-    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - Gespielte Spiele: " + ChatFormat.GOLD + gespieltespiele);
-    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - Gesprungene Bloecke: " + ChatFormat.GOLD + absolviertebloecke);
-    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - Fails pro Runde: " + ChatFormat.GOLD + durchschnitt);
-    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - 0 Fails: " + ChatFormat.GOLD + nullfailrunden + "\n");
-
-                                }
- }
-
- @HookHandler
-  public void leavesbleiben(LeafDecayHook event){
-
-    Block blatt = event.getBlock();
-    Location blattloc = blatt.getLocation();
-    double x = blattloc.getX();
-    double y = blattloc.getY();
-    double z = blattloc.getZ();
-
-    if (x >= 267 && x <= 295 && y >= 18 && y <= 53 && z >= 199 && z <= 236){
-
-      event.setCanceled();
-
-    }
-  }
-
- @HookHandler
-  public void teleportausdnaraum(TeleportHook event){
-
-    Player player = event.getPlayer();
-    Location ausgangloc = event.getCurrentLocation();
-    double xa = ausgangloc.getX();
-    double ya = ausgangloc.getY();
-    double za = ausgangloc.getZ();
-    World world = ausgangloc.getWorld();
-    Location zielloc = event.getDestination();
-    double xz = zielloc.getX();
-    double zz = zielloc.getZ(); 
-
-    if (xa >= 267 && xa <= 295 && za >= 199 && za <= 236 && an == true){
-
-      if(xz > 295 || xz < 267){
-
-            clearbasic(world);
-            loosemessage(player);
-            cleararraylist();
-            arrayan = false;
-            an = false;
-            return;
-        
-      }
-
-      if(zz > 236 || zz < 199){
-
-            clearbasic(world);
-            cleararraylist();
-            loosemessage(player);
-            arrayan = false;
-            an = false;
-            return;
-      }
-   }
-  }
-
- @HookHandler
-  public void telemitdruckplatte(RedstoneChangeHook event){
-
-    Block druckplatte = event.getSourceBlock();
-    Location locdruckplatte = druckplatte.getLocation();
-    double x = locdruckplatte.getX();
-    double y = locdruckplatte.getY();
-    double z = locdruckplatte.getZ();
-    World world = locdruckplatte.getWorld();
-
-    int xdruckplatte = (int)x;
-    int ydruckplatte = (int)y;
-    int zdruckplatte = (int)z;
-
-    if(xdruckplatte == 244 && ydruckplatte == 71 && zdruckplatte == 258 && an == false){
-
-      an = true;
-      setglassanfang();
-      fails = 0;
-      Player player = world.getClosestPlayer(244, 71, 258, 5);
-      loadstats(player);
-
-   }
-
-   if(xdruckplatte == 267 && ydruckplatte == 18 && zdruckplatte == 199 && an == true){
-
-    clearbasic(world);
-    Player player = world.getClosestPlayer(267, 18, 199, 5);
-    loosemessage(player);
-
-    if(arrayan){
-
-      cleararraylist();
-      arrayan = false;
-
+  	@Override 
+  	public boolean enable() {
+    	Canary.hooks().registerListener(this, this);
+    	super.enable();
+    	logger.info("Getting config data");
+    	PropertiesFile config = getConfig();
+    	levelhoehe = config.getInt("levelhoehe", 16);
+    	harrypotterevent = config.getBoolean("harrypotter", false);
+    	config.save();
+    	return true;
     }
 
-    an = false;
+    @Command(aliases = {"dna"},
+           	description = "Teleportiert den Spieler zu DNA.",
+           	permissions = {""},
+           	toolTip = "/dna")
+	public void dna(MessageReceiver caller, String[] parameters){
+    	if (caller instanceof Player){
+      		Player player = (Player)caller;
+      		playerteleportvorstart(player);
+      		setglassanfang();
+      		an = true;
+      		fails = 0;
+      		loadstats(player);
+    	}
+  	}
 
-   }
-  }
+  	public static void setBlockType(BlockType jumpedBlock,BlockType jumpingBlock, BlockType finishBlock){
+    	gesprungenerblock=jumpedBlock;
+    	zuspringenderblock=jumpingBlock;
+    	zielblock=finishBlock;
+  	}
+
+ 	@Command(aliases = {"statsdna"},
+    	     description = "Zeigt dem Spieler seine Stats",
+          	 permissions = {""},
+          	 toolTip = "/statsdna")
+	public void statsdnaCommand(MessageReceiver caller, String[] args){
+    	if(caller instanceof Player){
+    		Player player = (Player)caller;
+    		loadstats(player);
+    		double durchschnitt = (double)gesamtfails/gespieltespiele;
+    		durchschnitt = durchschnitt * 100;
+    		durchschnitt = Math.round(durchschnitt);
+    		durchschnitt = durchschnitt / 100;
+    		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + "Das sind die Stats von " + ChatFormat.BLUE + player.getDisplayName() + ChatFormat.DARK_GREEN + ":");
+    		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - Gespielte Spiele: " + ChatFormat.GOLD + gespieltespiele);
+    		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - Gesprungene Bloecke: " + ChatFormat.GOLD + absolviertebloecke);
+    		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - Fails pro Runde: " + ChatFormat.GOLD + durchschnitt);
+    		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - 0 Fails: " + ChatFormat.GOLD + nullfailrunden + "\n");
+        }
+ 	}
+
+ 	@HookHandler
+  	public void leavesbleiben(LeafDecayHook event){
+    	Block blatt = event.getBlock();
+    	Location blattloc = blatt.getLocation();
+    	double x = blattloc.getX();
+    	double y = blattloc.getY();
+    	double z = blattloc.getZ();
+    	if (x >= 267 && x <= 295 && y >= 18 && y <= 53 && z >= 199 && z <= 236){
+      		event.setCanceled();
+    	}
+  	}
+
+ 	@HookHandler
+  	public void teleportausdnaraum(TeleportHook event){
+    	Player player = event.getPlayer();
+    	Location ausgangloc = event.getCurrentLocation();
+    	double xa = ausgangloc.getX();
+    	double ya = ausgangloc.getY();
+    	double za = ausgangloc.getZ();
+    	World world = ausgangloc.getWorld();
+    	Location zielloc = event.getDestination();
+    	double xz = zielloc.getX();
+    	double zz = zielloc.getZ(); 
+    	if (xa >= 267 && xa <= 295 && za >= 199 && za <= 236 && an == true){
+    		if(xz > 295 || xz < 267){
+            	clearbasic(world);
+            	loosemessage(player);
+            	cleararraylist();
+            	arrayan = false;
+            	an = false;
+            	return;
+      		}
+			if(zz > 236 || zz < 199){
+        		clearbasic(world);
+            	cleararraylist();
+            	loosemessage(player);
+            	arrayan = false;
+            	an = false;
+            	return;
+      		}
+   		}
+  	}
+
+	@HookHandler
+	public void telemitdruckplatte(RedstoneChangeHook event){
+    	Block druckplatte = event.getSourceBlock();
+    	Location locdruckplatte = druckplatte.getLocation();
+    	double x = locdruckplatte.getX();
+    	double y = locdruckplatte.getY();
+    	double z = locdruckplatte.getZ();
+    	World world = locdruckplatte.getWorld();
+
+    	int xdruckplatte = (int)x;
+    	int ydruckplatte = (int)y;
+    	int zdruckplatte = (int)z;
+    	if(xdruckplatte == 244 && ydruckplatte == 71 && zdruckplatte == 258 && an == false){
+      		an = true;
+      		setglassanfang();
+      		fails = 0;
+      		Player player = world.getClosestPlayer(244, 71, 258, 5);
+      		loadstats(player);
+   		}
+   		if(xdruckplatte == 267 && ydruckplatte == 18 && zdruckplatte == 199 && an == true){
+    		clearbasic(world);
+    		Player player = world.getClosestPlayer(267, 18, 199, 5);
+    		loosemessage(player);
+    		if(arrayan){
+      			cleararraylist();
+      			arrayan = false;
+    		}
+    	an = false;
+   		}
+  	}
 
  @HookHandler
   public void ichlaufe(PlayerMoveHook event) {
-
     if (an){
-    
-      Player player = event.getPlayer();
-      Location loc = player.getLocation();
-      double x = loc.getX();
-      double y = loc.getY();
-      double z = loc.getZ();
-      World world = loc.getWorld();
-      Location blockuntermir = new Location(x, y-1, z);
+    	Player player = event.getPlayer();
+      	Location loc = player.getLocation();
+      	double x = loc.getX();
+      	double y = loc.getY();
+      	double z = loc.getZ();
+      	World world = loc.getWorld();
+      	Location blockuntermir = new Location(x, y-1, z);
 
-      int x1 = (int)x;
-      int y1 = (int)y;
-      int z1 = (int)z;
+      	int x1 = (int)x;
+      	int y1 = (int)y;
+      	int z1 = (int)z;
 
-      Block b = world.getBlockAt(x1, y1 - 1, z1);
+      	Block b = world.getBlockAt(x1, y1 - 1, z1);
 
-      double setof = Math.random() * 10;
-      int ofset = (int)setof;
- 
-    if (b.getType() == BlockType.Glass) {
-
-      i = 0;
-      hohe = y1 + levelhoehe + ofset;
-
-      if(hohe > 51){
-
-        hohe = 51;
-
-      }
-      FileLoader fl = new FileLoader("C:/Users/R/Desktop/server/config/events.txt");
-      startmessage(player);
-      blockuntermir.getWorld().setBlockAt(blockuntermir, BlockType.WhiteGlass);
-      makerightblocks(player);
-      arrayan = true;
-      playSound(blockuntermir, SoundEffect.Type.NOTE_PLING, 2.0f, 3.0f);
-
-
-                                        }
-  
-
-    if (b.getType() == zuspringenderblock){
-
-      blockuntermir.getWorld().setBlockAt(blockuntermir, gesprungenerblock);
-      absolviertebloecke = absolviertebloecke + 1;
-      savestats(player);
-
-
-
-      if (y < hohe){
-
-        double sprungauswahl = Math.random();
-
-        if(eachblock.size() > 1 && (eachblock.get(eachblock.size() - 1).getY()  > eachblock.get(eachblock.size() - 2).getY())){
-
-        levelanzeige(player);
-
-                                                                                                                             }
-
-        if(sprungauswahl < 0.95){
-
-        makerightblocks(player);
-
-                                }
-
-        if(sprungauswahl >= 0.95){
-
-          vierersprung(player);
-
-                                 }
-
-                   }
-  
-      if (y >= hohe) {
-
-          makelastblock(player);
-
-                     }
-
-                                          }  
-
-    if (b.getType() == zielblock && b.getY() > 25){
-
-      gewinnmessage(player);
-      absolviertebloecke = absolviertebloecke + 1;
-      savestats(player);
-      cleararraylist();
-      blockuntermir.getWorld().setBlockAt(blockuntermir, BlockType.DiamondBlock);
-      winteleport(player);
-      clearbasic(world);
-      arrayan = false;
-      an = false;
-
-
-                                              }
-      while(arrayan){
-
-        int arraylaenge = eachblock.size();
-        int letzterarraywert = arraylaenge - 1; 
-        int vorletzterarraywert = arraylaenge - 2;
-        double ydarfnichtunter = eachblock.get(letzterarraywert).getY() - 2;
-
-      if(y1 < ydarfnichtunter){
-
-        double xb = eachblock.get(vorletzterarraywert).getX();
-        double yb = eachblock.get(vorletzterarraywert).getY() + 1;
-        double zb = eachblock.get(vorletzterarraywert).getZ();
-
-        int xlb = (int)xb;
-        int ylb = (int)yb;
-        int zlb = (int)zb;
-
-        float richtung = player.getLocation().getRotation();
-        Location vorletzterblock = new Location(world, xlb, ylb, zlb, 0f, richtung);
-        player.teleportTo(vorletzterblock);
-        fails = fails + 1;
-        playSound(vorletzterblock, SoundEffect.Type.BAT_DEATH, 1.0f, 0.75f);
-        gesamtfails = gesamtfails + 1;
-        savestats(player);
-        return;
-      }
-      else{
-
-       return;
-
-      }
-    }
-    
-                                            }
+      	double setof = Math.random() * 10;
+      	int ofset = (int)setof;
+    	if (b.getType() == BlockType.Glass) {
+    		i = 0;
+      		hohe = y1 + levelhoehe + ofset;
+      		if(hohe > 51){
+        		hohe = 51;
+      		}
+      		startmessage(player);
+      		blockuntermir.getWorld().setBlockAt(blockuntermir, BlockType.WhiteGlass);
+      		makerightblocks(player);
+      		arrayan = true;
+      		playSound(blockuntermir, SoundEffect.Type.NOTE_PLING, 2.0f, 3.0f);
+    	}
+    	if (b.getType() == zuspringenderblock){
+    		blockuntermir.getWorld().setBlockAt(blockuntermir, gesprungenerblock);
+      		absolviertebloecke = absolviertebloecke + 1;
+      		savestats(player);
+      		if (y < hohe){
+        	double sprungauswahl = Math.random();
+        		if(eachblock.size() > 1 && (eachblock.get(eachblock.size() - 1).getY()  > eachblock.get(eachblock.size() - 2).getY())){
+        			levelanzeige(player);
+				}
+        		if(sprungauswahl < 0.95){
+        			makerightblocks(player);
+          		}
+        		if(sprungauswahl >= 0.95){
+         			vierersprung(player);
+            	}
+        	}
+      		if (y >= hohe) {
+        		makelastblock(player);
+        	}
+		}  
+    	if (b.getType() == zielblock && b.getY() > 25){
+      		gewinnmessage(player);
+      		absolviertebloecke = absolviertebloecke + 1;
+      		savestats(player);
+      		cleararraylist();
+      		blockuntermir.getWorld().setBlockAt(blockuntermir, BlockType.DiamondBlock);
+      		winteleport(player);
+      		clearbasic(world);
+      		arrayan = false;
+      		an = false;
+    	}
+    	while(arrayan){
+      		int arraylaenge = eachblock.size();
+        	int letzterarraywert = arraylaenge - 1; 
+        	int vorletzterarraywert = arraylaenge - 2;
+        	double ydarfnichtunter = eachblock.get(letzterarraywert).getY() - 2;
+      		if(y1 < ydarfnichtunter){
+        		double xb = eachblock.get(vorletzterarraywert).getX();
+        		double yb = eachblock.get(vorletzterarraywert).getY() + 1;
+        		double zb = eachblock.get(vorletzterarraywert).getZ();
+        		int xlb = (int)xb;
+        		int ylb = (int)yb;
+        		int zlb = (int)zb;
+        		float richtung = player.getLocation().getRotation();
+        		Location vorletzterblock = new Location(world, xlb, ylb, zlb, 0f, richtung);
+        		player.teleportTo(vorletzterblock);
+        		fails = fails + 1;
+        		playSound(vorletzterblock, SoundEffect.Type.BAT_DEATH, 1.0f, 0.75f);
+        		gesamtfails = gesamtfails + 1;
+        		savestats(player);
+        		return;
+        	}else{
+       			return;
+        	}
+    	}
+	}
 }
 
   public void setglassanfang(){
+    FileLoader fl = new FileLoader("C:/Users/R/Desktop/server/config/events.txt");
     Location nul = new Location(0, 0, 0);
     Location startglas = new Location(281, 18, 213);
     startglas.getWorld().setBlockAt(startglas, BlockType.Glass);
     eachblock.add(nul);
     eachblock.add(startglas);
-
   }
+
+
 
   public void makerightblocks(Player player){
 
@@ -605,7 +530,7 @@ public void levelanzeige(Player player){
 
       Location where = player.getLocation();
       Location whereNow = new Location(281, 18, 235);
-      player.teleportTo(whereNow);
+      player.teleportTo(new Location(player.getWorld(), 281, 18, 235, 0f, 180f));
       player.setModeId(2);
 
                                                    }
@@ -682,50 +607,38 @@ public void levelanzeige(Player player){
 
                              }
 
-  public void gewinnmessage(Player player) {
+	public void gewinnmessage(Player player) {
+    	clearbasic(player.getWorld());
+    	cleararraylist();
+    	String msg2 = player.getDisplayName();
+    	String msg3 = " hat DNA mit ";
+    	String msg4 = " Fehlern ";
+    	String msg5 = "gewonnen ";
+    	if(fails == 1){
+      		msg4 = " Fehler ";
+        }
+    	if(gespieltespiele == 20){
+       		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + "Du hast 20 Spiele absolviert. Herzlichen Glueckwunsch!");
+       	}
 
-
-    clearbasic(player.getWorld());
-    cleararraylist();
-    String msg2 = player.getDisplayName();
-    String msg3 = " hat DNA mit ";
-    String msg4 = " Fehlern ";
-    String msg5 = "gewonnen ";
-
-    if(fails == 1){
-
-      msg4 = " Fehler ";
-
-                   }
-
-    if(gespieltespiele == 20){
-
-       Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + "Du hast 20 Spiele absolviert. Herzlichen Glueckwunsch!");
-
-                               }
-
-    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.BLUE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + fails + ChatFormat.DARK_GREEN + msg4 + ChatFormat.GOLD + msg5 + ChatFormat.DARK_GREEN + "!");
-
-    if(fails == 0){
-      if(harrypotterevent){
-
-      ItemFactory factory = Canary.factory().getItemFactory();
-      Item hinweisschaufel = factory.newItem(ItemType.GoldSpade);
-      hinweisschaufel.setDisplayName(ChatFormat.YELLOW + "Hinweis..");
-      hinweisschaufel.setDamage(32);
-      player.getInventory().setSlot(7, hinweisschaufel);
-      nullfailrunden = nullfailrunden + 1;
-      savestats(player);
-      loadstats(player);
-
-      String msg6 = "Fuer diese gute Leistung bekommst du einen ";
-      String msg7 = "Hinweis";
-      String msg8 = " fuer ";
-      String msg9 = "[HP-PS1]";
-
-      Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + msg6 + ChatFormat.GOLD + msg7 + ChatFormat.DARK_GREEN + msg8 + ChatFormat.DARK_AQUA + msg9 + ChatFormat.DARK_GREEN + ".");
+    	Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.BLUE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + fails + ChatFormat.DARK_GREEN + msg4 + ChatFormat.GOLD + msg5 + ChatFormat.DARK_GREEN + "!");
+    	if(fails == 0){
+      		if(harrypotterevent){
+      			ItemFactory factory = Canary.factory().getItemFactory();
+      			Item hinweisschaufel = factory.newItem(ItemType.GoldSpade);
+      			hinweisschaufel.setDisplayName(ChatFormat.YELLOW + "Hinweis..");
+      			hinweisschaufel.setDamage(32);
+      			player.getInventory().setSlot(7, hinweisschaufel);
+      			nullfailrunden = nullfailrunden + 1;
+      			savestats(player);
+      			loadstats(player);
+      			String msg6 = "Fuer diese gute Leistung bekommst du einen ";
+      			String msg7 = "Hinweis";
+      			String msg8 = " fuer ";
+      			String msg9 = "[HP-PS1]";
+      			Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + msg6 + ChatFormat.GOLD + msg7 + ChatFormat.DARK_GREEN + msg8 + ChatFormat.DARK_AQUA + msg9 + ChatFormat.DARK_GREEN + ".");
+    		}
+  		}
     }
-  }
-
-                                           }
+    
 }

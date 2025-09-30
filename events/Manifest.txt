@@ -1,1 +1,1 @@
-Class-Path: ../lib/EZPlugin.jar
+Class-Path: ../lib/EZPlugin.jar;../plugins/HPPS1.jar

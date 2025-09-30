@@ -18,7 +18,7 @@ import net.canarymod.hook.world.LeafDecayHook;
 import net.canarymod.hook.player.ConnectionHook;
 import net.canarymod.chat.ChatFormat;
 import net.canarymod.hook.world.BlockUpdateHook;
-
+import net.canarymod.hook.system.ServerShutdownHook;
 import net.canarymod.hook.player.BlockRightClickHook;
 
 public class events extends EZPlugin implements PluginListener {
@@ -56,7 +56,7 @@ public class events extends EZPlugin implements PluginListener {
  	public void joinevent(ConnectionHook event){
     	Player player = event.getPlayer();
     	this.myEvent=checkEvent();
-    	logger.info("Wir haben den "+tag+"."+monat+"."+jahr);
+    	logger.info("Wir haben den "+tag+"."+monat+"."+jahr+"!");
     	if(myEvent==EventEnum.CHRISTMAS){
     		Christmas.startChristmas();
    		}else if(myEvent==EventEnum.NEWYEAR){
@@ -64,6 +64,11 @@ public class events extends EZPlugin implements PluginListener {
    		}else if(myEvent==EventEnum.HALLOWEEN){
    			Halloween.startHalloween();
    		}
+ 	}
+
+ 	@HookHandler
+ 	public void serverShutdown(ServerShutdownHook event){
+ 		endEvent();
  	}
 
 	@Command(aliases = { "event" },
@@ -103,7 +108,7 @@ public class events extends EZPlugin implements PluginListener {
   	}
 
   	private EventEnum checkEvent(){
-  		if(monat == 12 || monat == 1){
+  		if(monat == 12){
     		return EventEnum.CHRISTMAS;
     	}else if(monat==1 && tag<10){
     		return EventEnum.NEWYEAR;

@@ -7,27 +7,28 @@ import net.canarymod.api.world.World;
 
 public class Halloween extends EZPlugin{
 	public static Location[] pumpkins = new Location[5];
-	public static Location[] webs = new Location[3];
+	public static Location[] webs = new Location[5];
 	public static World world;
 
 
 	public static void endHalloween(){
 		logger.info("Das Event Halloween wird beendet.");
 		events.myEvent=null;
-		removeBlocks();
 		OwnFileWriter fw = new OwnFileWriter(events.fileName, "no");
+		removeBlocks();
+		world.setRaining(false);
 	}
 
 	public static void startHalloween(){
 		logger.info("Das Event Halloween wird gestartet.");
 		events.myEvent=EventEnum.HALLOWEEN;
 		fillArrays();
+		OwnFileWriter fw = new OwnFileWriter(events.fileName, "halloween");
 		logger.info("Wir haben jetzt "+world.getRelativeTime()+" Uhr");
 		world.setRaining(true);
 		world.setThundering(true);
 		world.setThunderStrength((float)Math.random());
 		placeBlocks();
-		OwnFileWriter fw = new OwnFileWriter(events.fileName, "halloween");
 	}
 
 	private static void placeBlocks(){
@@ -66,6 +67,8 @@ public class Halloween extends EZPlugin{
 		webs[0]=new Location(252, 72, 264);
 		webs[1]=new Location(250, 71, 261);
 		webs[2]=new Location(249, 72, 264);
+		webs[3]=new Location(243, 73, 260);
+		webs[4]=new Location(245, 74, 262);
 	}
 
 }

@@ -22,8 +22,8 @@ public class FileLoader extends EZPlugin{
         logger.info("[FileLoader] Event HALLOWEEN erkannt!");
         DNA.setBlockType(BlockType.JackOLantern, BlockType.SoulSand, BlockType.SpiderWeb);
       }else if(eventName.equalsIgnoreCase("christmas")){
-        //TODO: Christmas event
         logger.info("[FileLoader] Event CHRISTMAS erkannt");
+        DNA.setBlockType(BlockType.LapisBlock, BlockType.GoldBlock, BlockType.DiamondBlock);
       }else{
         DNA.setBlockType(BlockType.AcaciaLog, BlockType.AcaciaLeaves, BlockType.RedstoneBlock);
       }
