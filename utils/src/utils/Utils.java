@@ -2,9 +2,14 @@ package utils;
 import net.canarymod.api.entity.living.humanoid.Player;
 import net.canarymod.Canary;
 import net.canarymod.chat.ChatFormat;
+import net.canarymod.api.world.position.Location;
+import net.canarymod.api.inventory.Item;
 
 public class Utils {
-    public static Integer CalculateDistanceBetweenPlayers(Player sir, Player butler){
+  
+  public static Location HubLocation = new Location(251, 71, 262);
+
+  public static Integer CalculateDistanceBetweenPlayers(Player sir, Player butler){
     double xs = sir.getX();
     double ys = sir.getY();
     double zs = sir.getZ();
@@ -25,5 +30,17 @@ public class Utils {
   public static void BroadcastWrongArgumentLengthMessage(String pluginName){
     String serverMessage = ChatFormat.DARK_GREEN + "Falsche Anzahl an Argumenten!";
     Utils.SendServerMessage(pluginName, serverMessage);
+  }
+
+  public static void ClearPlayerInventory(Player player){
+    player.getInventory().clearInventory();
+    Item schuhe = player.getInventory().getBootsSlot();
+    player.getInventory().removeItem(schuhe);
+    Item hose = player.getInventory().getLeggingsSlot();
+    player.getInventory().removeItem(hose);
+    Item brustplatte = player.getInventory().getChestplateSlot();
+    player.getInventory().removeItem(brustplatte);
+    Item helm = player.getInventory().getHelmetSlot();
+    player.getInventory().removeItem(helm);
   }
 }
