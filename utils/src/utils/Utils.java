@@ -13,6 +13,7 @@ public class Utils {
   public static int SPECTATOR_MODE = 3;
   public static final int TICKS_PER_SECOND = 20;
   public static Location HubLocation = new Location(251, 71, 262);
+  public static Location PressurePlate1vs1Location = new Location(107, 151, 303);
 
   public static Integer CalculateDistanceBetweenPlayers(Player sir, Player butler){
     double xs = sir.getX();
@@ -39,13 +40,18 @@ public class Utils {
 
   public static void ClearPlayerInventory(Player player){
     player.getInventory().clearInventory();
-    Item schuhe = player.getInventory().getBootsSlot();
-    player.getInventory().removeItem(schuhe);
-    Item hose = player.getInventory().getLeggingsSlot();
-    player.getInventory().removeItem(hose);
-    Item brustplatte = player.getInventory().getChestplateSlot();
-    player.getInventory().removeItem(brustplatte);
-    Item helm = player.getInventory().getHelmetSlot();
-    player.getInventory().removeItem(helm);
+    removeArmorFromInventory(player);
+  }
+
+  private static void removeArmorFromInventory(Player player){
+    removeItemIfNotNull(player, player.getInventory().getBootsSlot());
+    removeItemIfNotNull(player, player.getInventory().getLeggingsSlot());
+    removeItemIfNotNull(player, player.getInventory().getChestplateSlot());
+    removeItemIfNotNull(player, player.getInventory().getHelmetSlot());
+  }
+
+  private static void removeItemIfNotNull(Player player, Item item){
+    if(item != null)
+      player.getInventory().removeItem(item);
   }
 }

@@ -29,6 +29,6 @@ public class join extends EZPlugin implements PluginListener{
       player.teleportTo(Utils.HubLocation);  
     } 
     else 
-      player.setModeId(0); 
+      player.setModeId(Utils.SURVIVAL_MODE); 
   }
 }
