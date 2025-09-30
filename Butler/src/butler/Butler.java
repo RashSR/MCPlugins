@@ -14,7 +14,7 @@ import java.util.List;
 public class Butler extends EZPlugin implements PluginListener{
   public String displayNameButler = "";
   private static boolean IsPluginEnabled = false;
-  private static final String msg1 = ChatFormat.DARK_AQUA + "[Butler/Sir] ";
+  public static final String msg1 = ChatFormat.DARK_AQUA + "[Butler/Sir] ";
 
   @Override
   public boolean enable() {
