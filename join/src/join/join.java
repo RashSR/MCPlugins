@@ -24,7 +24,7 @@ public class join extends EZPlugin implements PluginListener{
     double z = currentPosition.getZ();
 
     if(x > 80 && x < 300 && z > 200 && z < 400){
-      player.setModeId(2);  
+      player.setModeId(Utils.ADVENTURE_MODE);  
       Utils.ClearPlayerInventory(player);
       player.teleportTo(Utils.HubLocation);  
     } 

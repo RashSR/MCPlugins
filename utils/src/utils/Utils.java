@@ -7,6 +7,10 @@ import net.canarymod.api.inventory.Item;
 
 public class Utils {
   
+  public static int SURVIVAL_MODE = 0;
+  public static int CREATIVE_MODE = 1;
+  public static int ADVENTURE_MODE = 2;
+  public static int SPECTATOR_MODE = 3;
   public static Location HubLocation = new Location(251, 71, 262);
 
   public static Integer CalculateDistanceBetweenPlayers(Player sir, Player butler){
