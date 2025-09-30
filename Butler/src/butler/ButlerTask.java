@@ -3,6 +3,7 @@ import net.canarymod.Canary;
 import net.canarymod.api.entity.living.humanoid.Player;
 import net.canarymod.tasks.ServerTask;
 import net.canarymod.chat.ChatFormat;
+import utils.Utils;
 
 public class ButlerTask extends ServerTask {
   
@@ -27,7 +28,7 @@ public class ButlerTask extends ServerTask {
     playtimeCycle++;
 
     if(playtimeCycle < MAX_PLAYTIME_CYCLES){
-      int distance = calculateDistanceBetweenPlayers(sir, butler);
+      int distance = Utils.calculateDistanceBetweenPlayers(sir, butler);
       String msg2 = "Die Distanz zwischen Sir und Butler betraegt ";
       String serverMessage = Butler.msg1 + ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD +
         distance + ChatFormat.DARK_GREEN + " Meter.";
@@ -62,17 +63,5 @@ public class ButlerTask extends ServerTask {
       Canary.instance().getServer().broadcastMessage(serverMessage);
       Canary.getServer().removeSynchronousTask(this);
     }
-  }
-
-  public Integer calculateDistanceBetweenPlayers(Player sir, Player butler){
-    double xs = sir.getX();
-    double ys = sir.getY();
-    double zs = sir.getZ();
-    double xb = butler.getX();
-    double yb = butler.getY();
-    double zb = butler.getZ();
-    double d = Math.sqrt((xs - xb)*(xs - xb) + (ys - yb)*(ys - yb) + (zs - zb)*(zs - zb));
-    int distance = (int)d;
-    return distance;
   }
 }
