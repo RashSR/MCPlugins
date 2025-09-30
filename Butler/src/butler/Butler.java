@@ -10,13 +10,11 @@ import net.canarymod.plugin.PluginListener;
 import net.canarymod.hook.player.HealthChangeHook;
 import net.canarymod.api.world.effects.SoundEffect;
 import java.util.List;
-import java.util.ArrayList;
 
 public class Butler extends EZPlugin implements PluginListener{
-  String displayNameSir = "";
-  String displayNameButler = "";
-  public static boolean IsPluginEnabled = false;
-  private static final String msg1 = "[Butler/Sir] ";
+  public String displayNameButler = "";
+  private static boolean IsPluginEnabled = false;
+  private static final String msg1 = ChatFormat.DARK_AQUA + "[Butler/Sir] ";
 
   @Override
   public boolean enable() {
@@ -28,18 +26,25 @@ public class Butler extends EZPlugin implements PluginListener{
            description = "sir plugin",
            permissions = {"*"},
            toolTip = "/sir")
-  public void sirCommand(MessageReceiver caller, String[] args){
-    if(IsPluginEnabled)
-      IsPluginEnabled = false;
+  public void SetSirCommand(MessageReceiver caller, String[] args){
+    if(hasRightArgumentCount(args) && caller instanceof Player && hasServerEnoughPlayer()){
+      if(IsPluginEnabled)
+        IsPluginEnabled = false;
 
-    if(!IsPluginEnabled){ 
-      Player butler = (Player)caller;
-      Player sir = Canary.instance().getServer().getPlayer(args[1]);
+      if(args[1].equalsIgnoreCase("info")){
+        broadcastUsageMessage();
+        return;
+      }
 
-      if(!(butler.getDisplayName().equalsIgnoreCase(args[1])))
-        sirbut(butler, sir);
-      else
-        doubleplayermsg();
+      if(!IsPluginEnabled && isPlayerOnline(args[1])){ 
+        Player butler = (Player)caller;
+        Player sir = Canary.instance().getServer().getPlayer(args[1]);
+
+        if(!(butler.getDisplayName().equalsIgnoreCase(args[1])))
+          startGame(butler, sir);
+        else
+          broadcastDuplicatePlayerMessage();
+      }
     }
   }
 
@@ -47,67 +52,114 @@ public class Butler extends EZPlugin implements PluginListener{
             description = "butler plugin",
             permissions = { "*" },
             toolTip = "/butler")
-  public void butlerCommand(MessageReceiver caller, String[] args) {
-    if (caller instanceof Player) { 
-
+  public void SetButlerCommand(MessageReceiver caller, String[] args) {
+    if(hasRightArgumentCount(args) && caller instanceof Player && hasServerEnoughPlayer()){ 
       if(IsPluginEnabled)
         IsPluginEnabled = false;
 
-      if(!IsPluginEnabled){
+      if(args[1].equalsIgnoreCase("info")){
+        broadcastUsageMessage();
+        return;
+      }
+
+      if(!IsPluginEnabled && isPlayerOnline(args[1])){
         Player sir = (Player)caller;
         Player butler = Canary.instance().getServer().getPlayer(args[1]);
 
         if(!(sir.getDisplayName().equalsIgnoreCase(args[1])))
-          sirbut(butler, sir);
+          startGame(butler, sir);
 
       else
-        doubleplayermsg();
+        broadcastDuplicatePlayerMessage();
       }
     }
   }
 
   @HookHandler
-  public void butlerverliertleben(HealthChangeHook event){
+  public void BulterHealthDecreaseEvent(HealthChangeHook event){
     if(IsPluginEnabled){
-      Player ptakedmg = event.getPlayer();
-      String pname = ptakedmg.getDisplayName();
-      float healtbefore = event.getOldValue();
-      float healtafter = event.getNewValue();
+      Player damagedPlayer = event.getPlayer();
+      String playerName = damagedPlayer.getDisplayName();
+      float startingHealth = event.getOldValue();
+      float newHealth = event.getNewValue();
 
-      if (pname.equalsIgnoreCase(displayNameButler)){
-        if(healtbefore > healtafter)
-          playSound(ptakedmg.getLocation(), SoundEffect.Type.BOW_HIT, 1.0f, 1.0f);
+      if (playerName.equalsIgnoreCase(displayNameButler)){
+        if(startingHealth > newHealth)
+          playSound(damagedPlayer.getLocation(), SoundEffect.Type.BOW_HIT, 1.0f, 1.0f);
 
-        if(healtafter <= 4){
+        if(newHealth <= 4){
           String msg2 = "Der Butler ";
           String msg3 = " konnte seinem Sir nicht treu dienen.";
-          Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + msg2 + ChatFormat.BLUE + pname + ChatFormat.DARK_GREEN + msg3);
+          String serverMessage = msg1 + ChatFormat.DARK_GREEN + msg2 + ChatFormat.BLUE + playerName + ChatFormat.DARK_GREEN + msg3;
+          Canary.instance().getServer().broadcastMessage(serverMessage);
           IsPluginEnabled = false;
         }
-
       }
     }
   }
 
-  public void sirbut(Player butler, Player sir){
-    List<Player> spielerliste = new ArrayList <Player>();
-    spielerliste = Canary.instance().getServer().getPlayerList();
-
-    if(spielerliste.size() <= 1)
-      Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + "Es sind gerade" + ChatFormat.GOLD + " zu wenig " + ChatFormat.DARK_GREEN + "Spieler online zum Butler/Sir spielen.");
-
-    if(spielerliste.size() > 1){
-      IsPluginEnabled = true;
-      Canary.getServer().addSynchronousTask(new ButlerTask(sir, butler));
-      displayNameSir = sir.getDisplayName();
-      String msg2 = "Der Sir ist ";
-      String msg3 = " und der Butler ist ";
-      displayNameButler = butler.getDisplayName();    
-      Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + msg2 + ChatFormat.BLUE + displayNameSir + ChatFormat.DARK_GREEN + msg3 + ChatFormat.BLUE + displayNameButler + ChatFormat.DARK_GREEN + ".");
-    }
+  public void startGame(Player butler, Player sir){
+    IsPluginEnabled = true;
+    Canary.getServer().addSynchronousTask(new ButlerTask(sir, butler));
+    String displayNameSir = sir.getDisplayName();
+    displayNameButler = butler.getDisplayName(); 
+    String msg2 = "Der Sir ist ";
+    String msg3 = " und der Butler ist ";
+    String serverMessage = msg1 + ChatFormat.DARK_GREEN + 
+      msg2 + ChatFormat.BLUE + displayNameSir + ChatFormat.DARK_GREEN + 
+      msg3 + ChatFormat.BLUE + displayNameButler + ChatFormat.DARK_GREEN + ".";
+    Canary.instance().getServer().broadcastMessage(serverMessage);
   }
 
-  public void doubleplayermsg(){
-    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + "Man kann Butler/Sir nicht mit sich selbst spielen.");
+  private boolean hasRightArgumentCount(String[] args){
+    if(args.length != 2){
+      broadcastWrongArgumentLengthMessage();
+      return false;
+    }
+        
+    return true;
+  }
+
+  private void broadcastWrongArgumentLengthMessage(){
+    String serverMessage = msg1 + ChatFormat.DARK_GREEN + "Falsche Anzahl an Argumenten!";
+    Canary.instance().getServer().broadcastMessage(serverMessage);
+    broadcastUsageMessage();
+  }
+
+  private void broadcastUsageMessage(){
+    String msg2 = ChatFormat.GOLD + "/sir <Spielername Butler>\n";
+    String msg3 = "/butler <Spielername Sir>";
+    String serverMessage = msg1 + ChatFormat.DARK_GREEN + "Verwendung:\n" + msg2 + msg3;
+    Canary.instance().getServer().broadcastMessage(serverMessage);
+  }
+
+  private void broadcastDuplicatePlayerMessage(){
+    String serverMessage = msg1 + ChatFormat.DARK_GREEN + "Man kann Butler/Sir nicht mit sich selbst spielen.";
+    Canary.instance().getServer().broadcastMessage(serverMessage);
+  }
+
+  private boolean hasServerEnoughPlayer(){
+    List<Player> playerList = Canary.instance().getServer().getPlayerList();
+    
+    if(playerList.size() <= 1){
+      String serverMessage = msg1 + ChatFormat.DARK_GREEN + "Es sind gerade" + ChatFormat.GOLD + 
+        "zu wenig" + ChatFormat.DARK_GREEN + "Spieler online zum Butler/Sir spielen.";
+      Canary.instance().getServer().broadcastMessage(serverMessage);
+      return false;
+    }
+
+    return true;
+  }
+
+  private boolean isPlayerOnline(String playerName){
+    List<Player> playerList = Canary.instance().getServer().getPlayerList();
+    for(Player p : playerList){
+      if(p.getDisplayName().equalsIgnoreCase(playerName))
+        return true;
+    }
+
+    String serverMessage = msg1 + ChatFormat.DARK_GREEN + "Der Spieler" + ChatFormat.BLUE + playerName + ChatFormat.DARK_GREEN + " ist nicht online.";
+    Canary.instance().getServer().broadcastMessage(serverMessage);
+    return false;
   }
 }
