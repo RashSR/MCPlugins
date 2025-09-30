@@ -15,7 +15,7 @@ import utils.Utils;
 public class Butler extends EZPlugin implements PluginListener{
   public String displayNameButler = "";
   private static boolean IsPluginEnabled = false;
-  public static final String pluginName = "[Butler/Sir] ";
+  public static final String pluginName = "[Butler/Sir]";
 
   @Override
   public boolean enable() {
@@ -114,17 +114,12 @@ public class Butler extends EZPlugin implements PluginListener{
 
   private boolean hasRightArgumentCount(String[] args){
     if(args.length != 2){
-      broadcastWrongArgumentLengthMessage();
+      Utils.BroadcastWrongArgumentLengthMessage(pluginName);
+      broadcastUsageMessage();
       return false;
     }
-        
+    
     return true;
-  }
-
-  private void broadcastWrongArgumentLengthMessage(){
-    String serverMessage = ChatFormat.DARK_GREEN + "Falsche Anzahl an Argumenten!";
-    Utils.SendServerMessage(pluginName, serverMessage);
-    broadcastUsageMessage();
   }
 
   private void broadcastUsageMessage(){

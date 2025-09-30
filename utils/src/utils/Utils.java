@@ -18,7 +18,12 @@ public class Utils {
 
   public static void SendServerMessage(String pluginName, String message){
       String plugin = ChatFormat.DARK_AQUA + pluginName;
-      String serverMessage = plugin + message;
+      String serverMessage = plugin + " " + message;
       Canary.instance().getServer().broadcastMessage(serverMessage);
+  }
+
+  public static void BroadcastWrongArgumentLengthMessage(String pluginName){
+    String serverMessage = ChatFormat.DARK_GREEN + "Falsche Anzahl an Argumenten!";
+    Utils.SendServerMessage(pluginName, serverMessage);
   }
 }
