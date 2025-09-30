@@ -32,13 +32,10 @@ public class StatsDna extends DataAccess {
   public int allfails;
   
   public StatsDna() {
-
     super("stats_dna");
-                     }
+  }
   
   public DataAccess getInstance() {
-    
     return new StatsDna();
   }
 }
-
