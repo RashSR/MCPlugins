@@ -2,6 +2,7 @@ package cantbuild;
 import net.canarymod.Canary;
 import com.pragprog.ahmine.ez.EZPlugin;
 import net.canarymod.plugin.PluginListener;
+import utils.Utils;
 import net.canarymod.hook.HookHandler;
 import net.canarymod.hook.player.BlockPlaceHook;
 import net.canarymod.api.world.blocks.Block;
@@ -29,11 +30,11 @@ public class CantBuild extends EZPlugin implements PluginListener {
   }
 
   public void showCantBuildMessage(){
-    String msg1 = "[BuildIt] ";
+    String pluginName = "[BuildIt]";
     String msg2 = "Hier koennen ";
     String msg3 = "keine ";
     String msg4 = "Bloecke platziert werden.";
-    String serverMessage = ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + msg4;
-    Canary.instance().getServer().broadcastMessage(serverMessage);
+    String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + msg4;
+    Utils.SendServerMessage(pluginName, serverMessage);
   }
 }
