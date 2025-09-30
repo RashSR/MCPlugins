@@ -6,8 +6,7 @@ import net.canarymod.chat.ChatFormat;
 import utils.Utils;
 
 public class ButlerTask extends ServerTask {
-  
-  private static final int TICKS_PER_SECOND = 20;
+
   private static final int MAX_PLAYTIME_CYCLES = 60;
   private static final int MAX_BLOCK_DISTANCE = 10;
   private int playtimeCycle = 0;
@@ -15,11 +14,11 @@ public class ButlerTask extends ServerTask {
   private Player butler;
 
   //the delay before executing. Set to 0 or less to run within the next Server tick If delay is 0 or less, the task will run with each server tick
-  private static final long TaskDelay = 5 * TICKS_PER_SECOND; //20 Ticks -> 1 second -> repeats all 5 Seconds
-  private static final boolean IsContinousTask = true;
+  private static final long TaskDelay = 5 * Utils.TICKS_PER_SECOND; //20 Ticks -> 1 second -> repeats all 5 Seconds
+  private static final boolean isContinousTask = true;
 
   public ButlerTask(Player sir, Player butler) {
-    super(Canary.getServer(), TaskDelay, IsContinousTask);
+    super(Canary.getServer(), TaskDelay, isContinousTask);
     this.sir = sir;
     this.butler = butler;
   }

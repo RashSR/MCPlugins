@@ -41,20 +41,15 @@ public class liquiddestroystop extends EZPlugin implements PluginListener {
   }
 
   @HookHandler
-  public void weggespuelt(LiquidDestroyHook event){
+  public void LiquidDestroyHookEvent(LiquidDestroyHook event){
     Block flushedBlock = event.getBlock();
-
-    if(flushedBlock.getType() == BlockType.Torch){
-      Canary.getServer().addSynchronousTask(new LiquidTask(flushedBlock, 1));
+    BlockType type = flushedBlock.getType();
+    if(type == BlockType.Torch || type == BlockType.NetherWart){
+      Canary.getServer().addSynchronousTask(new LiquidTask(flushedBlock));
     }
-    else if(flushedBlock.getType() == BlockType.TallGrass || flushedBlock.getType() == BlockType.Dandelion || 
-       flushedBlock.getType() == BlockType.Poppy || flushedBlock.getType() == BlockType.Carrots || 
-       flushedBlock.getType() == BlockType.Potatoes || flushedBlock.getType() == BlockType.SpiderWeb){
+    else if(type == BlockType.TallGrass || type == BlockType.Dandelion || type == BlockType.Poppy || 
+            type == BlockType.Carrots || type == BlockType.Potatoes || type == BlockType.SpiderWeb)
       event.setCanceled();
-    }
-    else if (flushedBlock.getType() == BlockType.NetherWart){
-      Canary.getServer().addSynchronousTask(new LiquidTask(flushedBlock, 2));
-    }
   }
 
   @HookHandler
@@ -62,8 +57,9 @@ public class liquiddestroystop extends EZPlugin implements PluginListener {
     if(isEnabled){
       Block placedLiquid = event.getBlockPlaced();
       Location loc = placedLiquid.getLocation();
+      BlockType type = placedLiquid.getType();
 
-      if(placedLiquid.getType() == BlockType.LavaFlowing || placedLiquid.getType() == BlockType.WaterFlowing)
+      if(type == BlockType.LavaFlowing || type == BlockType.WaterFlowing)
         Canary.getServer().addSynchronousTask(new LiquidPlayerTaskTask(loc));
     }
   }

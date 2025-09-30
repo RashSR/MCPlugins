@@ -11,6 +11,7 @@ public class Utils {
   public static int CREATIVE_MODE = 1;
   public static int ADVENTURE_MODE = 2;
   public static int SPECTATOR_MODE = 3;
+  public static final int TICKS_PER_SECOND = 20;
   public static Location HubLocation = new Location(251, 71, 262);
 
   public static Integer CalculateDistanceBetweenPlayers(Player sir, Player butler){

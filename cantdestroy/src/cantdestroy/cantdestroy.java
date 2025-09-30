@@ -7,6 +7,7 @@ import net.canarymod.plugin.PluginListener;
 import net.canarymod.hook.HookHandler;
 import net.canarymod.hook.player.BlockDestroyHook;
 import com.pragprog.ahmine.ez.EZPlugin;
+import net.canarymod.api.world.blocks.Block;
 import net.canarymod.api.world.blocks.BlockType;
 import net.canarymod.chat.ChatFormat;
 import net.canarymod.api.inventory.Item;
@@ -57,13 +58,15 @@ public class cantdestroy extends EZPlugin implements PluginListener{
   public void BlockDestroyHookEvent(BlockDestroyHook event) {
     if(isEnabled){
       Player player = event.getPlayer();
-      int x = event.getBlock().getX();
-      int y = event.getBlock().getY();
-      int z = event.getBlock().getZ();
+      Block destroyedBlock = event.getBlock();
+      int x = destroyedBlock.getX();
+      int y = destroyedBlock.getY();
+      int z = destroyedBlock.getZ();
+      BlockType type = destroyedBlock.getType();
 
       //for bedwars
       if(z >= 300 && z <= 525 && x > 300 && x < 555){
-        if(event.getBlock().getType() == BlockType.BedBlock || event.getBlock().getType() == BlockType.SandstoneBlank)
+        if(type == BlockType.BedBlock || type == BlockType.SandstoneBlank)
           return; 
       }
 
@@ -73,20 +76,18 @@ public class cantdestroy extends EZPlugin implements PluginListener{
 
       //for Zombie
       if(x >= 245 && x <= 271 && y >= 69 && y <= 80 && z >= 525 && z <= 549){
-        if (event.getBlock().getType() == BlockType.Reed || event.getBlock().getType() == BlockType.OakSapling || 
-            event.getBlock().getType() == BlockType.OakLog || event.getBlock().getType() == BlockType.OakLeaves || 
-            event.getBlock().getType() == BlockType.OakWood || event.getBlock().getType() == BlockType.NetherWart || 
-            event.getBlock().getType() == BlockType.GlowStone || event.getBlock().getType() == BlockType.Carrots || 
-            event.getBlock().getType() == BlockType.Potatoes || event.getBlock().getType() == BlockType.Melon)
+        if (type == BlockType.Reed || type == BlockType.OakSapling || type == BlockType.OakLog || type == BlockType.OakLeaves || 
+            type == BlockType.OakWood || type == BlockType.NetherWart || type == BlockType.GlowStone || 
+            type == BlockType.Carrots || type == BlockType.Potatoes || type == BlockType.Melon)
           return;
       }
 
-      if(event.getBlock().getType() == BlockType.SlimeBlock){
+      if(type == BlockType.SlimeBlock){
         Item iteminderhand = player.getItemHeld();
         if(iteminderhand.getType() == ItemType.GoldSpade){
           player.getInventory().removeItem(iteminderhand.getType());
           player.setModeId(2);
-          event.getBlock().getLocation().getWorld().setBlockAt(event.getBlock().getLocation(), BlockType.Air);
+          destroyedBlock.getLocation().getWorld().setBlockAt(event.getBlock().getLocation(), BlockType.Air);
         }
       }   
 
