@@ -11,39 +11,32 @@ import net.canarymod.api.world.blocks.BlockType;
 import net.canarymod.tasks.ServerTask;
 import net.canarymod.api.world.position.Location;
 import net.canarymod.api.world.World;
+import utils.Utils;
 
 public class LiquidPlayerTaskTask extends ServerTask {
 
 	private Location loc;
+	private static final boolean isContinousTask = false;
 
-    public LiquidPlayerTaskTask(Location myLoc) {
+    public LiquidPlayerTaskTask(Location loc) {
+        super(Canary.getServer(), 2 * Utils.TICKS_PER_SECOND, isContinousTask);
+        this.loc = loc;
+	}
 
-        super(Canary.getServer(), 2 * 20, false);
-        loc = myLoc;
-
-                                  }
-
-     public void run(){
-
-     	loc.getWorld().setBlockAt(loc, BlockType.Air);
-     	World world = loc.getWorld();
+	public void run(){
+		World world = loc.getWorld();
+     	world.setBlockAt(loc, BlockType.Air);
      	double x = loc.getX();
      	double y = loc.getY();
      	double z = loc.getZ();
 
-     	int xb = (int)x;
-     	int yb = (int)y;
-     	int zb = (int)z;
-
-     	Block a = world.getBlockAt(xb, yb, zb);
-     	Block b = world.getBlockAt(xb + 1, yb, zb);
+     	Block a = world.getBlockAt((int)x, (int)y, (int)z);
+     	Block b = world.getBlockAt((int)x + 1, (int)y, (int)z);
      	b.getLocation().getWorld().setBlockAt(b.getLocation(), BlockType.Air);
 
      	if (a.getType() == BlockType.Air){
-     	a.update();
-     	Canary.instance().getServer().broadcastMessage("wir sind da");
-     	return;
-     }
-
-     }
+			a.update();
+			Canary.instance().getServer().broadcastMessage("wir sind da");
+     	}
+    }
 }
