@@ -32,7 +32,7 @@ public class ButlerTask extends ServerTask {
       String msg2 = "Die Distanz zwischen Sir und Butler betraegt ";
       String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD +
         distance + ChatFormat.DARK_GREEN + " Meter.";
-      Utils.SendServerMessage(Butler.pluginName, serverMessage);
+      Utils.BroadcastServerMessage(Butler.pluginName, serverMessage);
 
       if (distance > MAX_BLOCK_DISTANCE){
           if(butler.getHealth() > 4)
@@ -53,14 +53,14 @@ public class ButlerTask extends ServerTask {
 
         serverMessage = ChatFormat.DARK_GREEN + "Der Butler muss nur noch fuer " + 
           ChatFormat.GOLD + remainingTime + ChatFormat.DARK_GREEN + minuteLabel + " durchhalten.";
-        Utils.SendServerMessage(Butler.pluginName, serverMessage);
+        Utils.BroadcastServerMessage(Butler.pluginName, serverMessage);
       }                
     }
 
     if(playtimeCycle >= MAX_PLAYTIME_CYCLES){
       String serverMessage = ChatFormat.DARK_GREEN + "Der Butler " + ChatFormat.BLUE + 
         butler.getDisplayName() + ChatFormat.DARK_GREEN + " konnte seinem Sir treu dienen!";
-      Utils.SendServerMessage(Butler.pluginName, serverMessage);
+      Utils.BroadcastServerMessage(Butler.pluginName, serverMessage);
       Canary.getServer().removeSynchronousTask(this);
     }
   }

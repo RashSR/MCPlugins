@@ -92,7 +92,7 @@ public class Butler extends EZPlugin implements PluginListener{
           String msg2 = "Der Butler ";
           String msg3 = " konnte seinem Sir nicht treu dienen.";
           String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.BLUE + playerName + ChatFormat.DARK_GREEN + msg3;
-          Utils.SendServerMessage(pluginName, serverMessage);
+          Utils.BroadcastServerMessage(pluginName, serverMessage);
           IsPluginEnabled = false;
         }
       }
@@ -109,7 +109,7 @@ public class Butler extends EZPlugin implements PluginListener{
     String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.BLUE + 
       displayNameSir + ChatFormat.DARK_GREEN + msg3 + ChatFormat.BLUE + 
       displayNameButler + ChatFormat.DARK_GREEN + ".";
-    Utils.SendServerMessage(pluginName, serverMessage);
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
   }
 
   private boolean hasRightArgumentCount(String[] args){
@@ -126,12 +126,12 @@ public class Butler extends EZPlugin implements PluginListener{
     String msg2 = ChatFormat.GOLD + "/sir <Spielername Butler>\n";
     String msg3 = "/butler <Spielername Sir>";
     String serverMessage = ChatFormat.DARK_GREEN + "Verwendung:\n" + msg2 + msg3;
-    Utils.SendServerMessage(pluginName, serverMessage);
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
   }
 
   private void broadcastDuplicatePlayerMessage(){
     String serverMessage = ChatFormat.DARK_GREEN + "Man kann Butler/Sir nicht mit sich selbst spielen.";
-    Utils.SendServerMessage(pluginName, serverMessage);
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
   }
 
   private boolean hasServerEnoughPlayer(){
@@ -140,7 +140,7 @@ public class Butler extends EZPlugin implements PluginListener{
     if(playerList.size() <= 1){
       String serverMessage = ChatFormat.DARK_GREEN + "Es sind gerade" + ChatFormat.GOLD + 
         "zu wenig" + ChatFormat.DARK_GREEN + "Spieler online zum Butler/Sir spielen.";
-      Utils.SendServerMessage(pluginName, serverMessage);
+      Utils.BroadcastServerMessage(pluginName, serverMessage);
       return false;
     }
 
@@ -155,7 +155,7 @@ public class Butler extends EZPlugin implements PluginListener{
     }
 
     String serverMessage = ChatFormat.DARK_GREEN + "Der Spieler" + ChatFormat.BLUE + playerName + ChatFormat.DARK_GREEN + " ist nicht online.";
-    Utils.SendServerMessage(pluginName, serverMessage);
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
     return false;
   }
 }

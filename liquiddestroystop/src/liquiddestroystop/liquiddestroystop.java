@@ -1,6 +1,4 @@
 package liquiddestroystop;
-import net.canarymod.plugin.Plugin;
-import net.canarymod.logger.Logman;
 import net.canarymod.Canary;
 import net.canarymod.commandsys.*;
 import net.canarymod.chat.MessageReceiver;
@@ -14,113 +12,69 @@ import net.canarymod.api.world.blocks.BlockType;
 import net.canarymod.api.world.position.Location;
 import net.canarymod.chat.ChatFormat;
 import net.canarymod.hook.player.BlockPlaceHook;
+import utils.Utils;
 
 public class liquiddestroystop extends EZPlugin implements PluginListener {
 
-@Override 
+  public static final String pluginName = "[Sicherheit]";
+  private static boolean isEnabled = false;
+
+  @Override 
   public boolean enable() {
+    Canary.hooks().registerListener(this, this);
+    return super.enable();
+  }
 
-  Canary.hooks().registerListener(this, this);
-  return super.enable();
-
-                          }
-
-  int i = 1;
-
-   public static boolean an = false;
-
- @Command(aliases = { "liquiddestroy" },
+  @Command(aliases = { "liquiddestroy" },
           description = "Flüßigkeiten verschwinden beim platzieren.",
           permissions = { "" },
           toolTip = "/liquiddestroy")
-
-  public void liquiddestroyCommand(MessageReceiver caller, String[] args) {
-    if (caller instanceof Player) { 
-
-      Player me = (Player)caller;
-
-      if(i == 1){
-      an = true;
-      onmessage();
-      i = i + 1;
-      return;
-      }
-      if(i == 2){
-      an = false;
-      offmessage();
-      i = i - 1;
-      }
-
-                                  }
-                                                                   }
-
-
-@HookHandler
-public void weggespuelt(LiquidDestroyHook event){
-
-
-  Block weggeschwemmt = event.getBlock();
-
-  if(weggeschwemmt.getType() == BlockType.Torch){
-
-
-
-    int i = 1;
-    Canary.getServer().addSynchronousTask(new LiquidTask(weggeschwemmt, i));
-
+  public void liquidDestroyCommand(MessageReceiver caller, String[] args) {
+    if(isEnabled){
+      isEnabled = false;
+      displayDeactivationMessage();
+    }
+    else{
+      isEnabled = true;
+      displayActivationMessage();
+    }  
   }
 
-  if(weggeschwemmt.getType() == BlockType.TallGrass || weggeschwemmt.getType() == BlockType.Dandelion || weggeschwemmt.getType() == BlockType.Poppy || weggeschwemmt.getType() == BlockType.Carrots || weggeschwemmt.getType() == BlockType.Potatoes || weggeschwemmt.getType() == BlockType.SpiderWeb){
+  @HookHandler
+  public void weggespuelt(LiquidDestroyHook event){
+    Block flushedBlock = event.getBlock();
 
-    event.setCanceled();
-
+    if(flushedBlock.getType() == BlockType.Torch){
+      Canary.getServer().addSynchronousTask(new LiquidTask(flushedBlock, 1));
+    }
+    else if(flushedBlock.getType() == BlockType.TallGrass || flushedBlock.getType() == BlockType.Dandelion || 
+       flushedBlock.getType() == BlockType.Poppy || flushedBlock.getType() == BlockType.Carrots || 
+       flushedBlock.getType() == BlockType.Potatoes || flushedBlock.getType() == BlockType.SpiderWeb){
+      event.setCanceled();
+    }
+    else if (flushedBlock.getType() == BlockType.NetherWart){
+      Canary.getServer().addSynchronousTask(new LiquidTask(flushedBlock, 2));
+    }
   }
 
-  if (weggeschwemmt.getType() == BlockType.NetherWart){
+  @HookHandler
+  public void BlockPlaceHookEvent(BlockPlaceHook event){
+    if(isEnabled){
+      Block placedLiquid = event.getBlockPlaced();
+      Location loc = placedLiquid.getLocation();
 
-    int i = 2;
-    Canary.getServer().addSynchronousTask(new LiquidTask(weggeschwemmt, i));
+      if(placedLiquid.getType() == BlockType.LavaFlowing || placedLiquid.getType() == BlockType.WaterFlowing)
+        Canary.getServer().addSynchronousTask(new LiquidPlayerTaskTask(loc));
+    }
   }
 
-}
-
-@HookHandler
-public void liquidgesetzt(BlockPlaceHook event){
-
-if(an){
- Block lavawasser = event.getBlockPlaced();
- Location loc = lavawasser.getLocation();
-
-
- if(lavawasser.getType() == BlockType.LavaFlowing || lavawasser.getType() == BlockType.WaterFlowing){
-
-//Canary.getServer().addSynchronousTask(new LiquidPlayerTask(loc));
-  Canary.getServer().addSynchronousTask(new LiquidPlayerTaskTask(loc));
-
-
+  public void displayActivationMessage(){
+    String serverMessage = ChatFormat.DARK_GREEN + "Fluessigkeiten werden" + ChatFormat.GOLD + "gecleart" + ChatFormat.DARK_GREEN + ".";
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
   }
 
- }
-
-
-
-
-}
-
- public void onmessage(){
-
-  String msg1 = "[Sicherheit] ";
-  String msg2 = "Fluessigkeiten werden gecleart.";
-  Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + msg2);
-
-                        }
-
- public void offmessage(){
-
-  String msg1 = "[Sicherheit]";
-  String msg2 = "Fluessigkeiten werden nicht gecleart";
-  Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + msg2);
-
-                         }
-
+  public void displayDeactivationMessage(){
+    String serverMessage = ChatFormat.DARK_GREEN + "Fluessigkeiten werden" + ChatFormat.GOLD + "nicht " + ChatFormat.DARK_GREEN + "gecleart.";
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
+  }
 }

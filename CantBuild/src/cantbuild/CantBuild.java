@@ -35,6 +35,6 @@ public class CantBuild extends EZPlugin implements PluginListener {
     String msg3 = "keine ";
     String msg4 = "Bloecke platziert werden.";
     String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + msg4;
-    Utils.SendServerMessage(pluginName, serverMessage);
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
   }
 }

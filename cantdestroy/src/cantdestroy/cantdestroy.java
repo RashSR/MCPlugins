@@ -73,7 +73,11 @@ public class cantdestroy extends EZPlugin implements PluginListener{
 
       //for Zombie
       if(x >= 245 && x <= 271 && y >= 69 && y <= 80 && z >= 525 && z <= 549){
-        if (event.getBlock().getType() == BlockType.Reed || event.getBlock().getType() == BlockType.OakSapling || event.getBlock().getType() == BlockType.OakLog || event.getBlock().getType() == BlockType.OakLeaves || event.getBlock().getType() == BlockType.OakWood || event.getBlock().getType() == BlockType.NetherWart || event.getBlock().getType() == BlockType.GlowStone || event.getBlock().getType() == BlockType.Carrots || event.getBlock().getType() == BlockType.Potatoes || event.getBlock().getType() == BlockType.Melon)
+        if (event.getBlock().getType() == BlockType.Reed || event.getBlock().getType() == BlockType.OakSapling || 
+            event.getBlock().getType() == BlockType.OakLog || event.getBlock().getType() == BlockType.OakLeaves || 
+            event.getBlock().getType() == BlockType.OakWood || event.getBlock().getType() == BlockType.NetherWart || 
+            event.getBlock().getType() == BlockType.GlowStone || event.getBlock().getType() == BlockType.Carrots || 
+            event.getBlock().getType() == BlockType.Potatoes || event.getBlock().getType() == BlockType.Melon)
           return;
       }
 
@@ -104,7 +108,7 @@ public class cantdestroy extends EZPlugin implements PluginListener{
     String msg2 = ChatFormat.GOLD + "/break\n";
     String msg3 = "/break info";
     String serverMessage = ChatFormat.DARK_GREEN + "Verwendung:\n" + msg2 + msg3;
-    Utils.SendServerMessage(pluginName, serverMessage);
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
   }
 
   public void displayBreakMessage() {
@@ -112,7 +116,7 @@ public class cantdestroy extends EZPlugin implements PluginListener{
     String msg3 = "zerstoert ";
     String msg4 = "werden!";
     String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + msg4;
-    Utils.SendServerMessage(pluginName, serverMessage);
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
   }
 
   public void displayNoBreakMessage(){
@@ -120,6 +124,6 @@ public class cantdestroy extends EZPlugin implements PluginListener{
     String msg3 = "nicht ";
     String msg4 = "zerstoert werden!";
     String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + msg4;
-    Utils.SendServerMessage(pluginName, serverMessage);
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
   }
 }
