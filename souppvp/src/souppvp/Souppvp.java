@@ -74,13 +74,18 @@ public class Souppvp extends EZPlugin implements PluginListener{
   }
 
   @HookHandler
-  public void telemitdruckplatte1vs1(RedstoneChangeHook event){
-    Block druckplatte = event.getSourceBlock();
-    Location locdruckplatte = druckplatte.getLocation();
+  public void RedstoneChangeHookEvent(RedstoneChangeHook event){
+    if(isEnabled)
+      return;
 
-    if(EZPlugin.locEqual(locdruckplatte, Utils.PressurePlate1vs1Location) && !isEnabled){
-      isEnabled = true;
-      displayActivationMethod();
+    Block eventBlock = event.getSourceBlock();
+    if(eventBlock.getType() == BlockType.StonePlate){
+      Location eventLocation = eventBlock.getLocation();
+      
+      if(EZPlugin.locEqual(eventLocation, Utils.PressurePlate1vs1SoupKitLocation)){
+        isEnabled = true;
+        displayActivationMethod();
+      }
     }
   }
 

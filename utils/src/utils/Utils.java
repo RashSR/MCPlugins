@@ -13,7 +13,7 @@ public class Utils {
   public static int SPECTATOR_MODE = 3;
   public static final int TICKS_PER_SECOND = 20;
   public static Location HubLocation = new Location(251, 71, 262);
-  public static Location PressurePlate1vs1Location = new Location(107, 151, 303);
+  public static Location PressurePlate1vs1SoupKitLocation = new Location(107, 151, 303);
 
   public static Integer CalculateDistanceBetweenPlayers(Player sir, Player butler){
     double xs = sir.getX();
