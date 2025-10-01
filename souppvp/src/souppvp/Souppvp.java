@@ -31,21 +31,12 @@ public class Souppvp extends EZPlugin implements PluginListener{
           permissions = { "" },
           toolTip = "/soup")
   public void soupCommand(MessageReceiver caller, String[] args) {
-    if (caller instanceof Player) { 
-      Player player = (Player)caller;
-
-      if(isEnabled)
-        displayDecativationMethod();
-      else
-        displayActivationMethod();
-      
-      isEnabled = !isEnabled;
-    }
-  }
-
-  private void removeSoupFromSelectedHotbarSlot(Player player) {
-    int hotbar = player.getInventory().getSelectedHotbarSlotId();
-    player.getInventory().setSlot(ItemType.Bowl, 1, hotbar);
+    if(isEnabled)
+      displayDecativationMethod();
+    else
+      displayActivationMethod();
+    
+    isEnabled = !isEnabled;
   }
 
   @HookHandler
@@ -71,6 +62,11 @@ public class Souppvp extends EZPlugin implements PluginListener{
         }
       }
     }
+  }
+
+  private void removeSoupFromSelectedHotbarSlot(Player player) {
+    int hotbar = player.getInventory().getSelectedHotbarSlotId();
+    player.getInventory().setSlot(ItemType.Bowl, 1, hotbar);
   }
 
   @HookHandler

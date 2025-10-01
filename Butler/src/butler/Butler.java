@@ -28,7 +28,7 @@ public class Butler extends EZPlugin implements PluginListener{
            permissions = {"*"},
            toolTip = "/sir")
   public void SetSirCommand(MessageReceiver caller, String[] args){
-    if(hasRightArgumentCount(args) && caller instanceof Player && hasServerEnoughPlayer()){
+    if(hasRightArgumentCount(args) && caller instanceof Player butler && hasServerEnoughPlayer()){
       if(IsPluginEnabled)
         IsPluginEnabled = false;
 
@@ -38,7 +38,6 @@ public class Butler extends EZPlugin implements PluginListener{
       }
 
       if(!IsPluginEnabled && isPlayerOnline(args[1])){ 
-        Player butler = (Player)caller;
         Player sir = Canary.instance().getServer().getPlayer(args[1]);
 
         if(!(butler.getDisplayName().equalsIgnoreCase(args[1])))
@@ -54,7 +53,7 @@ public class Butler extends EZPlugin implements PluginListener{
             permissions = { "*" },
             toolTip = "/butler")
   public void SetButlerCommand(MessageReceiver caller, String[] args) {
-    if(hasRightArgumentCount(args) && caller instanceof Player && hasServerEnoughPlayer()){ 
+    if(hasRightArgumentCount(args) && caller instanceof Player sir && hasServerEnoughPlayer()){ 
       if(IsPluginEnabled)
         IsPluginEnabled = false;
 
@@ -64,7 +63,6 @@ public class Butler extends EZPlugin implements PluginListener{
       }
 
       if(!IsPluginEnabled && isPlayerOnline(args[1])){
-        Player sir = (Player)caller;
         Player butler = Canary.instance().getServer().getPlayer(args[1]);
 
         if(!(sir.getDisplayName().equalsIgnoreCase(args[1])))

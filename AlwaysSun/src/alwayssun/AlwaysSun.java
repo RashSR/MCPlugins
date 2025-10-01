@@ -22,7 +22,6 @@ public class AlwaysSun extends EZPlugin implements PluginListener{
 
  	@HookHandler 
  	public void noTimeChange(TimeChangeHook event){
- 		World world = event.getWorld();
  		event.setCanceled();
  	}
 }

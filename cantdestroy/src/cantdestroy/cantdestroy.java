@@ -30,9 +30,7 @@ public class cantdestroy extends EZPlugin implements PluginListener{
           permissions = { "" },
           toolTip = "/break, or /break info")
   public void breakCommand(MessageReceiver caller, String[] args) {
-    if (hasRightArgumentCount(args) && caller instanceof Player) { 
-      Player player = (Player)caller;
-
+    if (hasRightArgumentCount(args)) { 
       if(args.length == 1){
         if (isEnabled){
           isEnabled = false;

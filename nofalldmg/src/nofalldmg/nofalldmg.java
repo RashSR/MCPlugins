@@ -20,26 +20,21 @@ public class nofalldmg extends EZPlugin implements PluginListener{
   public void DamageHookEvent(DamageHook event) {
     Entity ent = event.getDefender();
 
-    if (ent instanceof Player) {
-      Player player = (Player) ent;
+    if (ent instanceof Player player && event.getDamageSource().getDamagetype() == DamageType.FALL) {
+      double xp = player.getX();
+      double yp = player.getY();
+      double zp = player.getZ();
+      int x = (int) xp;
+      int y = (int) yp;
+      int z = (int) zp;
 
-      if (event.getDamageSource().getDamagetype() == DamageType.FALL) {
-        double xp = player.getX();
-        double yp = player.getY();
-        double zp = player.getZ();
-        int x = (int) xp;
-        int y = (int) yp;
-        int z = (int) zp;
-
-        if(x == 251 && y == 71 && z == 262 || x == 256 && y == 71 && z == 546 || 
-           x == 107 && y == 151 && z == 309 || x ==281 && y == 18 && z == 235 || 
-           x == 93 && y == 79 && z == 327 || x == -350 && y == 64 && z == 264)
-          event.setCanceled();
-            
-        if(x >= 267 && x <= 295 && y >= 18 && y <= 53 && z >= 199 && z <= 236)
-          event.setCanceled();
-        
-      }
+      if(x == 251 && y == 71 && z == 262 || x == 256 && y == 71 && z == 546 || 
+          x == 107 && y == 151 && z == 309 || x ==281 && y == 18 && z == 235 || 
+          x == 93 && y == 79 && z == 327 || x == -350 && y == 64 && z == 264)
+        event.setCanceled();
+          
+      if(x >= 267 && x <= 295 && y >= 18 && y <= 53 && z >= 199 && z <= 236)
+        event.setCanceled();
     }
   }
 }
