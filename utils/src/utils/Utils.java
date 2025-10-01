@@ -22,6 +22,7 @@ public class Utils {
   public static Location ChristmasMapLocation = new Location(207, 135, 309);
   public static Location ShriekingShackLocation = new Location(145, 157, 276);
   public static Location PressurePlate1vs1SoupKitLocation = new Location(107, 151, 303);
+  public static Location PressurePlateHubTo1vs1Location = new Location(243, 71, 266);
 
   public static Integer CalculateDistanceBetweenPlayers(Player sir, Player butler){
     double xs = sir.getX();

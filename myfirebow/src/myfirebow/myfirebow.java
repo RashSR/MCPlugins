@@ -12,7 +12,6 @@ import net.canarymod.hook.HookHandler;
 import net.canarymod.hook.entity.ProjectileHitHook;
 import net.canarymod.plugin.PluginListener;
 import utils.Utils;
-
 import com.pragprog.ahmine.ez.EZPlugin;
 import net.canarymod.chat.ChatFormat;
 import net.canarymod.hook.world.ExplosionHook;

@@ -4,19 +4,29 @@ import net.canarymod.commandsys.*;
 import net.canarymod.chat.MessageReceiver;
 import net.canarymod.api.entity.living.humanoid.Player;
 import com.pragprog.ahmine.ez.EZPlugin;
+import net.canarymod.hook.HookHandler;
 import net.canarymod.chat.ChatFormat;
 import net.canarymod.api.inventory.ItemType;
 import net.canarymod.api.factory.ItemFactory;
 import net.canarymod.api.inventory.Item;
+import net.canarymod.hook.world.RedstoneChangeHook;
 import net.canarymod.api.world.World;
 import net.canarymod.api.world.blocks.Block;
 import net.canarymod.api.world.blocks.BlockType;
 import net.canarymod.api.world.position.Location;
 import net.canarymod.api.world.position.Position;
+import net.canarymod.hook.player.ItemUseHook;
+import net.canarymod.plugin.PluginListener;
 import utils.Utils;
 
-public class chatbefehle extends EZPlugin {
+public class chatbefehle extends EZPlugin implements PluginListener{
   
+  @Override 
+  public boolean enable() {
+    Canary.hooks().registerListener(this, this);
+    return super.enable();
+  }
+
   @Command(aliases = { "hub" },
             description = "Teleportiert den Spieler in die Hauptlobby.",
             permissions = { "" },
@@ -48,25 +58,7 @@ public class chatbefehle extends EZPlugin {
       if(args.length == 1){
         player.teleportTo(Utils.Location1vs1);
         player.setModeId(Utils.ADVENTURE_MODE);
-
-        ItemFactory factory = Canary.factory().getItemFactory();
-        Item quidditchTeleportItem = factory.newItem(ItemType.GoldNugget);
-        Item netherTeleportItem = factory.newItem(ItemType.NetherWart);
-        Item christmasTeleportItem = factory.newItem(ItemType.SpruceSapling);
-        Item shrieckingShackTeleportItem =factory.newItem(ItemType.DarkOakSapling);
-        Item teleportBackItem = factory.newItem(ItemType.Feather);
-
-        quidditchTeleportItem.setDisplayName(ChatFormat.GREEN + "Quidditch-Map besichtigen");
-        netherTeleportItem.setDisplayName(ChatFormat.GREEN + "Nether-Map besichtigen");     
-        christmasTeleportItem.setDisplayName(ChatFormat.GREEN + "Weihnachts-Map besichtigen");
-        shrieckingShackTeleportItem.setDisplayName(ChatFormat.GREEN + "Peitschende-Weide-Map besichtigen");
-        teleportBackItem.setDisplayName(ChatFormat.RED + "Besichtigung beenden!");
-
-        player.getInventory().setSlot(1, quidditchTeleportItem);
-        player.getInventory().setSlot(2, netherTeleportItem);
-        player.getInventory().setSlot(3, christmasTeleportItem);
-        player.getInventory().setSlot(4, shrieckingShackTeleportItem);
-        player.getInventory().setSlot(8, teleportBackItem);
+        givePlayer1vs1TeleportItems(player);
       }
       else if(args.length == 2 && args[1].equalsIgnoreCase("maps"))
           display1vs1MapOptions();
@@ -89,6 +81,78 @@ public class chatbefehle extends EZPlugin {
         }
       }
     }  
+  }
+
+  @HookHandler
+  public void VisitMapByItem(ItemUseHook event) {
+    Player player = event.getPlayer();
+    ItemType heldItemType = player.getItemHeld().getType();
+    String heldItemName = player.getItemHeld().getDisplayName();
+
+    if(heldItemType == ItemType.GoldNugget && heldItemName.equalsIgnoreCase(ChatFormat.GREEN + "Quidditch-Map besichtigen")) 
+    {
+     player.setModeId(Utils.CREATIVE_MODE);
+     player.teleportTo(Utils.QuidditchFieldLocation);
+    }
+    else if(heldItemType == ItemType.NetherWart && heldItemName.equalsIgnoreCase(ChatFormat.GREEN + "Nether-Map besichtigen")) 
+    {
+      player.setModeId(Utils.CREATIVE_MODE);
+      player.teleportTo(Utils.NetherMapLocation);     
+    }
+    else if(heldItemType == ItemType.SpruceSapling && heldItemName.equalsIgnoreCase(ChatFormat.GREEN + "Weihnachts-Map besichtigen")) 
+    {
+      player.setModeId(Utils.CREATIVE_MODE);
+      player.teleportTo(Utils.ChristmasMapLocation);     
+    }
+    else if(heldItemType == ItemType.DarkOakSapling && heldItemName.equalsIgnoreCase(ChatFormat.GREEN + "Peitschende-Weide-Map besichtigen"))
+    {
+      player.setModeId(Utils.CREATIVE_MODE);
+      player.teleportTo(Utils.ShriekingShackLocation);
+    }
+    else if(heldItemType == ItemType.Feather && heldItemName.equalsIgnoreCase(ChatFormat.RED + "Besichtigung beenden!")) 
+    {
+      player.setModeId(Utils.ADVENTURE_MODE);
+      player.teleportTo(Utils.Location1vs1);     
+    }
+  } 
+ 
+  @HookHandler
+  public void RedstoneChnageHookEvent(RedstoneChangeHook event){
+    Block eventBlock = event.getSourceBlock();
+    if(eventBlock.getType() == BlockType.StonePlate){
+      Location eventLocation = eventBlock.getLocation();
+
+      if(EZPlugin.locEqual(eventLocation, Utils.PressurePlateHubTo1vs1Location)){
+        World world = eventLocation.getWorld();
+        Player player = world.getClosestPlayer(Utils.PressurePlateHubTo1vs1Location.getX(), 
+        Utils.PressurePlateHubTo1vs1Location.getY(), Utils.PressurePlateHubTo1vs1Location.getZ(), 5);
+
+        if(player != null){
+          givePlayer1vs1TeleportItems(player);
+        }
+      }
+    }
+  }
+
+  private void givePlayer1vs1TeleportItems(Player player){
+    ItemFactory factory = Canary.factory().getItemFactory();
+    Item quidditchTeleportItem = factory.newItem(ItemType.GoldNugget);
+    Item netherTeleportItem = factory.newItem(ItemType.NetherWart);
+    Item christmasTeleportItem = factory.newItem(ItemType.SpruceSapling);
+    Item shrieckingShackTeleportItem =factory.newItem(ItemType.DarkOakSapling);
+    Item teleportBackItem = factory.newItem(ItemType.Feather);
+
+    quidditchTeleportItem.setDisplayName(ChatFormat.GREEN + "Quidditch-Map besichtigen");
+    netherTeleportItem.setDisplayName(ChatFormat.GREEN + "Nether-Map besichtigen");     
+    christmasTeleportItem.setDisplayName(ChatFormat.GREEN + "Weihnachts-Map besichtigen");
+    shrieckingShackTeleportItem.setDisplayName(ChatFormat.GREEN + "Peitschende-Weide-Map besichtigen");
+    teleportBackItem.setDisplayName(ChatFormat.RED + "Besichtigung beenden!");
+
+    player.getInventory().setSlot(1, quidditchTeleportItem);
+    player.getInventory().setSlot(2, netherTeleportItem);
+    player.getInventory().setSlot(3, christmasTeleportItem);
+    player.getInventory().setSlot(4, shrieckingShackTeleportItem);
+    player.getInventory().setSlot(8, teleportBackItem);
   }
 
   @Command(aliases = {"buildit"},
