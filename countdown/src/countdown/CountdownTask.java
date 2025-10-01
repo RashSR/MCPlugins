@@ -1,12 +1,11 @@
 package countdown;
-import net.canarymod.plugin.Plugin;
-import net.canarymod.logger.Logman;
 import net.canarymod.Canary;
 import net.canarymod.commandsys.*;
 import net.canarymod.chat.MessageReceiver;
 import net.canarymod.api.entity.living.humanoid.Player;
 import com.pragprog.ahmine.ez.EZPlugin;
 import net.canarymod.tasks.ServerTask;
+import utils.Utils;
 import net.canarymod.chat.ChatFormat;
 import net.canarymod.api.world.effects.SoundEffect;
 import net.canarymod.api.world.position.Location;
@@ -14,76 +13,43 @@ import net.canarymod.api.world.World;
 
 public class CountdownTask extends ServerTask {
 
-    int timeins;
-    int i = 0;
-    public static boolean gleich = true;
-    int anzahlvielfaches;
+    private int timeInSeconds;
+    private boolean isFirstRun = true;
+    private static final boolean isContinousTask = true;
 
-	public CountdownTask(int myzahl, boolean istan) {
-
-        super(Canary.getServer(), 20, istan);
-        timeins = myzahl;
-
-                                             }
+	public CountdownTask(int timeInSeconds) {
+        super(Canary.getServer(), 1 * Utils.TICKS_PER_SECOND, isContinousTask);
+        this.timeInSeconds = timeInSeconds;
+    }
 
     public void run(){
-
-        if(vielfaches30(timeins) > 0 && gleich == false){
-
-            Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Countdown] " + ChatFormat.DARK_GREEN +  "Der Server wird in " + ChatFormat.GOLD + timeins + ChatFormat.DARK_GREEN + " Sekunden heruntergefahren.");
-
-                                     }
-        
-        if(timeins == 10 && gleich == false){
-
-            Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Countdown] " + ChatFormat.DARK_GREEN +  "Der Server wird in " + ChatFormat.GOLD + timeins + ChatFormat.DARK_GREEN + " Sekunden heruntergefahren.");
-
-                                            }
-
-        if(timeins <= 5 && timeins > 0 && gleich == false){
-
-            Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Countdown] " + ChatFormat.DARK_GREEN +  "Der Server wird in " + ChatFormat.GOLD + timeins + ChatFormat.DARK_GREEN + " Sekunden heruntergefahren.");
-
-                                       }
-
-        if(timeins == 0){
-
+        if (!isFirstRun && (multipleOf30(timeInSeconds) > 0 || timeInSeconds == 10 || (timeInSeconds <= 5 && timeInSeconds > 0) )) 
+        {
+            String serverMessage = ChatFormat.DARK_GREEN + "Der Server wird in " + ChatFormat.GOLD + 
+                timeInSeconds + ChatFormat.DARK_GREEN + " Sekunden heruntergefahren.";
+            Utils.BroadcastServerMessage(countdown.pluginName, serverMessage);
+        }
+        else if(timeInSeconds == 0){
             Canary.getServer().removeSynchronousTask(this);
             Canary.getServer().initiateShutdown(ChatFormat.DARK_GREEN + "Besuchen Sie uns gerne wieder!");
+        }
 
-                        }
-
-        if(i == 0){
-
-            gleich = false;
-
-                  }
-
-        i = i + 1;
-        timeins = timeins - 1;
+        isFirstRun = false; 
+        timeInSeconds--;
     }
 
 
-    public Integer vielfaches30(int meinezahl){
+    public Integer multipleOf30(int number){
+        int countOfMultiples = 0;
 
-        anzahlvielfaches = 0;
-        while(meinezahl >= 30){
+        while(number >= 30){
+            number = number - 30;
+            countOfMultiples = countOfMultiples + 1;
+        }
 
-            meinezahl = meinezahl - 30;
-            anzahlvielfaches = anzahlvielfaches + 1;
-
-                             }
-
-        if(meinezahl == 0 && anzahlvielfaches > 0){
-
-            return anzahlvielfaches;
-
-                          }
-
-        else{
-
-            return 0;
-
-            }
+        if(number == 0 && countOfMultiples > 0)
+            return countOfMultiples;
+        
+        return 0;     
     } 
 }
