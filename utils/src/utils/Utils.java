@@ -13,6 +13,14 @@ public class Utils {
   public static int SPECTATOR_MODE = 3;
   public static final int TICKS_PER_SECOND = 20;
   public static Location HubLocation = new Location(251, 71, 262);
+  public static Location ZombieLocation = new Location(256, 71, 546);
+  public static Location Location1vs1 = new Location(107, 151, 309);
+  public static Location BuildItLocation = new Location(93, 79, 327);
+  public static Location CityLocation = new Location(4928, 64, 4899);
+  public static Location QuidditchFieldLocation = new Location(163, 138, 309);
+  public static Location NetherMapLocation = new Location(163, 149, 364);
+  public static Location ChristmasMapLocation = new Location(207, 135, 309);
+  public static Location ShriekingShackLocation = new Location(145, 157, 276);
   public static Location PressurePlate1vs1SoupKitLocation = new Location(107, 151, 303);
 
   public static Integer CalculateDistanceBetweenPlayers(Player sir, Player butler){
