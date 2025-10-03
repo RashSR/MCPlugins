@@ -1,6 +1,4 @@
 package fillblocks;
-import net.canarymod.plugin.Plugin;
-import net.canarymod.logger.Logman;
 import net.canarymod.Canary;
 import net.canarymod.commandsys.*;
 import net.canarymod.chat.MessageReceiver;
@@ -22,14 +20,10 @@ import utils.Utils;
 
 public class FillBlocks extends EZPlugin implements PluginListener{
 
-  public static boolean fill = false;
+  private static boolean fill = false;
+  private Block firstBlock = null;
+  private Block secondBlock = null;
   int blockzahl = 0;
-  int firstx;
-  int firsty;
-  int firstz;
-  int secondx;
-  int secondy;
-  int secondz;
   int xmax;
   int xmin;
   int ymax;
@@ -50,18 +44,19 @@ public class FillBlocks extends EZPlugin implements PluginListener{
             permissions = { "*" },
             toolTip = "/fillblocks")
   public void FillBlocksCommand(MessageReceiver caller, String[] args) {
-    if (caller instanceof Player) { 
-      Player player = (Player)caller;
-
+    if (caller instanceof Player player) { 
       if(args.length == 1){
         startPlugin();
+
         ItemFactory factory = Canary.factory().getItemFactory();
         Item blazerodair = factory.newItem(ItemType.BlazeRod);
         Item restartstick = factory.newItem(ItemType.Stick);
         Item resetbone = factory.newItem(ItemType.Bone);
+
         blazerodair.setDisplayName(ChatFormat.BLUE + "Bloecke zu Luft");
         restartstick.setDisplayName(ChatFormat.GREEN + "Neustart");
         resetbone.setDisplayName(ChatFormat.RED + "Reset");
+
         player.getInventory().setSlot(0, restartstick);
         player.getInventory().setSlot(1, blazerodair);
         player.getInventory().setSlot(8, resetbone);                     
@@ -79,52 +74,43 @@ public class FillBlocks extends EZPlugin implements PluginListener{
   @HookHandler
   public void BlockLeftClickHookEvent(BlockLeftClickHook event){
     if(fill){
-      blockzahl++;
       Block clickedBlock = event.getBlock();
-
-      if(blockzahl == 1){
-        firstx = clickedBlock.getX();
-        firsty = clickedBlock.getY();
-        firstz = clickedBlock.getZ();
-        Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.GOLD + "Startblock" + ChatFormat.DARK_GREEN + " hat die Koordinaten " + ChatFormat.GOLD + firstx + ChatFormat.DARK_GREEN + ", " + ChatFormat.GOLD + firsty + ChatFormat.DARK_GREEN + ", " + ChatFormat.GOLD + firstz + ChatFormat.DARK_GREEN + ".");
-        Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.DARK_GREEN + "Geben sie den " + ChatFormat.GOLD + "Zielblock" + ChatFormat.DARK_GREEN + " an." );
-                      }
-
-      if(blockzahl == 2){
-        secondx = clickedBlock.getX();
-        secondy = clickedBlock.getY();
-        secondz = clickedBlock.getZ();
-        Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.GOLD + "Zielblock" + ChatFormat.DARK_GREEN + " hat die Koordinaten " + ChatFormat.GOLD + secondx + ChatFormat.DARK_GREEN + ", " + ChatFormat.GOLD + secondy + ChatFormat.DARK_GREEN + ", " + ChatFormat.GOLD + secondz + ChatFormat.DARK_GREEN + ".");
-        howmuchblocks(firstx, firsty, firstz, secondx, secondy, secondz);
-      }
+      handleBlockSelection(clickedBlock);
     }
   }
 
   @HookHandler
   public void BlockRightClickHookEvent(BlockRightClickHook event){
     if(fill){
-      blockzahl = blockzahl + 1;
       Block clickedBlock = event.getBlockClicked();
-      Player player = event.getPlayer();
+      handleBlockSelection(clickedBlock);
 
-      if(blockzahl == 1){
-        firstx = clickedBlock.getX();
-        firsty = clickedBlock.getY();
-        firstz = clickedBlock.getZ();
-        Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.GOLD + "Startblock" + ChatFormat.DARK_GREEN + " hat die Koordinaten " + ChatFormat.GOLD + firstx + ChatFormat.DARK_GREEN + ", " + ChatFormat.GOLD + firsty + ChatFormat.DARK_GREEN + ", " + ChatFormat.GOLD + firstz + ChatFormat.DARK_GREEN + ".");
-        Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.DARK_GREEN + "Geben sie den " + ChatFormat.GOLD + "Zielblock" + ChatFormat.DARK_GREEN + " an." );
-      }
-      else if(blockzahl == 2){
-        secondx = clickedBlock.getX();
-        secondy = clickedBlock.getY();
-        secondz = clickedBlock.getZ();
-        Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.GOLD + "Zielblock" + ChatFormat.DARK_GREEN + " hat die Koordinaten " + ChatFormat.GOLD + secondx + ChatFormat.DARK_GREEN + ", " + ChatFormat.GOLD + secondy + ChatFormat.DARK_GREEN + ", " + ChatFormat.GOLD + secondz + ChatFormat.DARK_GREEN + ".");
-        howmuchblocks(firstx, firsty, firstz, secondx, secondy, secondz);
-      }
-      else if(blockzahl == 3){
+      //Is needed to determine to which blocktype the selected blocks are changed
+      if(blockzahl == 3)
         blockChange(clickedBlock.getType());
-      }
     }
+ }
+
+ private void handleBlockSelection(Block clickedBlock){
+  blockzahl++;
+
+  if(blockzahl == 1){
+    firstBlock = clickedBlock;
+    String serverMessage = ChatFormat.GOLD + "Startblock" + ChatFormat.DARK_GREEN + " hat die Koordinaten " + 
+      ChatFormat.GOLD + firstBlock.getX() + ChatFormat.DARK_GREEN + ", " + ChatFormat.GOLD + firstBlock.getY() + 
+      ChatFormat.DARK_GREEN + ", " + ChatFormat.GOLD + firstBlock.getZ() + ChatFormat.DARK_GREEN + ".";
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
+    serverMessage = ChatFormat.DARK_GREEN + "Geben sie den " + ChatFormat.GOLD + "Zielblock" + ChatFormat.DARK_GREEN + " an.";
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
+  }
+  else if(blockzahl == 2){
+    secondBlock = clickedBlock;
+    String serverMessage = ChatFormat.GOLD + "Zielblock" + ChatFormat.DARK_GREEN + " hat die Koordinaten " +
+      ChatFormat.GOLD + secondBlock.getX() + ChatFormat.DARK_GREEN + ", " + ChatFormat.GOLD + secondBlock.getY() +
+      ChatFormat.DARK_GREEN + ", " + ChatFormat.GOLD + secondBlock.getZ() + ChatFormat.DARK_GREEN + ".";
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
+    howmuchblocks();
+  }
  }
 
   @HookHandler
@@ -150,7 +136,15 @@ public class FillBlocks extends EZPlugin implements PluginListener{
     }
   }
 
-  public void howmuchblocks(int x1, int y1, int z1, int x2, int y2, int z2){
+  private void howmuchblocks(){
+    int x1 = firstBlock.getX();
+    int y1 = firstBlock.getY();
+    int z1 = firstBlock.getZ();
+
+    int x2 = firstBlock.getX();
+    int y2 = firstBlock.getY();
+    int z2 = firstBlock.getZ();
+
     if(x1 > x2){
       xmax = x1;
       xmin = x2;
