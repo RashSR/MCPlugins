@@ -4,6 +4,7 @@ import net.canarymod.Canary;
 import net.canarymod.chat.ChatFormat;
 import net.canarymod.api.world.position.Location;
 import net.canarymod.api.inventory.Item;
+import net.canarymod.api.world.blocks.Block;
 
 public class Utils {
   
@@ -45,6 +46,27 @@ public class Utils {
   public static void BroadcastWrongArgumentLengthMessage(String pluginName){
     String serverMessage = ChatFormat.DARK_GREEN + "Falsche Anzahl an Argumenten!";
     Utils.BroadcastServerMessage(pluginName, serverMessage);
+  }
+
+  public static int CalculateBlockCountInVolume(Block startBlock, Block endBlock){
+    int xmin = Math.min(startBlock.getX(), endBlock.getX());
+    int xmax = Math.max(startBlock.getX(), endBlock.getX());
+    int ymin = Math.min(startBlock.getY(), endBlock.getY());
+    int ymax = Math.max(startBlock.getY(), endBlock.getY());
+    int zmin = Math.min(startBlock.getZ(), endBlock.getZ());
+    int zmax = Math.max(startBlock.getZ(), endBlock.getZ());
+
+    int totalBlocks = 0;
+    for(int x = xmin; x <= xmax; x++){
+      for(int y = ymin; y <= ymax; y++){
+        for(int z = zmin; z <= zmax; z++){
+          totalBlocks = totalBlocks + 1;
+          Location loc = new Location(x, y, z);
+        }
+      }
+    }
+
+    return totalBlocks;
   }
 
   public static void ClearPlayerInventory(Player player){
