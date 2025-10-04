@@ -2,6 +2,9 @@ package events;
 import net.canarymod.logger.Logman;
 import utils.Utils;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import com.pragprog.ahmine.ez.EZPlugin;
 import net.canarymod.api.world.blocks.BlockType;
 import net.canarymod.api.world.position.Location;
@@ -9,6 +12,7 @@ import net.canarymod.api.world.World;
 
 public class HalloweenEvent extends EZPlugin implements IEvent{
 	private World world;
+	private Map<BlockType, ArrayList<Location>> eventBlocks = new HashMap<>();
 
 	public HalloweenEvent(World world){
 		this.world = world;
@@ -17,7 +21,6 @@ public class HalloweenEvent extends EZPlugin implements IEvent{
 	public void startEvent(){
 		logger.info("Das Event Halloween wird gestartet.");
 		Utils.WriteToEventFile("halloween");
-		logger.info("Wir haben jetzt " + world.getRelativeTime() + " Uhr");
 		world.setRaining(true);
 		world.setThundering(true);
 		world.setThunderStrength((float)Math.random());
@@ -26,9 +29,10 @@ public class HalloweenEvent extends EZPlugin implements IEvent{
 
 	public void endEvent(){
 		logger.info("Das Event Halloween wird beendet.");
-		Utils.WriteToEventFile("no");
+		Utils.WriteToEventFile("no"); 
 		removeBlocks();
 		world.setRaining(false);
+		world.setThundering(false);
 	}
 
 	public EventType getEventType(){
@@ -36,33 +40,39 @@ public class HalloweenEvent extends EZPlugin implements IEvent{
 	}
 
 	private void placeBlocks(){
-		for(Location loc : getPumpkinList())
-			world.setBlockAt(loc, BlockType.JackOLantern);
+		gatherEventBlocks();
 		
-		for(Location loc : getSpiderWebList())
-			world.setBlockAt(loc, BlockType.SpiderWeb);
+		for(Map.Entry<BlockType, ArrayList<Location>> entry : eventBlocks.entrySet()){
+			BlockType blockType = entry.getKey();
+			for (Location loc : entry.getValue())
+				world.setBlockAt(loc, blockType);
+		}
 	}
 
 	private void removeBlocks(){
-		for(Location loc : getPumpkinList())
-			world.setBlockAt(loc, BlockType.Air);
-		
-		for(Location loc : getSpiderWebList())
-			world.setBlockAt(loc, BlockType.Air);
+		for(Map.Entry<BlockType, ArrayList<Location>> entry : eventBlocks.entrySet()){
+			BlockType blockType = entry.getKey();
+			for (Location loc : entry.getValue())
+				world.setBlockAt(loc, BlockType.Air);
+		}
 	}
 
-	private static ArrayList<Location> getPumpkinList(){
+	private void gatherEventBlocks(){
+		eventBlocks.put(BlockType.JackOLantern, getPumpkinList());
+		eventBlocks.put(BlockType.SpiderWeb, getSpiderWebList());
+	}
+
+	private ArrayList<Location> getPumpkinList(){
 		ArrayList<Location> pumpkins = new ArrayList<Location>();
 		pumpkins.add(new Location(252, 72, 263));
 		pumpkins.add(new Location(248, 73, 263));
 		pumpkins.add(new Location(245, 72, 264));
 		pumpkins.add(new Location(243, 73, 265));
 		pumpkins.add(new Location(242, 73, 263));
-
 		return pumpkins;
 	}
 
-	private static ArrayList<Location> getSpiderWebList(){
+	private ArrayList<Location> getSpiderWebList(){
 		ArrayList<Location> spiderWebs = new ArrayList<Location>();
 		spiderWebs.add(new Location(252, 72, 264));
 		spiderWebs.add(new Location(250, 71, 261));
