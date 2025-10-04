@@ -18,7 +18,7 @@ import net.canarymod.hook.world.TimeChangeHook;
 import java.util.Random;
 import java.util.ArrayList;
 
-public class Christmas extends EZPlugin{
+public class Christmas extends EZPlugin implements IEvent{
     public static Location[] fichtenbleatter = new Location[32];
     public static Location[] lapisblocks = new Location[4];
     public static Location[] goldblocks = new Location[4];
@@ -34,26 +34,34 @@ public class Christmas extends EZPlugin{
     private static BlockType[] material = {BlockType.RedstoneBlock, BlockType.QuartzBlock};
     private static int offset;
 
-    public static void endChristmas(){
+    public Christmas(){
+        //startEvent();
+    }
+
+    public void endEvent(){
         weihnachten = false;
         removeCandySticks();
         clear();
         removeSnow();
         logger.info("Das Event Christmas wird beendet.");
-        events.CurrentEvent = null;
+        events.CurrentEventType = null;
         OwnFileWriter fw = new OwnFileWriter(events.fileName, "no");
     }
 
-    public static void startChristmas(){
+    public void startEvent(){
         makeCandySticks(new Location(267, 17, 227), new Location(295, 17, 199), 30);
         fillChristmasArrays();
         weihnachtsevent();
         weihnachten = true;
         dnaMakeSnow();
-        events.CurrentEvent=EventEnum.CHRISTMAS;
+        events.CurrentEventType=EventEnum.CHRISTMAS;
         logger.info("Das Event Christmas wird gestartet.");
         OwnFileWriter fw = new OwnFileWriter(events.fileName, "christmas");
     }
+
+    public EventEnum getEventType(){
+		return EventEnum.CHRISTMAS;
+	}
 
     private static void makeCandySticks(Location groundCorner1, Location groundCorner2, int maxHeight){
         candyStickElements = new ArrayList<>();

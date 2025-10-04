@@ -14,9 +14,10 @@ import net.canarymod.hook.system.ServerShutdownHook;
 import utils.Utils;
 
 public class events extends EZPlugin implements PluginListener {
-	public static EventEnum CurrentEvent;
+	public static EventEnum CurrentEventType;
 	private static final String pluginName = "[Events]";
     public static String fileName="C:/Users/R/Desktop/server/config/events.txt";
+	private IEvent currentEvent;
 	
 	private int month = Integer.parseInt(getMonth());
     private int year = Integer.parseInt(getYear());
@@ -48,24 +49,15 @@ public class events extends EZPlugin implements PluginListener {
 
 	@HookHandler 
  	public void ConnectionHookEvent(ConnectionHook event){
-    	CurrentEvent = getCurrentEvent();
     	logger.info("Wir haben den "+day+"."+month+"."+year+"!");
-
-		switch (CurrentEvent) {
-			case CHRISTMAS:
-					Christmas.startChristmas();
-				break;
-			case NEWYEAR:
-				String serverMessage = ChatFormat.DARK_GREEN + "Wir wuenschen euch ein" + ChatFormat.GOLD + 
-					"frohes " + ChatFormat.DARK_GREEN + "neues Jahr " + ChatFormat.GOLD + getYear() + ChatFormat.DARK_GREEN + ".";
-				Utils.BroadcastServerMessage(pluginName, serverMessage);
-				break;
-			case HALLOWEEN:
-				Halloween.startHalloween();
-				break;
-			default:
-				break;
-		}
+		currentEvent = getCurrentEvent();
+		if(currentEvent != null)
+			currentEvent.startEvent();
+			/* Maybe into Constructor to NewYear Event
+			String serverMessage = ChatFormat.DARK_GREEN + "Wir wuenschen euch ein" + ChatFormat.GOLD + 
+				"frohes " + ChatFormat.DARK_GREEN + "neues Jahr " + ChatFormat.GOLD + getYear() + ChatFormat.DARK_GREEN + ".";
+			Utils.BroadcastServerMessage(pluginName, serverMessage); 
+			*/
  	}
 
  	@HookHandler
@@ -79,38 +71,32 @@ public class events extends EZPlugin implements PluginListener {
             toolTip = "/event weihnachten, /event keins")
   	public void eventsCommand(MessageReceiver caller, String[] args) {
 		if(args.length==2){
-			if(args[1].equalsIgnoreCase("weihnachten") && CurrentEvent!=EventEnum.CHRISTMAS){
+			if(args[1].equalsIgnoreCase("weihnachten") && CurrentEventType!=EventEnum.CHRISTMAS){
 				endEvent();
-				Christmas.startChristmas();
-			}else if(args[1].equalsIgnoreCase("keins") && CurrentEvent!=null){
+				currentEvent = new Christmas();
+				currentEvent.startEvent();
+			}else if(args[1].equalsIgnoreCase("keins") && CurrentEventType!=null){
 				endEvent();
-			}else if(args[1].equalsIgnoreCase("halloween") && CurrentEvent!=EventEnum.HALLOWEEN){
+			}else if(args[1].equalsIgnoreCase("halloween") && CurrentEventType!=EventEnum.HALLOWEEN){
 				endEvent();
-				Halloween.startHalloween();
+				currentEvent = new Halloween();
+				currentEvent.startEvent();
 			}
 		}
   	}
 
   	private void endEvent(){
-		switch (CurrentEvent) {
-			case CHRISTMAS:
-					Christmas.endChristmas();
-				break;
-			case HALLOWEEN:
-				Halloween.endHalloween();
-				break;
-			default:
-				break;
-		}
+		if(currentEvent != null)
+			currentEvent.endEvent();
   	}
 
-  	private EventEnum getCurrentEvent(){
+  	private IEvent getCurrentEvent(){
   		if(month == 12){
-    		return EventEnum.CHRISTMAS;
+    		return new Christmas();
     	}else if(month==1 && day<10){
-    		return EventEnum.NEWYEAR;
+    		return null;//EventEnum.NEWYEAR;
     	}else if(month==10&&day>20){
-    		return EventEnum.HALLOWEEN;
+    		return new Halloween();
     	}else{
     		return null;
     	}
