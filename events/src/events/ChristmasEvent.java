@@ -45,7 +45,7 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
         removeSnow();
         logger.info("Das Event Christmas wird beendet.");
         isRunning = false;
-        OwnFileWriter fw = new OwnFileWriter(Utils.EventFileLocation, "no");
+        Utils.WriteToEventFile("no");
     }
 
     public void startEvent(){
@@ -55,7 +55,7 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
         isRunning = true;
         dnaMakeSnow();
         logger.info("Das Event Christmas wird gestartet.");
-        OwnFileWriter fw = new OwnFileWriter(Utils.EventFileLocation, "christmas");
+        Utils.WriteToEventFile("christmas");
     }
 
     public EventType getEventType(){

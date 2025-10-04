@@ -27,7 +27,7 @@ public class events extends EZPlugin implements PluginListener {
 
 	@HookHandler 
  	public void ConnectionHookEvent(ConnectionHook event){
-    	logger.info("Wir haben den " + Utils.getDay() + "." + Utils.getMonth() + "." + Utils.getYear() + "!");
+    	logger.info("Wir haben den " + Utils.getDay() + "." + Utils.getMonth() + "." + Utils.GetYear() + "!");
 		currentEvent = getCurrentEvent(event.getPlayer().getWorld());
 		if(currentEvent != null)
 			currentEvent.startEvent();

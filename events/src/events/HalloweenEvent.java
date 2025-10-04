@@ -1,7 +1,6 @@
 package events;
 import net.canarymod.logger.Logman;
 import utils.Utils;
-
 import java.util.ArrayList;
 import com.pragprog.ahmine.ez.EZPlugin;
 import net.canarymod.api.world.blocks.BlockType;
@@ -17,7 +16,7 @@ public class HalloweenEvent extends EZPlugin implements IEvent{
 
 	public void startEvent(){
 		logger.info("Das Event Halloween wird gestartet.");
-		OwnFileWriter fw = new OwnFileWriter(Utils.EventFileLocation, "halloween");
+		Utils.WriteToEventFile("halloween");
 		logger.info("Wir haben jetzt " + world.getRelativeTime() + " Uhr");
 		world.setRaining(true);
 		world.setThundering(true);
@@ -27,7 +26,7 @@ public class HalloweenEvent extends EZPlugin implements IEvent{
 
 	public void endEvent(){
 		logger.info("Das Event Halloween wird beendet.");
-		OwnFileWriter fw = new OwnFileWriter(Utils.EventFileLocation, "no");
+		Utils.WriteToEventFile("no");
 		removeBlocks();
 		world.setRaining(false);
 	}

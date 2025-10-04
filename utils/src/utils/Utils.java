@@ -1,17 +1,19 @@
 package utils;
 import net.canarymod.api.entity.living.humanoid.Player;
-
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
+import com.pragprog.ahmine.ez.EZPlugin;
 import net.canarymod.Canary;
 import net.canarymod.chat.ChatFormat;
 import net.canarymod.api.world.position.Location;
 import net.canarymod.api.inventory.Item;
 import net.canarymod.api.world.blocks.Block;
 
-public class Utils {
+public class Utils extends EZPlugin{
   
   public static int SURVIVAL_MODE = 0;
   public static int CREATIVE_MODE = 1;
@@ -95,7 +97,7 @@ public class Utils {
       player.getInventory().removeItem(item);
   }
 
-  public static int getYear() {
+  public static int GetYear() {
     DateFormat dateFormat = new SimpleDateFormat("yyyy");
     Date date = new Date();
     return Integer.parseInt(dateFormat.format(date)); 
@@ -112,4 +114,22 @@ public class Utils {
     Date date = new Date();
     return Integer.parseInt(dateFormat.format(date));
 	}
+
+  public static void WriteToEventFile(String text){
+    File file = new File(EventFileLocation);
+    try{
+      if (file.createNewFile()){
+        logger.info("[FileLoader] File wurde erstellt!");
+      }else {
+        logger.info("[FileWriter] File bereits vorhanden!");
+      }
+
+      FileWriter fw = new FileWriter(EventFileLocation);
+      BufferedWriter bw = new BufferedWriter(fw);
+      bw.write(text);
+      bw.close();
+    }catch(Exception e){
+      logger.info("[FileWriter] Unhandled IO-Exception.");
+    }
+  }
 }

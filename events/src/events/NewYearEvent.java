@@ -18,7 +18,7 @@ public class NewYearEvent extends EZPlugin implements IEvent{
     
     public void startEvent(){
         String serverMessage = ChatFormat.DARK_GREEN + "Wir wuenschen euch ein" + ChatFormat.GOLD + 
-				"frohes " + ChatFormat.DARK_GREEN + "neues Jahr " + ChatFormat.GOLD + Utils.getYear() + ChatFormat.DARK_GREEN + ".";
+				"frohes " + ChatFormat.DARK_GREEN + "neues Jahr " + ChatFormat.GOLD + Utils.GetYear() + ChatFormat.DARK_GREEN + ".";
 		Utils.BroadcastServerMessage(events.pluginName, serverMessage); 
     };
 
