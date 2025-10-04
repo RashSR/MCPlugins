@@ -125,8 +125,7 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
         if(world.getBlockAt(x, y, z).getType() == BlockType.Air){
                 return true;
         }
-        return false;
-        
+        return false; 
     }
 
     private boolean makeCone(Location highestBlock, int height){
@@ -175,7 +174,6 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
 
     private int[] sortCorners(Location groundCorner1, Location groundCorner2){
         int[] sortedCorners = new int[4];
-        //logger.info("GC1.X = " + groundCorner1.getX() + ", GC1.Z = " + groundCorner1.getZ() + ", GC2.X = " + groundCorner2.getX() + ", GC2.Z = " + groundCorner2.getZ());
         if(groundCorner1.getX() <= groundCorner2.getX()){
             sortedCorners[0] = (int)groundCorner1.getX();
             sortedCorners[1] = (int)groundCorner2.getX();
@@ -190,10 +188,9 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
             sortedCorners[2] = (int)groundCorner2.getZ();
             sortedCorners[3] = (int)groundCorner1.getZ();
         }
-        //logger.info("Sorted Values: X1 = " + sortedCorners[0] + ", X2 = " + sortedCorners[1] + ", Z1 = " + sortedCorners[2] + ", Z2 = " + sortedCorners[3]);
+
         for(int i = 0; i <= 100; i++){
             int val = randNumBetween(sortedCorners[0], sortedCorners[1]);
-            //ogger.info("Ich generiere Zahlen zwischen " + sortedCorners[0] + " und " + sortedCorners[1] + ": " + val);
         }
         return sortedCorners;
     }
