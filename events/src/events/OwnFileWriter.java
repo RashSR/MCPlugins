@@ -1,8 +1,6 @@
 package events;
 import java.io.File;
-import java.io.FileNotFoundException;
 import com.pragprog.ahmine.ez.EZPlugin;
-import net.canarymod.logger.Logman;
 import java.io.*;
 
 public class OwnFileWriter extends EZPlugin{
