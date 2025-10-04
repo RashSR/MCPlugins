@@ -11,10 +11,11 @@ import net.canarymod.plugin.PluginListener;
 import net.canarymod.hook.player.ConnectionHook;
 import net.canarymod.chat.ChatFormat;
 import net.canarymod.hook.system.ServerShutdownHook;
+import net.canarymod.api.entity.living.humanoid.Player;
+import net.canarymod.api.world.World;
 import utils.Utils;
 
 public class events extends EZPlugin implements PluginListener {
-	public static EventEnum CurrentEventType;
 	private static final String pluginName = "[Events]";
     public static String fileName="C:/Users/R/Desktop/server/config/events.txt";
 	private IEvent currentEvent;
@@ -50,7 +51,7 @@ public class events extends EZPlugin implements PluginListener {
 	@HookHandler 
  	public void ConnectionHookEvent(ConnectionHook event){
     	logger.info("Wir haben den "+day+"."+month+"."+year+"!");
-		currentEvent = getCurrentEvent();
+		currentEvent = getCurrentEvent(event.getPlayer().getWorld());
 		if(currentEvent != null)
 			currentEvent.startEvent();
 			/* Maybe into Constructor to NewYear Event
@@ -70,33 +71,42 @@ public class events extends EZPlugin implements PluginListener {
             permissions = { "*" },
             toolTip = "/event weihnachten, /event keins")
   	public void eventsCommand(MessageReceiver caller, String[] args) {
-		if(args.length==2){
-			if(args[1].equalsIgnoreCase("weihnachten") && CurrentEventType!=EventEnum.CHRISTMAS){
-				endEvent();
-				currentEvent = new Christmas();
-				currentEvent.startEvent();
-			}else if(args[1].equalsIgnoreCase("keins") && CurrentEventType!=null){
-				endEvent();
-			}else if(args[1].equalsIgnoreCase("halloween") && CurrentEventType!=EventEnum.HALLOWEEN){
-				endEvent();
-				currentEvent = new Halloween();
-				currentEvent.startEvent();
+		if(args.length==2 && caller instanceof Player player){
+			String eventParam = args[1];
+
+			switch (eventParam) {
+				case "weihnachten":
+					endEvent();
+					currentEvent = new ChristmasEvent(player.getWorld());
+					currentEvent.startEvent();
+					break;
+				case "keins":
+					endEvent();
+					break;
+				case "halloween":
+					endEvent();
+					currentEvent = new HalloweenEvent(player.getWorld());
+					currentEvent.startEvent();
+				default:
+					break;
 			}
 		}
   	}
 
   	private void endEvent(){
-		if(currentEvent != null)
+		if(currentEvent != null){
 			currentEvent.endEvent();
+			currentEvent = null;
+		}
   	}
 
-  	private IEvent getCurrentEvent(){
+  	private IEvent getCurrentEvent(World world){
   		if(month == 12){
-    		return new Christmas();
+    		return new ChristmasEvent(world);
     	}else if(month==1 && day<10){
     		return null;//EventEnum.NEWYEAR;
     	}else if(month==10&&day>20){
-    		return new Halloween();
+    		return new HalloweenEvent(world);
     	}else{
     		return null;
     	}

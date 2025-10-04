@@ -18,7 +18,7 @@ import net.canarymod.hook.world.TimeChangeHook;
 import java.util.Random;
 import java.util.ArrayList;
 
-public class Christmas extends EZPlugin implements IEvent{
+public class ChristmasEvent extends EZPlugin implements IEvent{
     public static Location[] fichtenbleatter = new Location[32];
     public static Location[] lapisblocks = new Location[4];
     public static Location[] goldblocks = new Location[4];
@@ -34,8 +34,8 @@ public class Christmas extends EZPlugin implements IEvent{
     private static BlockType[] material = {BlockType.RedstoneBlock, BlockType.QuartzBlock};
     private static int offset;
 
-    public Christmas(){
-        //startEvent();
+    public ChristmasEvent(World world){
+        this.world = world;
     }
 
     public void endEvent(){
@@ -44,7 +44,6 @@ public class Christmas extends EZPlugin implements IEvent{
         clear();
         removeSnow();
         logger.info("Das Event Christmas wird beendet.");
-        events.CurrentEventType = null;
         OwnFileWriter fw = new OwnFileWriter(events.fileName, "no");
     }
 
@@ -54,7 +53,6 @@ public class Christmas extends EZPlugin implements IEvent{
         weihnachtsevent();
         weihnachten = true;
         dnaMakeSnow();
-        events.CurrentEventType=EventEnum.CHRISTMAS;
         logger.info("Das Event Christmas wird gestartet.");
         OwnFileWriter fw = new OwnFileWriter(events.fileName, "christmas");
     }

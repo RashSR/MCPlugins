@@ -6,19 +6,15 @@ import net.canarymod.api.world.blocks.BlockType;
 import net.canarymod.api.world.position.Location;
 import net.canarymod.api.world.World;
 
-public class Halloween extends EZPlugin implements IEvent{
-	public static Location[] pumpkins = new Location[5];
-	public static Location[] webs = new Location[5];
-	private static World world;
+public class HalloweenEvent extends EZPlugin implements IEvent{
+	private World world;
 
-	public Halloween(){
-		//startEvent();
+	public HalloweenEvent(World world){
+		this.world = world;
 	}
 
 	public void startEvent(){
 		logger.info("Das Event Halloween wird gestartet.");
-		events.CurrentEventType = EventEnum.HALLOWEEN;
-		fillArrays();
 		OwnFileWriter fw = new OwnFileWriter(events.fileName, "halloween");
 		logger.info("Wir haben jetzt " + world.getRelativeTime() + " Uhr");
 		world.setRaining(true);
@@ -29,7 +25,6 @@ public class Halloween extends EZPlugin implements IEvent{
 
 	public void endEvent(){
 		logger.info("Das Event Halloween wird beendet.");
-		events.CurrentEventType = null;
 		OwnFileWriter fw = new OwnFileWriter(events.fileName, "no");
 		removeBlocks();
 		world.setRaining(false);
@@ -39,30 +34,23 @@ public class Halloween extends EZPlugin implements IEvent{
 		return EventEnum.HALLOWEEN;
 	}
 
-	private static void placeBlocks(){
-		for(int i = 0; i < pumpkins.length; i++){
-			world.setBlockAt(pumpkins[i], BlockType.JackOLantern);
-			if(i < webs.length){
-				world.setBlockAt(webs[i], BlockType.SpiderWeb);
-			}
-		}
+	private void placeBlocks(){
+		for(Location loc : getPumpkinList())
+			world.setBlockAt(loc, BlockType.JackOLantern);
+		
+		for(Location loc : getSpiderWebList())
+			world.setBlockAt(loc, BlockType.SpiderWeb);
 	}
 
-	private static void removeBlocks(){
-		for(int i = 0; i < pumpkins.length; i++){
-			world.setBlockAt(pumpkins[i], BlockType.Air);
-			if(i<webs.length){
-				world.setBlockAt(webs[i], BlockType.Air);
-			}
-		}
+	private void removeBlocks(){
+		for(Location loc : getPumpkinList())
+			world.setBlockAt(loc, BlockType.Air);
+		
+		for(Location loc : getSpiderWebList())
+			world.setBlockAt(loc, BlockType.Air);
 	}
 
-	private static void fillArrays(){
-		fillPumpkinArray();
-		fillWebArray();
-	}
-
-	private static ArrayList<Location> fillPumpkinArray(){
+	private static ArrayList<Location> getPumpkinList(){
 		ArrayList<Location> pumpkins = new ArrayList<Location>();
 		pumpkins.add(new Location(252, 72, 263));
 		pumpkins.add(new Location(248, 73, 263));
@@ -73,7 +61,7 @@ public class Halloween extends EZPlugin implements IEvent{
 		return pumpkins;
 	}
 
-	private static ArrayList<Location> fillWebArray(){
+	private static ArrayList<Location> getSpiderWebList(){
 		ArrayList<Location> spiderWebs = new ArrayList<Location>();
 		spiderWebs.add(new Location(252, 72, 264));
 		spiderWebs.add(new Location(250, 71, 261));
