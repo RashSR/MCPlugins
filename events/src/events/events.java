@@ -16,12 +16,8 @@ import net.canarymod.api.world.World;
 import utils.Utils;
 
 public class events extends EZPlugin implements PluginListener {
-	private static final String pluginName = "[Events]";
+	protected static final String pluginName = "[Events]";
 	private IEvent currentEvent;
-	
-	private int month = Integer.parseInt(getMonth());
-    private int year = Integer.parseInt(getYear());
-    private int day = Integer.parseInt(getDay());
 	
 	@Override
 	public boolean enable() { 
@@ -29,35 +25,12 @@ public class events extends EZPlugin implements PluginListener {
   		return super.enable(); 
 	}
 
-	private String getYear() {
-    	DateFormat dateFormat = new SimpleDateFormat("yyyy");
-    	Date date = new Date();
-    	return dateFormat.format(date); 
-    }
-
-	private String getMonth(){
-   		DateFormat dateFormat = new SimpleDateFormat("MM");
-   		Date date = new Date();
-		return dateFormat.format(date);
-	}
-
-	private String getDay(){
-   		DateFormat dateFormat = new SimpleDateFormat("dd");
-   		Date date = new Date();
-   		return dateFormat.format(date);
-	}
-
 	@HookHandler 
  	public void ConnectionHookEvent(ConnectionHook event){
-    	logger.info("Wir haben den "+day+"."+month+"."+year+"!");
+    	logger.info("Wir haben den " + Utils.getDay() + "." + Utils.getMonth() + "." + Utils.getYear() + "!");
 		currentEvent = getCurrentEvent(event.getPlayer().getWorld());
 		if(currentEvent != null)
 			currentEvent.startEvent();
-			/* Maybe into Constructor to NewYear Event
-			String serverMessage = ChatFormat.DARK_GREEN + "Wir wuenschen euch ein" + ChatFormat.GOLD + 
-				"frohes " + ChatFormat.DARK_GREEN + "neues Jahr " + ChatFormat.GOLD + getYear() + ChatFormat.DARK_GREEN + ".";
-			Utils.BroadcastServerMessage(pluginName, serverMessage); 
-			*/
  	}
 
  	@HookHandler
@@ -75,7 +48,7 @@ public class events extends EZPlugin implements PluginListener {
 
 			switch (eventParam) {
 				case "weihnachten":
-					if(currentEvent.getEventType() != EventType.CHRISTMAS){
+					if(currentEvent == null || currentEvent.getEventType() != EventType.CHRISTMAS){
 						endEvent();
 						currentEvent = new ChristmasEvent(player.getWorld());
 						currentEvent.startEvent();
@@ -85,11 +58,18 @@ public class events extends EZPlugin implements PluginListener {
 					endEvent();
 					break;
 				case "halloween":
-				if(currentEvent.getEventType() != EventType.HALLOWEEN){
-					endEvent();
-					currentEvent = new HalloweenEvent(player.getWorld());
-					currentEvent.startEvent();
-				}
+					if(currentEvent == null || currentEvent.getEventType() != EventType.HALLOWEEN){
+						endEvent();
+						currentEvent = new HalloweenEvent(player.getWorld());
+						currentEvent.startEvent();
+					}
+					break;
+				case "neujahr":
+					if(currentEvent == null || currentEvent.getEventType() != EventType.NEWYEAR){
+						endEvent();
+						currentEvent = new NewYearEvent(player.getWorld());
+						currentEvent.startEvent();
+					}
 				default:
 					break;
 			}
@@ -97,21 +77,21 @@ public class events extends EZPlugin implements PluginListener {
   	}
 
   	private void endEvent(){
-		if(currentEvent != null){
+		if(currentEvent != null)
 			currentEvent.endEvent();
-			currentEvent = null;
-		}
   	}
 
   	private IEvent getCurrentEvent(World world){
-  		if(month == 12){
+		int day = Utils.getDay();
+		int month = Utils.getMonth();
+
+  		if(month == 12)
     		return new ChristmasEvent(world);
-    	}else if(month==1 && day<10){
-    		return null;//EventEnum.NEWYEAR;
-    	}else if(month==10&&day>20){
+    	else if(month==1 && day<10)
+    		return new NewYearEvent(world);
+    	else if(month==10&&day>20)
     		return new HalloweenEvent(world);
-    	}else{
-    		return null;
-    	}
+
+    	return null;
   	}
 }

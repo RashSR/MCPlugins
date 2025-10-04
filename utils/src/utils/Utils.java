@@ -1,5 +1,10 @@
 package utils;
 import net.canarymod.api.entity.living.humanoid.Player;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import net.canarymod.Canary;
 import net.canarymod.chat.ChatFormat;
 import net.canarymod.api.world.position.Location;
@@ -89,4 +94,22 @@ public class Utils {
     if(item != null)
       player.getInventory().removeItem(item);
   }
+
+  public static int getYear() {
+    DateFormat dateFormat = new SimpleDateFormat("yyyy");
+    Date date = new Date();
+    return Integer.parseInt(dateFormat.format(date)); 
+  }
+
+	public static int getMonth(){
+    DateFormat dateFormat = new SimpleDateFormat("MM");
+    Date date = new Date();
+		return Integer.parseInt(dateFormat.format(date));
+	}
+
+	public static int getDay(){
+    DateFormat dateFormat = new SimpleDateFormat("dd");
+    Date date = new Date();
+    return Integer.parseInt(dateFormat.format(date));
+	}
 }
