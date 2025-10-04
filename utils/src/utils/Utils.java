@@ -12,7 +12,11 @@ public class Utils {
   public static int CREATIVE_MODE = 1;
   public static int ADVENTURE_MODE = 2;
   public static int SPECTATOR_MODE = 3;
+
   public static final int TICKS_PER_SECOND = 20;
+
+  public static final String EventFileLocation = "C:/Users/R/Desktop/server/config/events.txt";
+
   public static Location HubLocation = new Location(251, 71, 262);
   public static Location ZombieLocation = new Location(256, 71, 546);
   public static Location Location1vs1 = new Location(107, 151, 309);

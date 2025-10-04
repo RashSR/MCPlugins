@@ -17,7 +17,6 @@ import utils.Utils;
 
 public class events extends EZPlugin implements PluginListener {
 	private static final String pluginName = "[Events]";
-    public static String fileName="C:/Users/R/Desktop/server/config/events.txt";
 	private IEvent currentEvent;
 	
 	private int month = Integer.parseInt(getMonth());
@@ -76,17 +75,21 @@ public class events extends EZPlugin implements PluginListener {
 
 			switch (eventParam) {
 				case "weihnachten":
-					endEvent();
-					currentEvent = new ChristmasEvent(player.getWorld());
-					currentEvent.startEvent();
+					if(currentEvent.getEventType() != EventType.CHRISTMAS){
+						endEvent();
+						currentEvent = new ChristmasEvent(player.getWorld());
+						currentEvent.startEvent();
+					}
 					break;
 				case "keins":
 					endEvent();
 					break;
 				case "halloween":
+				if(currentEvent.getEventType() != EventType.HALLOWEEN){
 					endEvent();
 					currentEvent = new HalloweenEvent(player.getWorld());
 					currentEvent.startEvent();
+				}
 				default:
 					break;
 			}

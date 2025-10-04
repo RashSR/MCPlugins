@@ -16,6 +16,7 @@ import net.canarymod.hook.player.ConnectionHook;
 import net.canarymod.chat.ChatFormat;
 import net.canarymod.hook.world.TimeChangeHook;
 import java.util.Random;
+import utils.Utils;
 import java.util.ArrayList;
 
 public class ChristmasEvent extends EZPlugin implements IEvent{
@@ -29,39 +30,39 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
     private static ArrayList<Location> candyStickElements;
 
     public static World world;
-    public static boolean weihnachten = false;
     private static Random rand = new Random();
     private static BlockType[] material = {BlockType.RedstoneBlock, BlockType.QuartzBlock};
     private static int offset;
+    private boolean isRunning = false;
 
     public ChristmasEvent(World world){
         this.world = world;
     }
 
     public void endEvent(){
-        weihnachten = false;
         removeCandySticks();
         clear();
         removeSnow();
         logger.info("Das Event Christmas wird beendet.");
-        OwnFileWriter fw = new OwnFileWriter(events.fileName, "no");
+        isRunning = false;
+        OwnFileWriter fw = new OwnFileWriter(Utils.EventFileLocation, "no");
     }
 
     public void startEvent(){
         makeCandySticks(new Location(267, 17, 227), new Location(295, 17, 199), 30);
         fillChristmasArrays();
         weihnachtsevent();
-        weihnachten = true;
+        isRunning = true;
         dnaMakeSnow();
         logger.info("Das Event Christmas wird gestartet.");
-        OwnFileWriter fw = new OwnFileWriter(events.fileName, "christmas");
+        OwnFileWriter fw = new OwnFileWriter(Utils.EventFileLocation, "christmas");
     }
 
-    public EventEnum getEventType(){
-		return EventEnum.CHRISTMAS;
+    public EventType getEventType(){
+		return EventType.CHRISTMAS;
 	}
 
-    private static void makeCandySticks(Location groundCorner1, Location groundCorner2, int maxHeight){
+    private void makeCandySticks(Location groundCorner1, Location groundCorner2, int maxHeight){
         candyStickElements = new ArrayList<>();
         world = groundCorner1.getWorld();
         int x, z;
@@ -88,7 +89,7 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
         }
     }
 
-    private static boolean makeTrunk(int maxHeight, int x, int y, int z){
+    private boolean makeTrunk(int maxHeight, int x, int y, int z){
         int height = rand.nextInt(maxHeight - 5) + 5;
         Location[] candyStickTrunk = new Location[height];
         for(int i = 0; i < candyStickTrunk.length; i++){
@@ -108,7 +109,7 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
         return false;
     }
 
-    private static boolean isPlaceable(int x, int y, int z){
+    private boolean isPlaceable(int x, int y, int z){
         int distBetweenTrunks = 2;
         for(int i = -distBetweenTrunks; i <= distBetweenTrunks; i++){
             for(int j = -distBetweenTrunks; j <= distBetweenTrunks; j++){
@@ -128,7 +129,7 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
         
     }
 
-    private static boolean makeCone(Location highestBlock, int height){
+    private boolean makeCone(Location highestBlock, int height){
         int len = (height/4)+1;
         Location[] candyStickCone;
         Location slab = null;
@@ -166,13 +167,13 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
         return true;
     }
 
-    private static void removeCandySticks(){
+    private void removeCandySticks(){
         for(Location loc : candyStickElements){
             world.setBlockAt(loc, BlockType.Air);
         }
     }
 
-    private static int[] sortCorners(Location groundCorner1, Location groundCorner2){
+    private int[] sortCorners(Location groundCorner1, Location groundCorner2){
         int[] sortedCorners = new int[4];
         //logger.info("GC1.X = " + groundCorner1.getX() + ", GC1.Z = " + groundCorner1.getZ() + ", GC2.X = " + groundCorner2.getX() + ", GC2.Z = " + groundCorner2.getZ());
         if(groundCorner1.getX() <= groundCorner2.getX()){
@@ -197,11 +198,11 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
         return sortedCorners;
     }
 
-    private static int randNumBetween(int lowerBound, int upperBound){
+    private int randNumBetween(int lowerBound, int upperBound){
         return rand.nextInt(upperBound - lowerBound) + lowerBound;
     } 
 
-    public static void makeCandyStick(Location loc){
+    public void makeCandyStick(Location loc){
         for(double i = 0; i < 5; i++){
             if(!((i%2==0))){
                 loc.setY(loc.getY() + 1);
@@ -220,7 +221,7 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
         world.setBlockAt(loc, BlockType.QuartzBlock);          
     }
 
-    public static void dnaMakeSnow(){
+    public void dnaMakeSnow(){
         //TODO darf nicht mittelblock sein LOC -> 281, 18, 213
         dnaSnow = new ArrayList<>();
         int zaehler = 0;
@@ -244,12 +245,12 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
         s.start();
     }
 
-    static class stopSnowMelt extends Thread{
+    public class stopSnowMelt extends Thread{
         public void run(){
-            while(weihnachten){
+            while(isRunning){
                 for(Location loc : dnaSnow){
                     if(world.getBlockAt(loc).getType() != BlockType.Snow){
-                        if(weihnachten){
+                        if(isRunning){
                             world.setBlockAt(loc, BlockType.Snow);
                         }
                     }
@@ -258,13 +259,13 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
         }
     }
 
-    public static void removeSnow(){
+    public void removeSnow(){
         for(Location loc : dnaSnow){
             world.setBlockAt(loc, BlockType.Air);
         }
     }
     
-    public static void clear(){
+    public void clear(){
         for(int a = 0; a < fichtenbleatter.length; a++){
             world.setBlockAt(fichtenbleatter[a], BlockType.Air);
             if(a<lapisblocks.length){
@@ -286,9 +287,8 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
 
     @HookHandler
     public void stopLeafDecay(LeafDecayHook event){
-        if(weihnachten){
+        if(isRunning)
             event.setCanceled();
-        }
     }
 
     public static void fillChristmasArrays(){
@@ -366,7 +366,7 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
         fichtenbleatter[31] = new Location(246, 73, 263);
     }
 
-    public static void weihnachtsevent(){
+    public void weihnachtsevent(){
         for(int f = 0; f < fichtenbleatter.length; f++){
             world.setBlockAt(fichtenbleatter[f], BlockType.PineLeaves);
             if(f<lapisblocks.length){
