@@ -26,10 +26,12 @@ public class FillBlocks extends EZPlugin implements PluginListener{
     NOT_ENABLED, ENABLED, FIRST_BLOCK_SELECTED, SECOND_BLOCK_SELECTED
   }
 
+  private static final String pluginName = "[FillBlocks]";
+  private PluginState state = PluginState.NOT_ENABLED;
+
+  private Player invokingPlayer = null;
   private Block firstBlock = null;
   private Block secondBlock = null;
-  private PluginState state = PluginState.NOT_ENABLED;
-  private static final String pluginName = "[FillBlocks]";
 
   @Override
   public boolean enable() {  
@@ -44,7 +46,7 @@ public class FillBlocks extends EZPlugin implements PluginListener{
   public void FillBlocksCommand(MessageReceiver caller, String[] args) {
     if (caller instanceof Player player) { 
       if(args.length == 1){
-        startPlugin();
+        startPlugin(player);
 
         ItemFactory factory = Canary.factory().getItemFactory();
         Item airItem = factory.newItem(ItemType.BlazeRod);
@@ -66,6 +68,9 @@ public class FillBlocks extends EZPlugin implements PluginListener{
 
   @HookHandler
   public void BlockLeftClickHookEvent(BlockLeftClickHook event){
+    if(!checkForRightPlayer(event.getPlayer()))
+      return;
+
     if(this.state != PluginState.NOT_ENABLED){
       Block clickedBlock = event.getBlock();
       handleBlockSelection(clickedBlock);
@@ -74,6 +79,9 @@ public class FillBlocks extends EZPlugin implements PluginListener{
 
   @HookHandler
   public void BlockRightClickHookEvent(BlockRightClickHook event){
+    if(!checkForRightPlayer(event.getPlayer()))
+      return;
+
     if(this.state != PluginState.NOT_ENABLED){
       Block clickedBlock = event.getBlockClicked();
       handleBlockSelection(clickedBlock);
@@ -116,26 +124,29 @@ public class FillBlocks extends EZPlugin implements PluginListener{
     Player player = event.getPlayer();
     Item heldItem = player.getItemHeld();
 
-    if(heldItem.getType() == ItemType.Stick && heldItem.getDisplayName().equalsIgnoreCase(ChatFormat.GREEN + "Neustart"))
-        startPlugin();
+    if(heldItem.getType() == ItemType.Stick && heldItem.getDisplayName().equalsIgnoreCase(ChatFormat.GREEN + "Neustart") && this.state == PluginState.NOT_ENABLED && this.invokingPlayer == null)
+        startPlugin(player);
     else if(this.state != PluginState.NOT_ENABLED){
       if(heldItem.getType() == ItemType.Bone && heldItem.getDisplayName().equalsIgnoreCase(ChatFormat.RED + "Reset"))
         resetPlugin();
       else if(heldItem.getType() == ItemType.BlazeRod && heldItem.getDisplayName().equalsIgnoreCase(ChatFormat.BLUE + "Bloecke zu Luft") && this.state == PluginState.SECOND_BLOCK_SELECTED)
         changeBlocks(BlockType.Air, null);
     }
+    
   }
   
-  public void startPlugin(){
+  public void startPlugin(Player player){
     String serverMessage = ChatFormat.DARK_GREEN + "FillBlocks ist jetzt " + ChatFormat.GOLD + 
     "aktiviert" + ChatFormat.DARK_GREEN + ". \nGeben sie den" + ChatFormat.GOLD + 
     "Startblock" + ChatFormat.DARK_GREEN + " an.";
     Utils.BroadcastServerMessage(pluginName, serverMessage);
     this.state = PluginState.ENABLED;
+    this.invokingPlayer = player;
   }
 
   public void resetPlugin(){
     this.state = PluginState.NOT_ENABLED;
+    this.invokingPlayer = null;
     Utils.BroadcastServerMessage(pluginName, ChatFormat.RED + "Plugin wurde zurueckgesetzt.");
   }
 
@@ -165,6 +176,7 @@ public class FillBlocks extends EZPlugin implements PluginListener{
           Location loc = new Location(x, y, z);
           World world = loc.getWorld();
           world.setBlockAt(loc, blockType);
+          //This ensures that the correct blockType is used except for 1.8 blocks
           if(clickedBlock != null && clickedBlock.getData() != 0){
             Block placedBlock = world.getBlockAt(x, y, z);
             placedBlock.setData(clickedBlock.getData());
@@ -176,5 +188,12 @@ public class FillBlocks extends EZPlugin implements PluginListener{
 
     int blocksChanged = (xmax - xmin + 1) * (ymax - ymin + 1) * (zmax - zmin + 1);
     return blocksChanged;
+  }
+
+  private boolean checkForRightPlayer(Player player){
+    if(player == this.invokingPlayer)
+      return true;
+
+    return false;
   }
 }
