@@ -30,6 +30,7 @@ import net.canarymod.api.inventory.ItemType;
 import net.canarymod.database.Database;
 import net.canarymod.database.DataAccess;
 import net.canarymod.database.exceptions.*;
+import utils.Utils;
 
 public class DNA extends EZPlugin implements PluginListener{
 
@@ -46,7 +47,6 @@ public class DNA extends EZPlugin implements PluginListener{
 	int absolviertebloecke = 0;
  	int gesamtfails = 0;
 
- 	BlockType luft = BlockType.Air;
  	public static BlockType zuspringenderblock = BlockType.AcaciaLeaves;
  	public static BlockType gesprungenerblock = BlockType.AcaciaLog; 
 	public static BlockType zielblock = BlockType.RedstoneBlock;
@@ -80,7 +80,7 @@ public class DNA extends EZPlugin implements PluginListener{
       		setglassanfang();
       		an = true;
       		fails = 0;
-      		loadstats(player);
+      		loadStats(player);
     	}
   	}
 
@@ -97,7 +97,7 @@ public class DNA extends EZPlugin implements PluginListener{
 	public void statsdnaCommand(MessageReceiver caller, String[] args){
     	if(caller instanceof Player){
     		Player player = (Player)caller;
-    		loadstats(player);
+    		loadStats(player);
     		double durchschnitt = (double)gesamtfails/gespieltespiele;
     		durchschnitt = durchschnitt * 100;
     		durchschnitt = Math.round(durchschnitt);
@@ -170,7 +170,7 @@ public class DNA extends EZPlugin implements PluginListener{
       		setglassanfang();
       		fails = 0;
       		Player player = world.getClosestPlayer(244, 71, 258, 5);
-      		loadstats(player);
+      		loadStats(player);
    		}
    		if(xdruckplatte == 267 && ydruckplatte == 18 && zdruckplatte == 199 && an == true){
     		clearbasic(world);
@@ -284,282 +284,217 @@ public class DNA extends EZPlugin implements PluginListener{
 
 
 
-  public void makerightblocks(Player player){
+	public void makerightblocks(Player player){
+		Location loc = player.getLocation();
+		double xp = loc.getX();
+		double yp = loc.getY();
+		double zp = loc.getZ();
+		int xplayer = (int) xp;
+		int yplayer = (int) yp;
+		int zplayer = (int) zp;
+		World world = loc.getWorld();
+		luftblock = true;
 
-    Location loc = player.getLocation();
-     double xp = loc.getX();
-     double yp = loc.getY();
-     double zp = loc.getZ();
-     int xplayer = (int) xp;
-     int yplayer = (int) yp;
-     int zplayer = (int) zp;
-     World world = loc.getWorld();
-    luftblock = true;
+		while (luftblock){
 
-    while (luftblock){ 
+			double x = -4.5 + Math.random() * 10;
+			double y = -1.3 + Math.random();
+			double z = -4.5 + Math.random() * 10;
+			int xa = (int) x;
+			int ya = (int) y;
+			int za = (int) z;
+		
+			double betrag = (xa*xa) + ((ya-1)*(ya-1)) + (za*za);
+			double wurzel = Math.sqrt(betrag);
 
-      double x = -4.5 + Math.random() * 10;
-      double y = -1.3 + Math.random();
-      double z = -4.5 + Math.random() * 10;
-      int xa = (int) x;
-      int ya = (int) y;
-      int za = (int) z;
-  
-      double betrag = (xa*xa) + ((ya-1)*(ya-1)) + (za*za);
-      double wurzel = Math.sqrt(betrag);
+			if(wurzel > 2.5 && wurzel <= 5){
+				int xblock = xplayer + xa;
+				int yblock = yplayer + ya;
+				int zblock = zplayer + za;
 
-    if(wurzel > 2.5 && wurzel <= 5){
+				Block a = world.getBlockAt(xblock, yblock, zblock);
+				Block b = world.getBlockAt(xblock, yblock + 1, zblock);
+				Block c = world.getBlockAt(xblock, yblock + 2, zblock); 
 
-      int xblock = xplayer + xa;
-      int yblock = yplayer + ya;
-      int zblock = zplayer + za;
+				if (a.getType() == BlockType.Air && b.getType() == BlockType.Air && c.getType() == BlockType.Air){
+					Location guterblock = new Location(xblock, yblock, zblock);
+					eachblock.add(guterblock);
 
-      Block a = world.getBlockAt(xblock, yblock, zblock);
-      Block b = world.getBlockAt(xblock, yblock + 1, zblock);
-      Block c = world.getBlockAt(xblock, yblock + 2, zblock); 
+					if(eachblock.size() > 3){
+						Location blockweg = eachblock.get(i);
+						blockweg.getWorld().setBlockAt(blockweg, BlockType.Air);
+						i = i + 1;
+					}
 
-    if (a.getType() == luft && b.getType() == luft && c.getType() == luft){
+					guterblock.getWorld().setBlockAt(guterblock, zuspringenderblock);
+					playSound(guterblock, SoundEffect.Type.NOTE_HAT, 1.0f, 1.0f);
+					luftblock = false;
+				}
+			}
+		}
+	}
 
-        Location guterblock = new Location(xblock, yblock, zblock);
-        eachblock.add(guterblock);
+	public void vierersprung(Player player){
+		Location loc = player.getLocation();
+		double xp = loc.getX();
+		double yp = loc.getY();
+		double zp = loc.getZ();
+		int xplayer = (int) xp;
+		int yplayer = (int) yp;
+		int zplayer = (int) zp;
+		World world = loc.getWorld();
+		viererb = true;
 
-        if(eachblock.size() > 3){
+		while(viererb){
+			double richtungvierersprung = Math.random();
+			int xanteil = 0;
+			int zanteil = 0;
 
-          Location blockweg = eachblock.get(i);
-          blockweg.getWorld().setBlockAt(blockweg, luft);
-          i = i + 1;
+			if(richtungvierersprung <= 0.25)
+				xanteil = 5;
 
-        }
+			if(richtungvierersprung > 0.25 && richtungvierersprung <= 0.5)
+				xanteil = -5;
 
-        guterblock.getWorld().setBlockAt(guterblock, zuspringenderblock);
+			if(richtungvierersprung > 0.5 && richtungvierersprung <= 0.75)
+			zanteil = 5;
 
-        playSound(guterblock, SoundEffect.Type.NOTE_HAT, 1.0f, 1.0f);
-        luftblock = false;
-      
-    }
-  }
- }
-}
+			if(richtungvierersprung > 0.75 && richtungvierersprung <= 1)
+			zanteil = - 5;
+			
+			Location guterblock = new Location(xp + xanteil, yplayer - 1, zp + zanteil);
 
-public void vierersprung(Player player){
+			Block a = world.getBlockAt((int)guterblock.getX(), (int)guterblock.getY(), (int)guterblock.getZ());
+			Block b = world.getBlockAt((int)guterblock.getX(), (int)guterblock.getY() + 1, (int)guterblock.getZ());
+			Block c = world.getBlockAt((int)guterblock.getX(), (int)guterblock.getY() + 2, (int)guterblock.getZ());
 
-  Location loc = player.getLocation();
-  double xp = loc.getX();
-  double yp = loc.getY();
-  double zp = loc.getZ();
-  int xplayer = (int) xp;
-  int yplayer = (int) yp;
-  int zplayer = (int) zp;
-  World world = loc.getWorld();
-  viererb = true;
+			if (a.getType() == BlockType.Air && b.getType() == BlockType.Air && c.getType() == BlockType.Air){
+				eachblock.add(guterblock);
 
-  while(viererb){
+				if(eachblock.size() > 3){
+				Location blockweg = eachblock.get(i);
+				blockweg.getWorld().setBlockAt(blockweg, BlockType.Air);
+				i = i + 1;
+				}
 
-    double richtungvierersprung = Math.random();
-    int xanteil = 0;
-    int zanteil = 0;
-
-    if(richtungvierersprung <= 0.25){
-
-      xanteil = 5;
-
-    }
-
-    if(richtungvierersprung > 0.25 && richtungvierersprung <= 0.5){
-
-      xanteil = -5;
-
-    }
-
-    if(richtungvierersprung > 0.5 && richtungvierersprung <= 0.75){
-
-      zanteil = 5;
-
-    }
-
-    if(richtungvierersprung > 0.75 && richtungvierersprung <= 1){
-
-      zanteil = - 5;
-
-    }
-
-    Location guterblock = new Location(xp + xanteil, yplayer - 1, zp + zanteil);
-
-
-    Block a = world.getBlockAt((int)guterblock.getX(), (int)guterblock.getY(), (int)guterblock.getZ());
-    Block b = world.getBlockAt((int)guterblock.getX(), (int)guterblock.getY() + 1, (int)guterblock.getZ());
-    Block c = world.getBlockAt((int)guterblock.getX(), (int)guterblock.getY() + 2, (int)guterblock.getZ());
-
-    if (a.getType() == luft && b.getType() == luft && c.getType() == luft){
-
-        eachblock.add(guterblock);
-
-        if(eachblock.size() > 3){
-
-          Location blockweg = eachblock.get(i);
-          blockweg.getWorld().setBlockAt(blockweg, luft);
-          i = i + 1;
-
-        }
-
-        guterblock.getWorld().setBlockAt(guterblock, zuspringenderblock);
-
-        playSound(guterblock, SoundEffect.Type.NOTE_HAT, 1.0f, 1.0f);
-        viererb = false;
-
-    }
-  }
-}
+				guterblock.getWorld().setBlockAt(guterblock, zuspringenderblock);
+				playSound(guterblock, SoundEffect.Type.NOTE_HAT, 1.0f, 1.0f);
+				viererb = false;
+			}
+		}
+	}
 
     public void makelastblock(Player player) {
+     	Location loc = player.getLocation();
+		double xp = loc.getX();
+		double yp = loc.getY();
+		double zp = loc.getZ();
+		int xplayer = (int) xp;
+		int yplayer = (int) yp;
+		int zplayer = (int) zp;
+		World world = loc.getWorld();
+		letzterblock = true;
 
-     Location loc = player.getLocation();
-      double xp = loc.getX();
-      double yp = loc.getY();
-      double zp = loc.getZ();
-      int xplayer = (int) xp;
-      int yplayer = (int) yp;
-      int zplayer = (int) zp;
-      World world = loc.getWorld();
-      letzterblock = true;
+		while (letzterblock){ 
+			double x = -4.5 + Math.random() * 10;
+			double y = -1.3 + Math.random();
+			double z = -4.5 + Math.random() * 10;
+			int xa = (int) x;
+			int ya = (int) y;
+			int za = (int) z;
+		
+			double betrag = (xa*xa) + ((ya-1)*(ya-1)) + (za*za);
+			double wurzel = Math.sqrt(betrag);
 
-    while (letzterblock){ 
+			if(wurzel > 2.5 && wurzel <= 5){
+				int xblock = xplayer + xa;
+				int yblock = yplayer + ya;
+				int zblock = zplayer + za;
 
-      double x = -4.5 + Math.random() * 10;
-      double y = -1.3 + Math.random();
-      double z = -4.5 + Math.random() * 10;
-      int xa = (int) x;
-      int ya = (int) y;
-      int za = (int) z;
-  
-      double betrag = (xa*xa) + ((ya-1)*(ya-1)) + (za*za);
-      double wurzel = Math.sqrt(betrag);
+				Block a = world.getBlockAt(xblock, yblock, zblock);
+				Block b = world.getBlockAt(xblock, yblock + 1, zblock);
+				Block c = world.getBlockAt(xblock, yblock + 2, zblock); 
 
-    if(wurzel > 2.5 && wurzel <= 5){
+				if (a.getType() == BlockType.Air && b.getType() == BlockType.Air && c.getType() == BlockType.Air){
+					Location guterblock = new Location(xblock, yblock, zblock);
+					eachblock.add(guterblock);
+					guterblock.getWorld().setBlockAt(guterblock, zielblock);
+					playSound(guterblock, SoundEffect.Type.ORB, 3.0f, 3.0f);
+					letzterblock = false;
+				}
+			}
+		}
+	}
 
-      int xblock = xplayer + xa;
-      int yblock = yplayer + ya;
-      int zblock = zplayer + za;
-
-      Block a = world.getBlockAt(xblock, yblock, zblock);
-      Block b = world.getBlockAt(xblock, yblock + 1, zblock);
-      Block c = world.getBlockAt(xblock, yblock + 2, zblock); 
-
-    if (a.getType() == luft && b.getType() == luft && c.getType() == luft){
-
-
-        Location guterblock = new Location(xblock, yblock, zblock);
-        eachblock.add(guterblock);
-        guterblock.getWorld().setBlockAt(guterblock, zielblock);
-        playSound(guterblock, SoundEffect.Type.ORB, 3.0f, 3.0f);
-        letzterblock = false;
-
-                                                                                                      }
-  }
- }
-}
-
-public void levelanzeige(Player player){
-
-  int levelzahl = player.getLevel();
-
-  if(levelzahl < 16){
-
-    player.addExperience(7 + 2 * levelzahl);
-    return;
-
-  }  
-
-  if(levelzahl >= 16){
-
-    player.addExperience(37 + 5 * (levelzahl - 15));
-    return;
-
-   }
-  }
+	public void levelanzeige(Player player){
+		int levelzahl = player.getLevel();
+		if(levelzahl < 16)
+			player.addExperience(7 + 2 * levelzahl);
+		else if(levelzahl >= 16)
+			player.addExperience(37 + 5 * (levelzahl - 15));
+	}
 
 
-  public void clearbasic(World world){
-
-    for (Location clearblock : eachblock){
-
-      clearblock.getWorld().setBlockAt(clearblock, luft);
-
+	public void clearbasic(World world){
+		for (Location clearblock : eachblock)
+		clearblock.getWorld().setBlockAt(clearblock, BlockType.Air);
+		
+		for (int x = 267; x <= 295; x++) {
+			for(int y = 18; y <= 53; y++) {
+				for (int z = 199; z <= 227; z++) { 
+					Block b = world.getBlockAt(x, y, z);
+					if(b.getType() == BlockType.DiamondBlock){
+						b.getLocation().getWorld().setBlockAt(b.getLocation(), BlockType.Air);
+					}
+				}
+			}
+		}    
     }
 
-     for (int x = 267; x <= 295; x++) {
-         for(int y = 18; y <= 53; y++) {
-            for (int z = 199; z <= 227; z++) { 
+	@HookHandler
+	public void ItemUseHookEvent(ItemUseHook event) {
+		Player player = event.getPlayer();
+		if (player.getItemHeld().getType() == ItemType.Feather && player.getItemHeld().getDisplayName().equalsIgnoreCase(ChatFormat.RED + "Hub"))
+			player.teleportTo(Utils.HubLocation); 
+  	}
 
-              Block b = world.getBlockAt(x, y, z);
+  	public void loosemessage(Player player){
+		String msg2 = player.getDisplayName();
+		String msg3 = " hat ";
+		String msg4 = "aufgegeben";
+		player.removeExperience(player.getExperience());
 
-              if(b.getType() == BlockType.DiamondBlock){
+		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.BLUE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".");
+	}
 
-                b.getLocation().getWorld().setBlockAt(b.getLocation(), luft);
-               }
-        }
-       }
-      }    
-                                    }
+  	public void playerteleportvorstart(Player player){
+		Location where = player.getLocation();
+		Location whereNow = new Location(281, 18, 235);
+		player.teleportTo(new Location(player.getWorld(), 281, 18, 235, 0f, 180f));
+		player.setModeId(Utils.ADVENTURE_MODE);
+   	}
 
-  @HookHandler
-  public void backtohub(ItemUseHook event) {
+ 	public void cleararraylist(){
+    	eachblock.clear();
+  	}
 
-    Player player = event.getPlayer();
-    Location hub = new Location(251, 71, 262);
+	public void loadStats(Player player){
+		String playerName = player.getDisplayName();
+		StatsDna sd = new StatsDna();
+		HashMap<String, Object> search = new HashMap<String, Object>();
+		search.put("player_name", playerName);
 
-    if (player.getItemHeld().getType() == ItemType.Feather && player.getItemHeld().getDisplayName().equalsIgnoreCase(ChatFormat.RED + "Hub") ){
+		try {
+			Database.get().load(sd, search);
+		} catch (DatabaseReadException e) {
+			logger.info(playerName + " is not online");
+		}
 
-      player.teleportTo(hub); 
-
-    }
-  }
-
-  public void loosemessage(Player player){
-
-    String msg2 = player.getDisplayName();
-    String msg3 = " hat ";
-    String msg4 = "aufgegeben";
-    player.removeExperience(player.getExperience());
-
-    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.BLUE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".");
-
-                                         }
-
-  public void playerteleportvorstart(Player player){
-
-      Location where = player.getLocation();
-      Location whereNow = new Location(281, 18, 235);
-      player.teleportTo(new Location(player.getWorld(), 281, 18, 235, 0f, 180f));
-      player.setModeId(2);
-
-                                                   }
-
-  public void cleararraylist(){
-
-    eachblock.clear();
-
-                              }
-
-  public void loadstats(Player player){
-
-      String playername = player.getDisplayName();
-      StatsDna sd = new StatsDna();
-      HashMap<String, Object> search = new HashMap<String, Object>();
-      search.put("player_name", playername);
-
-       try {
-        Database.get().load(sd, search);
-      } catch (DatabaseReadException e) {
-        logger.info(playername + " is not online");
-       }
-
-    gespieltespiele = sd.playedgames;
-    nullfailrunden = sd.perfectwin;
-    absolviertebloecke = sd.jumpedblocks;
-    gesamtfails = sd.allfails;
-
-  }
+		gespieltespiele = sd.playedgames;
+		nullfailrunden = sd.perfectwin;
+		absolviertebloecke = sd.jumpedblocks;
+		gesamtfails = sd.allfails;
+  	}
 
   public void savestats(Player player){
 
@@ -581,31 +516,24 @@ public void levelanzeige(Player player){
       }
   }
 
-  public void winteleport(Player player){
+  	public void winteleport(Player player){
+		ItemFactory factory = Canary.factory().getItemFactory();
+		Item backfeder = factory.newItem(ItemType.Feather);
+		backfeder.setDisplayName(ChatFormat.RED + "Hub");
 
-    ItemFactory factory = Canary.factory().getItemFactory();
-    Item backfeder = factory.newItem(ItemType.Feather);
-    backfeder.setDisplayName(ChatFormat.RED + "Hub");
+		Location siegerpodest = new Location(277, 72, 214);
+		player.teleportTo(siegerpodest);
+		playSound(siegerpodest, SoundEffect.Type.LEVEL_UP, 2.0f, 2.0f);
+		player.getInventory().setSlot(8, backfeder);
+		player.removeExperience(player.getExperience());
+	}                            
 
-    Location siegerpodest = new Location(277, 72, 214);
-    player.teleportTo(siegerpodest);
-    playSound(siegerpodest, SoundEffect.Type.LEVEL_UP, 2.0f, 2.0f);
-    player.getInventory().setSlot(8, backfeder);
-    player.removeExperience(player.getExperience());
-
-
-                                        }                            
-
-  public void startmessage(Player player) {
-
-    String msg2 = "Das Spiel beginnt!";
-
-    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + msg2);
-
-    gespieltespiele = gespieltespiele + 1;
-    savestats(player);
-
-                             }
+  	public void startmessage(Player player) {
+		String msg2 = "Das Spiel beginnt!";
+		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + msg2);
+		gespieltespiele = gespieltespiele + 1;
+		savestats(player);
+    }
 
 	public void gewinnmessage(Player player) {
     	clearbasic(player.getWorld());
@@ -614,12 +542,10 @@ public void levelanzeige(Player player){
     	String msg3 = " hat DNA mit ";
     	String msg4 = " Fehlern ";
     	String msg5 = "gewonnen ";
-    	if(fails == 1){
+    	if(fails == 1)
       		msg4 = " Fehler ";
-        }
-    	if(gespieltespiele == 20){
+    	if(gespieltespiele == 20)
        		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + "Du hast 20 Spiele absolviert. Herzlichen Glueckwunsch!");
-       	}
 
     	Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.BLUE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + fails + ChatFormat.DARK_GREEN + msg4 + ChatFormat.GOLD + msg5 + ChatFormat.DARK_GREEN + "!");
     	if(fails == 0){
@@ -631,7 +557,7 @@ public void levelanzeige(Player player){
       			player.getInventory().setSlot(7, hinweisschaufel);
       			nullfailrunden = nullfailrunden + 1;
       			savestats(player);
-      			loadstats(player);
+      			loadStats(player);
       			String msg6 = "Fuer diese gute Leistung bekommst du einen ";
       			String msg7 = "Hinweis";
       			String msg8 = " fuer ";
@@ -640,5 +566,4 @@ public void levelanzeige(Player player){
     		}
   		}
     }
-    
 }
