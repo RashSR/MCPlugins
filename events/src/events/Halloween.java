@@ -13,7 +13,7 @@ public class Halloween extends EZPlugin{
 
 	public static void endHalloween(){
 		logger.info("Das Event Halloween wird beendet.");
-		events.myEvent=null;
+		events.CurrentEvent = null;
 		OwnFileWriter fw = new OwnFileWriter(events.fileName, "no");
 		removeBlocks();
 		world.setRaining(false);
@@ -21,7 +21,7 @@ public class Halloween extends EZPlugin{
 
 	public static void startHalloween(){
 		logger.info("Das Event Halloween wird gestartet.");
-		events.myEvent=EventEnum.HALLOWEEN;
+		events.CurrentEvent = EventEnum.HALLOWEEN;
 		fillArrays();
 		OwnFileWriter fw = new OwnFileWriter(events.fileName, "halloween");
 		logger.info("Wir haben jetzt "+world.getRelativeTime()+" Uhr");

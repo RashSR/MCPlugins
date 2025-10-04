@@ -2,32 +2,26 @@ package events;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import net.canarymod.logger.Logman;
 import net.canarymod.Canary;
 import net.canarymod.commandsys.*;
 import net.canarymod.chat.MessageReceiver;
-import net.canarymod.api.entity.living.humanoid.Player;
-import net.canarymod.api.world.position.Location;
-import net.canarymod.api.world.blocks.Block;
-import net.canarymod.api.world.blocks.BlockType;
 import com.pragprog.ahmine.ez.EZPlugin;
-import net.canarymod.api.world.World;
 import net.canarymod.hook.HookHandler;
 import net.canarymod.plugin.PluginListener;
-import net.canarymod.hook.world.LeafDecayHook;
 import net.canarymod.hook.player.ConnectionHook;
 import net.canarymod.chat.ChatFormat;
-import net.canarymod.hook.world.BlockUpdateHook;
 import net.canarymod.hook.system.ServerShutdownHook;
-import net.canarymod.hook.player.BlockRightClickHook;
+import utils.Utils;
 
 public class events extends EZPlugin implements PluginListener {
-	public static EventEnum myEvent;
-	private int monat = Integer.parseInt(getMonth());
-    private int jahr = Integer.parseInt(getYear());
-    private int tag = Integer.parseInt(getDay());
+	public static EventEnum CurrentEvent;
+	private static final String pluginName = "[Events]";
     public static String fileName="C:/Users/R/Desktop/server/config/events.txt";
-
+	
+	private int month = Integer.parseInt(getMonth());
+    private int year = Integer.parseInt(getYear());
+    private int day = Integer.parseInt(getDay());
+	
 	@Override
 	public boolean enable() { 
   		Canary.hooks().registerListener(this, this);
@@ -53,17 +47,25 @@ public class events extends EZPlugin implements PluginListener {
 	}
 
 	@HookHandler 
- 	public void joinevent(ConnectionHook event){
-    	Player player = event.getPlayer();
-    	this.myEvent=checkEvent();
-    	logger.info("Wir haben den "+tag+"."+monat+"."+jahr+"!");
-    	if(myEvent==EventEnum.CHRISTMAS){
-    		Christmas.startChristmas();
-   		}else if(myEvent==EventEnum.NEWYEAR){
-			Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Events] " + ChatFormat.DARK_GREEN + "Wir wuenschen euch ein" + ChatFormat.GOLD + "frohes " + ChatFormat.DARK_GREEN + "neues Jahr " + ChatFormat.GOLD + getYear() + ChatFormat.DARK_GREEN + ".");
-   		}else if(myEvent==EventEnum.HALLOWEEN){
-   			Halloween.startHalloween();
-   		}
+ 	public void ConnectionHookEvent(ConnectionHook event){
+    	CurrentEvent = getCurrentEvent();
+    	logger.info("Wir haben den "+day+"."+month+"."+year+"!");
+
+		switch (CurrentEvent) {
+			case CHRISTMAS:
+					Christmas.startChristmas();
+				break;
+			case NEWYEAR:
+				String serverMessage = ChatFormat.DARK_GREEN + "Wir wuenschen euch ein" + ChatFormat.GOLD + 
+					"frohes " + ChatFormat.DARK_GREEN + "neues Jahr " + ChatFormat.GOLD + getYear() + ChatFormat.DARK_GREEN + ".";
+				Utils.BroadcastServerMessage(pluginName, serverMessage);
+				break;
+			case HALLOWEEN:
+				Halloween.startHalloween();
+				break;
+			default:
+				break;
+		}
  	}
 
  	@HookHandler
@@ -76,43 +78,38 @@ public class events extends EZPlugin implements PluginListener {
             permissions = { "*" },
             toolTip = "/event weihnachten, /event keins")
   	public void eventsCommand(MessageReceiver caller, String[] args) {
-    	if (caller instanceof Player) { 
-      		Player player = (Player)caller;
-     		if(args.length==2){
-        		if(args[1].equalsIgnoreCase("weihnachten")&&myEvent!=EventEnum.CHRISTMAS){
-        			endEvent();
-        			Christmas.startChristmas();
-        		}else if(args[1].equalsIgnoreCase("keins")&&myEvent!=null){
-          			endEvent();
-            	}else if(args[1].equalsIgnoreCase("test")){
-        			Christmas.makeCandyStick(new Location(263, 63, 286));
-        			player.getWorld().setBlockAt(new Location(263, 63, 289), BlockType.Snow);   
-      			}else if(args[1].equalsIgnoreCase("halloween")&&myEvent!=EventEnum.HALLOWEEN){
-      				endEvent();
-      				Halloween.startHalloween();
-      			}
-      		}
-    	}
+		if(args.length==2){
+			if(args[1].equalsIgnoreCase("weihnachten") && CurrentEvent!=EventEnum.CHRISTMAS){
+				endEvent();
+				Christmas.startChristmas();
+			}else if(args[1].equalsIgnoreCase("keins") && CurrentEvent!=null){
+				endEvent();
+			}else if(args[1].equalsIgnoreCase("halloween") && CurrentEvent!=EventEnum.HALLOWEEN){
+				endEvent();
+				Halloween.startHalloween();
+			}
+		}
   	}
 
   	private void endEvent(){
-  		if(myEvent==EventEnum.CHRISTMAS){
-  			Christmas.endChristmas();
-  		}else if(myEvent==EventEnum.NEWYEAR){
-
-  		}else if(myEvent==EventEnum.HALLOWEEN){
-  			Halloween.endHalloween();
-  		}else{
-
-  		}
+		switch (CurrentEvent) {
+			case CHRISTMAS:
+					Christmas.endChristmas();
+				break;
+			case HALLOWEEN:
+				Halloween.endHalloween();
+				break;
+			default:
+				break;
+		}
   	}
 
-  	private EventEnum checkEvent(){
-  		if(monat == 12){
+  	private EventEnum getCurrentEvent(){
+  		if(month == 12){
     		return EventEnum.CHRISTMAS;
-    	}else if(monat==1 && tag<10){
+    	}else if(month==1 && day<10){
     		return EventEnum.NEWYEAR;
-    	}else if(monat==10&&tag>20){
+    	}else if(month==10&&day>20){
     		return EventEnum.HALLOWEEN;
     	}else{
     		return null;

@@ -40,7 +40,7 @@ public class Christmas extends EZPlugin{
         clear();
         removeSnow();
         logger.info("Das Event Christmas wird beendet.");
-        events.myEvent = null;
+        events.CurrentEvent = null;
         OwnFileWriter fw = new OwnFileWriter(events.fileName, "no");
     }
 
@@ -50,7 +50,7 @@ public class Christmas extends EZPlugin{
         weihnachtsevent();
         weihnachten = true;
         dnaMakeSnow();
-        events.myEvent=EventEnum.CHRISTMAS;
+        events.CurrentEvent=EventEnum.CHRISTMAS;
         logger.info("Das Event Christmas wird gestartet.");
         OwnFileWriter fw = new OwnFileWriter(events.fileName, "christmas");
     }
