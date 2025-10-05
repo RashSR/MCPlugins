@@ -8,13 +8,13 @@ import net.canarymod.chat.MessageReceiver;
 import com.pragprog.ahmine.ez.EZPlugin;
 import net.canarymod.hook.HookHandler;
 import net.canarymod.plugin.PluginListener;
-import net.canarymod.hook.player.ConnectionHook;
 import net.canarymod.chat.ChatFormat;
 import net.canarymod.hook.system.ServerShutdownHook;
 import net.canarymod.api.entity.living.humanoid.Player;
 import net.canarymod.api.world.World;
 import utils.Utils;
 import events.christmas.ChristmasEvent;
+import net.canarymod.hook.system.LoadWorldHook;
 
 public class events extends EZPlugin implements PluginListener {
 	protected static final String pluginName = "[Events]";
@@ -26,17 +26,17 @@ public class events extends EZPlugin implements PluginListener {
   		return super.enable(); 
 	}
 
-	@HookHandler 
- 	public void ConnectionHookEvent(ConnectionHook event){
-    	logger.info("Wir haben den " + Utils.getDay() + "." + Utils.getMonth() + "." + Utils.GetYear() + "!");
-		currentEvent = getCurrentEvent(event.getPlayer().getWorld());
-		if(currentEvent != null)
-			currentEvent.startEvent();
+ 	@HookHandler
+ 	public void ServerShutdownHookEvent(ServerShutdownHook event){
+ 		endEvent();
  	}
 
- 	@HookHandler
- 	public void serverShutdown(ServerShutdownHook event){
- 		endEvent();
+	@HookHandler
+ 	public void LoadWorldHookEvent(LoadWorldHook event){
+ 		logger.info("Wir haben den " + Utils.getDay() + "." + Utils.getMonth() + "." + Utils.GetYear() + "!");
+		currentEvent = getCurrentEvent(event.getWorld());
+		if(currentEvent != null)
+			currentEvent.startEvent();
  	}
 
 	@Command(aliases = { "event" },

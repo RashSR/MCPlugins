@@ -32,11 +32,12 @@ public class CandyCane extends EZPlugin{
         int z = (int)startLocation.getZ();
 
         for(int i = 0; i < candyStickTrunk.length; i++){
-            if(!isPlaceable(x, y+i, z)){
+            if(!isBlockPlaceableAt(x, y+i, z)){
                 return false;
             }
             candyStickTrunk[i] = new Location(x, i+y, z);
         }
+
         offset = rand.nextInt(2);
         if(makeCone(candyStickTrunk[candyStickTrunk.length - 1], height)){
             for(int i = 0; i < candyStickTrunk.length; i++){
@@ -80,9 +81,10 @@ public class CandyCane extends EZPlugin{
         int quitCond = 0;
         int y = (int) groundCorner2.getY() + 1;
         int[] xzVals = sortCorners(groundCorner1, groundCorner2);
+        
         if(y != groundCorner1.getY() + 1){
             logger.info("[events] Can't make Candy Sticks!");
-            return null;
+            return candyCanes;
         }
         Random rand = new Random();
         int amount = rand.nextInt(15) + 10;
@@ -172,7 +174,7 @@ public class CandyCane extends EZPlugin{
         return true;
     }
 
-    private boolean isPlaceable(int x, int y, int z){
+    private boolean isBlockPlaceableAt(int x, int y, int z){
         //Don't place above water
         if(world.getBlockAt(x, y-1, z).getType() == BlockType.Water)
             return false;

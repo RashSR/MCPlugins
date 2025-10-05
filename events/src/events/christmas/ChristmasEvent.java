@@ -15,7 +15,6 @@ import net.canarymod.hook.world.LeafDecayHook;
 import net.canarymod.hook.player.ConnectionHook;
 import net.canarymod.chat.ChatFormat;
 import net.canarymod.hook.world.TimeChangeHook;
-import java.util.Random;
 import utils.Utils;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,18 +60,18 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
     public void dnaMakeSnow(){
         //TODO darf nicht mittelblock sein LOC -> 281, 18, 213
         dnaSnow = new ArrayList<>();
-        int zaehler = 0;
+        int count = 0;
         for(int i = 267; i <= 295; i++){
             for(int j = 199; j <= 236; j++){
-                Location dnasnow = new Location(i, 18, j);
-                Block hoffentlichluft = world.getBlockAt(i, 18, j);
-                if(hoffentlichluft.getType() == BlockType.Air && !(world.getBlockAt(i, 17, j).getType() == BlockType.Water)){
-                    double zufallssnow = Math.random();
-                    if(zufallssnow < 0.8 && zaehler <= 1000){
-                        if(!(dnasnow.getX() == 281 && dnasnow.getZ() == 213)){
-                            world.setBlockAt(dnasnow, BlockType.Snow);
-                            zaehler = zaehler + 1;
-                            dnaSnow.add(dnasnow);
+                Location snowLocation = new Location(i, 18, j);
+                Block block = world.getBlockAt(i, 18, j);
+                if(block.getType() == BlockType.Air && !(world.getBlockAt(i, 17, j).getType() == BlockType.Water)){
+                    double randomSnowFactor = Math.random();
+                    if(randomSnowFactor < 0.8 && count <= 1000){
+                        if(!(snowLocation.getX() == 281 && snowLocation.getZ() == 213)){
+                            world.setBlockAt(snowLocation, BlockType.Snow);
+                            count = count + 1;
+                            dnaSnow.add(snowLocation);
                         }
                     }
                 }
