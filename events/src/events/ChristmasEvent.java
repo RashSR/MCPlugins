@@ -271,7 +271,7 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
             event.setCanceled();
     }
 
-    private void gatherEventBlocks(){
+    private void loadEventBlocks(){
         Map<String, ArrayList<Location>> blocks = BlockLocationLoader.load("config/block_locations_christmas.txt");
 		eventBlocks.put(BlockType.Snow, blocks.get("snow"));
 		eventBlocks.put(BlockType.RedstoneBlock, blocks.get("redstone"));
@@ -281,7 +281,7 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
 	}
 
     private void placeEventBlocks(){
-		gatherEventBlocks();
+		loadEventBlocks();
 		
 		for(Map.Entry<BlockType, ArrayList<Location>> entry : eventBlocks.entrySet()){
 			BlockType blockType = entry.getKey();

@@ -40,7 +40,7 @@ public class HalloweenEvent extends EZPlugin implements IEvent{
 	}
 
 	private void placeEventBlocks(){
-		gatherEventBlocks();
+		loadEventBlocks();
 		
 		for(Map.Entry<BlockType, ArrayList<Location>> entry : eventBlocks.entrySet()){
 			BlockType blockType = entry.getKey();
@@ -57,30 +57,9 @@ public class HalloweenEvent extends EZPlugin implements IEvent{
 		}
 	}
 
-	private void gatherEventBlocks(){
-		eventBlocks.put(BlockType.JackOLantern, getPumpkinList());
-		eventBlocks.put(BlockType.SpiderWeb, getSpiderWebList());
-	}
-
-	private ArrayList<Location> getPumpkinList(){
-		ArrayList<Location> pumpkins = new ArrayList<Location>();
-		pumpkins.add(new Location(252, 72, 263));
-		pumpkins.add(new Location(248, 73, 263));
-		pumpkins.add(new Location(245, 72, 264));
-		pumpkins.add(new Location(243, 73, 265));
-		pumpkins.add(new Location(242, 73, 263));
-		
-		return pumpkins;
-	}
-
-	private ArrayList<Location> getSpiderWebList(){
-		ArrayList<Location> spiderWebs = new ArrayList<Location>();
-		spiderWebs.add(new Location(252, 72, 264));
-		spiderWebs.add(new Location(250, 71, 261));
-		spiderWebs.add(new Location(249, 72, 264));
-		spiderWebs.add(new Location(243, 73, 260));
-		spiderWebs.add(new Location(245, 74, 262));
-		
-		return spiderWebs;
+	private void loadEventBlocks(){
+		Map<String, ArrayList<Location>> blocks = BlockLocationLoader.load("config/block_locations_halloween.txt");
+		eventBlocks.put(BlockType.JackOLantern, blocks.get("jack_o_lantern"));
+		eventBlocks.put(BlockType.RedstoneBlock, blocks.get("spider_web"));
 	}
 }

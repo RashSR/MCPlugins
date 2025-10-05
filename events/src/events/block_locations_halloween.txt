@@ -1,0 +1,18 @@
+# ===================================
+# Extra Block Locations
+# Format: <blockType> <x> <y> <z>
+# ===================================
+
+# --- Jack O Lantern ---
+jack_o_lantern 252 72 263
+jack_o_lantern 248 73 263
+jack_o_lantern 245 72 264
+jack_o_lantern 243 73 265
+jack_o_lantern 242 73 263
+
+# --- Spider Webs ---
+spider_web 252 72 264
+spider_web 250 71 261
+spider_web 249 72 264
+spider_web 243 73 260
+spider_web 245 74 262
