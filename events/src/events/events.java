@@ -14,6 +14,7 @@ import net.canarymod.hook.system.ServerShutdownHook;
 import net.canarymod.api.entity.living.humanoid.Player;
 import net.canarymod.api.world.World;
 import utils.Utils;
+import events.christmas.ChristmasEvent;
 
 public class events extends EZPlugin implements PluginListener {
 	protected static final String pluginName = "[Events]";

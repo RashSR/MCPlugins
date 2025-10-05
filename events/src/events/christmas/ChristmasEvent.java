@@ -1,4 +1,4 @@
-package events;
+package events.christmas;
 import net.canarymod.logger.Logman;
 import net.canarymod.Canary;
 import net.canarymod.commandsys.*;
@@ -21,6 +21,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import events.IEvent;
+import events.BlockLocationLoader;
+import events.EventType;
 
 public class ChristmasEvent extends EZPlugin implements IEvent{
     private Map<BlockType, ArrayList<Location>> eventBlocks = new HashMap<>();
