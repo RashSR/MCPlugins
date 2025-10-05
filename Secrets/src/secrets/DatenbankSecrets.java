@@ -1,6 +1,5 @@
 
 package secrets;
-
 import net.canarymod.database.Column;
 import net.canarymod.database.Column.DataType;
 import net.canarymod.database.DataAccess;
@@ -93,12 +92,10 @@ public class DatenbankSecrets extends DataAccess {
   public boolean s27;
 
   public DatenbankSecrets() {
-
     super("datenbank_secrets");
-                     }
+  }
   
   public DataAccess getInstance() { 
-    
     return new DatenbankSecrets();
   }
 }

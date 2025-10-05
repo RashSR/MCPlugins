@@ -18,8 +18,11 @@ import net.canarymod.hook.world.TimeChangeHook;
 import java.util.Random;
 import utils.Utils;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ChristmasEvent extends EZPlugin implements IEvent{
+    private Map<BlockType, ArrayList<Location>> eventBlocks = new HashMap<>();
     public static Location[] fichtenbleatter = new Location[32];
     public static Location[] lapisblocks = new Location[4];
     public static Location[] goldblocks = new Location[4];
@@ -41,7 +44,7 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
 
     public void endEvent(){
         removeCandySticks();
-        clear();
+        removeEventBlocks();
         removeSnow();
         logger.info("Das Event Christmas wird beendet.");
         isRunning = false;
@@ -50,8 +53,7 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
 
     public void startEvent(){
         makeCandySticks(new Location(267, 17, 227), new Location(295, 17, 199), 30);
-        fillChristmasArrays();
-        weihnachtsevent();
+        placeEventBlocks();
         isRunning = true;
         dnaMakeSnow();
         logger.info("Das Event Christmas wird gestartet.");
@@ -261,26 +263,6 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
             world.setBlockAt(loc, BlockType.Air);
         }
     }
-    
-    public void clear(){
-        for(int a = 0; a < fichtenbleatter.length; a++){
-            world.setBlockAt(fichtenbleatter[a], BlockType.Air);
-            if(a<lapisblocks.length){
-                world.setBlockAt(lapisblocks[a], BlockType.Air);
-            }
-            if(a<redstoneblocks.length){
-                world.setBlockAt(redstoneblocks[a], BlockType.Air);
-            }
-            if(a<goldblocks.length){
-                world.setBlockAt(goldblocks[a], BlockType.Air);
-            }
-            if(a<schnee.length){
-                world.setBlockAt(schnee[a], BlockType.Air);
-            }
-        }
-        world.setBlockAt(new Location(252, 71, 261), BlockType.Workbench);
-        world.setBlockAt(new Location(245, 71, 261), BlockType.Jukebox);
-    }
 
     @HookHandler
     public void stopLeafDecay(LeafDecayHook event){
@@ -288,96 +270,114 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
             event.setCanceled();
     }
 
-    public static void fillChristmasArrays(){
-        fillfichtenarray();
-        filllapisarray();
-        fillgoldarray();
-        fillredstonearray();        
-        fillschneearray();
+    private void gatherEventBlocks(){
+		eventBlocks.put(BlockType.Snow, getSnowList());
+		eventBlocks.put(BlockType.RedstoneBlock, getRedstoneList());
+        eventBlocks.put(BlockType.GoldBlock, getGoldList());
+		eventBlocks.put(BlockType.LapisBlock, getLapisList());
+        eventBlocks.put(BlockType.PineLeaves, getSpruceLeaveList());
+	}
+
+    private void placeEventBlocks(){
+		gatherEventBlocks();
+		
+		for(Map.Entry<BlockType, ArrayList<Location>> entry : eventBlocks.entrySet()){
+			BlockType blockType = entry.getKey();
+			for (Location loc : entry.getValue())
+				world.setBlockAt(loc, blockType);
+		}
+	}
+
+    private void removeEventBlocks(){
+		for(Map.Entry<BlockType, ArrayList<Location>> entry : eventBlocks.entrySet()){
+			BlockType blockType = entry.getKey();
+			for (Location loc : entry.getValue())
+				world.setBlockAt(loc, BlockType.Air);
+		}
+
+        world.setBlockAt(new Location(252, 71, 261), BlockType.Workbench);
+        world.setBlockAt(new Location(245, 71, 261), BlockType.Jukebox);
+	}
+
+    public ArrayList<Location> getSnowList(){
+        ArrayList<Location> snow = new ArrayList<Location>();
+        snow.add(new Location(252, 71, 263));
+        snow.add(new Location(251, 71, 263));
+        snow.add(new Location(251, 71, 262));
+        snow.add(new Location(251, 71, 261));
+        snow.add(new Location(250, 71, 261));
+        snow.add(new Location(249, 71, 262));
+        snow.add(new Location(250, 71, 263));
+        snow.add(new Location(250, 71, 264));
+        snow.add(new Location(249, 71, 263));
+
+        return snow;
     }
 
-    public static void fillschneearray(){
-        schnee[0] = new Location(252, 71, 263);
-        schnee[1] = new Location(251, 71, 263);
-        schnee[2] = new Location(251, 71, 262);
-        schnee[3] = new Location(251, 71, 261);
-        schnee[4] = new Location(250, 71, 261);
-        schnee[5] = new Location(249, 71, 262);
-        schnee[6] = new Location(250, 71, 263);
-        schnee[7] = new Location(250, 71, 264);
-        schnee[8] = new Location(249, 71, 263);
+    public ArrayList<Location> getRedstoneList(){
+        ArrayList<Location> redstone = new ArrayList<Location>();
+        redstone.add(new Location(251, 74, 263));
+        redstone.add(new Location(243, 73, 265));
+        redstone.add(new Location(244, 74, 262));
+
+        return redstone;
     }
 
-    public static void fillredstonearray(){
-        redstoneblocks[0] = new Location(251, 74, 263);
-        redstoneblocks[1] = new Location(243, 73, 265);
-        redstoneblocks[2] = new Location(244, 74, 262);
-    }
+    public ArrayList<Location> getGoldList(){
+        ArrayList<Location> gold = new ArrayList<Location>();
+        gold.add(new Location(251, 73, 261));
+        gold.add(new Location(243, 74, 263));
+        gold.add(new Location(245, 73, 260));
+        gold.add(new Location(246, 73, 262));
 
-    public static void fillgoldarray(){
-        goldblocks[0] = new Location(251, 73, 261);
-        goldblocks[1] = new Location(243, 74, 263);
-        goldblocks[2] = new Location(245, 73, 260);
-        goldblocks[3] = new Location(246, 73, 262);
+        return gold;
     }
   
-    public static void filllapisarray(){
-        lapisblocks[0] = new Location(244, 74, 264);
-        lapisblocks[1] = new Location(249, 74, 262);
-        lapisblocks[2] = new Location(252, 71, 261);
-        lapisblocks[3] = new Location(245, 71, 261);
+    public ArrayList<Location> getLapisList(){
+        ArrayList<Location> lapis = new ArrayList<Location>();
+        lapis.add(new Location(244, 74, 264));
+        lapis.add(new Location(249, 74, 262));
+        lapis.add(new Location(252, 71, 261));
+        lapis.add(new Location(245, 71, 261));
+
+        return lapis;
     }
 
-    public static void fillfichtenarray(){
-        fichtenbleatter[0] = new Location(249, 72, 264);
-        fichtenbleatter[1] = new Location(250, 73, 261);
-        fichtenbleatter[2] = new Location(248, 73, 262);
-        fichtenbleatter[3] = new Location(248, 73, 263);
-        fichtenbleatter[4] = new Location(252, 72, 262);
-        fichtenbleatter[5] = new Location(252, 73, 262);
-        fichtenbleatter[6] = new Location(252, 73, 263);
-        fichtenbleatter[7] = new Location(252, 74, 263);
-        fichtenbleatter[8] = new Location(252, 74, 262);
-        fichtenbleatter[9] = new Location(251, 74, 262);
-        fichtenbleatter[10] = new Location(250, 74, 262);
-        fichtenbleatter[11] = new Location(250, 74, 263);
-        fichtenbleatter[12] = new Location(249, 74, 263);
-        fichtenbleatter[13] = new Location(250, 75, 263);
-        fichtenbleatter[14] = new Location(250, 75, 262);
-        fichtenbleatter[15] = new Location(251, 75, 262);
-        fichtenbleatter[16] = new Location(251, 75, 263);
-        fichtenbleatter[17] = new Location(245, 73, 265);
-        fichtenbleatter[18] = new Location(245, 73, 264);
-        fichtenbleatter[19] = new Location(244, 74, 263);
-        fichtenbleatter[20] = new Location(245, 74, 263);
-        fichtenbleatter[21] = new Location(245, 74, 262);
-        fichtenbleatter[22] = new Location(242, 73, 263);
-        fichtenbleatter[23] = new Location(244, 73, 262);
-        fichtenbleatter[24] = new Location(245, 73, 261);
-        fichtenbleatter[25] = new Location(244, 74, 261);
-        fichtenbleatter[26] = new Location(243, 74, 262);
-        fichtenbleatter[27] = new Location(244, 74, 260);
-        fichtenbleatter[28] = new Location(243, 73, 260);
-        fichtenbleatter[29] = new Location(244, 74, 259);
-        fichtenbleatter[30] = new Location(244, 73, 258);
-        fichtenbleatter[31] = new Location(246, 73, 263);
-    }
+    public ArrayList<Location> getSpruceLeaveList(){
+        ArrayList<Location> spruceLeaves = new ArrayList<Location>();
+        spruceLeaves.add(new Location(249, 72, 264));
+        spruceLeaves.add(new Location(250, 73, 261));
+        spruceLeaves.add(new Location(248, 73, 262));
+        spruceLeaves.add(new Location(248, 73, 263));
+        spruceLeaves.add(new Location(252, 72, 262));
+        spruceLeaves.add(new Location(252, 73, 262));
+        spruceLeaves.add(new Location(252, 73, 263));
+        spruceLeaves.add(new Location(252, 74, 263));
+        spruceLeaves.add(new Location(252, 74, 262));
+        spruceLeaves.add(new Location(251, 74, 262));
+        spruceLeaves.add(new Location(250, 74, 262));
+        spruceLeaves.add(new Location(250, 74, 263));
+        spruceLeaves.add(new Location(249, 74, 263));
+        spruceLeaves.add(new Location(250, 75, 263));
+        spruceLeaves.add(new Location(250, 75, 262));
+        spruceLeaves.add(new Location(251, 75, 262));
+        spruceLeaves.add(new Location(251, 75, 263));
+        spruceLeaves.add(new Location(245, 73, 265));
+        spruceLeaves.add(new Location(245, 73, 264));
+        spruceLeaves.add(new Location(244, 74, 263));
+        spruceLeaves.add(new Location(245, 74, 263));
+        spruceLeaves.add(new Location(245, 74, 262));
+        spruceLeaves.add(new Location(242, 73, 263));
+        spruceLeaves.add(new Location(244, 73, 262));
+        spruceLeaves.add(new Location(245, 73, 261));
+        spruceLeaves.add(new Location(244, 74, 261));
+        spruceLeaves.add(new Location(243, 74, 262));
+        spruceLeaves.add(new Location(244, 74, 260));
+        spruceLeaves.add(new Location(243, 73, 260));
+        spruceLeaves.add(new Location(244, 74, 259));
+        spruceLeaves.add(new Location(244, 73, 258));
+        spruceLeaves.add(new Location(246, 73, 263));
 
-    public void weihnachtsevent(){
-        for(int f = 0; f < fichtenbleatter.length; f++){
-            world.setBlockAt(fichtenbleatter[f], BlockType.PineLeaves);
-            if(f<lapisblocks.length){
-                world.setBlockAt(lapisblocks[f], BlockType.LapisBlock);
-            }
-            if(f<redstoneblocks.length){
-                world.setBlockAt(redstoneblocks[f], BlockType.RedstoneBlock);
-            }
-            if(f<goldblocks.length){
-                world.setBlockAt(goldblocks[f], BlockType.GoldBlock);
-            }
-            if(f<schnee.length){
-                world.setBlockAt(schnee[f], BlockType.Snow);
-            } 
-        }
+        return spruceLeaves;
     }
 }

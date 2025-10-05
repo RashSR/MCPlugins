@@ -48,28 +48,23 @@ public class events extends EZPlugin implements PluginListener {
 
 			switch (eventParam) {
 				case "weihnachten":
-					if(currentEvent == null || currentEvent.getEventType() != EventType.CHRISTMAS){
-						endEvent();
-						currentEvent = new ChristmasEvent(player.getWorld());
-						currentEvent.startEvent();
-					}
+					endEvent();
+					currentEvent = new ChristmasEvent(player.getWorld());
+					currentEvent.startEvent();
 					break;
 				case "keins":
 					endEvent();
 					break;
 				case "halloween":
-					if(currentEvent == null || currentEvent.getEventType() != EventType.HALLOWEEN){
-						endEvent();
-						currentEvent = new HalloweenEvent(player.getWorld());
-						currentEvent.startEvent();
-					}
+					endEvent();
+					currentEvent = new HalloweenEvent(player.getWorld());
+					currentEvent.startEvent();
 					break;
 				case "neujahr":
-					if(currentEvent == null || currentEvent.getEventType() != EventType.NEWYEAR){
-						endEvent();
-						currentEvent = new NewYearEvent(player.getWorld());
-						currentEvent.startEvent();
-					}
+					endEvent();
+					currentEvent = new NewYearEvent(player.getWorld());
+					currentEvent.startEvent();
+					break;
 				default:
 					break;
 			}

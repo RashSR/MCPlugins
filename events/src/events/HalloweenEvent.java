@@ -24,13 +24,13 @@ public class HalloweenEvent extends EZPlugin implements IEvent{
 		world.setRaining(true);
 		world.setThundering(true);
 		world.setThunderStrength((float)Math.random());
-		placeBlocks();
+		placeEventBlocks();
 	}
 
 	public void endEvent(){
 		logger.info("Das Event Halloween wird beendet.");
 		Utils.WriteToEventFile("no"); 
-		removeBlocks();
+		removeEventBlocks();
 		world.setRaining(false);
 		world.setThundering(false);
 	}
@@ -39,7 +39,7 @@ public class HalloweenEvent extends EZPlugin implements IEvent{
 		return EventType.HALLOWEEN;
 	}
 
-	private void placeBlocks(){
+	private void placeEventBlocks(){
 		gatherEventBlocks();
 		
 		for(Map.Entry<BlockType, ArrayList<Location>> entry : eventBlocks.entrySet()){
@@ -49,7 +49,7 @@ public class HalloweenEvent extends EZPlugin implements IEvent{
 		}
 	}
 
-	private void removeBlocks(){
+	private void removeEventBlocks(){
 		for(Map.Entry<BlockType, ArrayList<Location>> entry : eventBlocks.entrySet()){
 			BlockType blockType = entry.getKey();
 			for (Location loc : entry.getValue())
@@ -69,6 +69,7 @@ public class HalloweenEvent extends EZPlugin implements IEvent{
 		pumpkins.add(new Location(245, 72, 264));
 		pumpkins.add(new Location(243, 73, 265));
 		pumpkins.add(new Location(242, 73, 263));
+		
 		return pumpkins;
 	}
 
