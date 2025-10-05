@@ -84,7 +84,7 @@ public class cantdestroy extends EZPlugin implements PluginListener{
         Item iteminderhand = player.getItemHeld();
         if(iteminderhand.getType() == ItemType.GoldSpade){
           player.getInventory().removeItem(iteminderhand.getType());
-          player.setModeId(2);
+          player.setModeId(Utils.ADVENTURE_MODE);
           destroyedBlock.getLocation().getWorld().setBlockAt(event.getBlock().getLocation(), BlockType.Air);
         }
       }   
