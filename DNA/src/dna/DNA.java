@@ -34,36 +34,33 @@ import utils.Utils;
 
 public class DNA extends EZPlugin implements PluginListener{
 
-	public static int levelhoehe;
-  	public static boolean harrypotterevent; // vorsicht 0 fails werden nicht getriggert falls hier false!
+	public int LEVEL_HEIGHT;
+  	public boolean harrypotterevent; // vorsicht 0 fails werden nicht getriggert falls hier false!
 
- 	int fails = 0;
- 	int i = 0;
- 	int zaeler = 1;
- 	int hohe;
-	String msg1 = "[DNA] ";
-	int gespieltespiele = 0;
+ 	int jumpFails = 0;
+ 	int height;
+	public static final String pluginName = "[DNA] ";
+	int totalPlayedGames = 0;
  	int nullfailrunden = 0;
 	int absolviertebloecke = 0;
  	int gesamtfails = 0;
 
- 	public static BlockType zuspringenderblock = BlockType.AcaciaLeaves;
- 	public static BlockType gesprungenerblock = BlockType.AcaciaLog; 
-	public static BlockType zielblock = BlockType.RedstoneBlock;
-	public static boolean an = false;
-  	public static boolean luftblock = false;
-  	public static boolean letzterblock = true;
-  	public static List<Location> eachblock = new ArrayList<Location>();
-  	public static boolean arrayan = false;
-  	public static boolean viererb = false;
+ 	public static BlockType BlockToJump = BlockType.AcaciaLeaves;
+ 	public static BlockType JumpedBlock = BlockType.AcaciaLog; 
+	public static BlockType DestinationBlock = BlockType.RedstoneBlock;
+	public boolean isEnabled = false;
+  	public boolean letzterblock = true;
+  	public List<Location> eachblock = new ArrayList<Location>();
+  	public boolean arrayan = false;
+  	public boolean viererb = false;
   
   	@Override 
   	public boolean enable() {
     	Canary.hooks().registerListener(this, this);
     	super.enable();
-    	logger.info("Getting config data");
+    	logger.info(pluginName + "Getting config data.");
     	PropertiesFile config = getConfig();
-    	levelhoehe = config.getInt("levelhoehe", 16);
+    	LEVEL_HEIGHT = config.getInt("levelhoehe", 16);
     	harrypotterevent = config.getBoolean("harrypotter", false);
     	config.save();
     	return true;
@@ -74,20 +71,19 @@ public class DNA extends EZPlugin implements PluginListener{
            	permissions = {""},
            	toolTip = "/dna")
 	public void dna(MessageReceiver caller, String[] parameters){
-    	if (caller instanceof Player){
-      		Player player = (Player)caller;
+    	if (caller instanceof Player player){
       		playerteleportvorstart(player);
-      		setglassanfang();
-      		an = true;
-      		fails = 0;
+      		placeStartBlock();
+      		isEnabled = true;
+      		jumpFails = 0;
       		loadStats(player);
     	}
   	}
 
   	public static void setBlockType(BlockType jumpedBlock,BlockType jumpingBlock, BlockType finishBlock){
-    	gesprungenerblock=jumpedBlock;
-    	zuspringenderblock=jumpingBlock;
-    	zielblock=finishBlock;
+    	JumpedBlock=jumpedBlock;
+    	BlockToJump=jumpingBlock;
+    	DestinationBlock=finishBlock;
   	}
 
  	@Command(aliases = {"statsdna"},
@@ -98,12 +94,12 @@ public class DNA extends EZPlugin implements PluginListener{
     	if(caller instanceof Player){
     		Player player = (Player)caller;
     		loadStats(player);
-    		double durchschnitt = (double)gesamtfails/gespieltespiele;
+    		double durchschnitt = (double)gesamtfails/totalPlayedGames;
     		durchschnitt = durchschnitt * 100;
     		durchschnitt = Math.round(durchschnitt);
     		durchschnitt = durchschnitt / 100;
-    		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + "Das sind die Stats von " + ChatFormat.BLUE + player.getDisplayName() + ChatFormat.DARK_GREEN + ":");
-    		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - Gespielte Spiele: " + ChatFormat.GOLD + gespieltespiele);
+    		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.DARK_GREEN + "Das sind die Stats von " + ChatFormat.BLUE + player.getDisplayName() + ChatFormat.DARK_GREEN + ":");
+    		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - Gespielte Spiele: " + ChatFormat.GOLD + totalPlayedGames);
     		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - Gesprungene Bloecke: " + ChatFormat.GOLD + absolviertebloecke);
     		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - Fails pro Runde: " + ChatFormat.GOLD + durchschnitt);
     		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - 0 Fails: " + ChatFormat.GOLD + nullfailrunden + "\n");
@@ -133,21 +129,21 @@ public class DNA extends EZPlugin implements PluginListener{
     	Location zielloc = event.getDestination();
     	double xz = zielloc.getX();
     	double zz = zielloc.getZ(); 
-    	if (xa >= 267 && xa <= 295 && za >= 199 && za <= 236 && an == true){
+    	if (xa >= 267 && xa <= 295 && za >= 199 && za <= 236 && isEnabled == true){
     		if(xz > 295 || xz < 267){
             	clearbasic(world);
-            	loosemessage(player);
-            	cleararraylist();
+            	displayLoseMessage(player);
+            	eachblock.clear();
             	arrayan = false;
-            	an = false;
+            	isEnabled = false;
             	return;
       		}
 			if(zz > 236 || zz < 199){
         		clearbasic(world);
-            	cleararraylist();
-            	loosemessage(player);
+            	eachblock.clear();
+            	displayLoseMessage(player);
             	arrayan = false;
-            	an = false;
+            	isEnabled = false;
             	return;
       		}
    		}
@@ -165,28 +161,28 @@ public class DNA extends EZPlugin implements PluginListener{
     	int xdruckplatte = (int)x;
     	int ydruckplatte = (int)y;
     	int zdruckplatte = (int)z;
-    	if(xdruckplatte == 244 && ydruckplatte == 71 && zdruckplatte == 258 && an == false){
-      		an = true;
-      		setglassanfang();
-      		fails = 0;
+    	if(xdruckplatte == 244 && ydruckplatte == 71 && zdruckplatte == 258 && isEnabled == false){
+      		isEnabled = true;
+      		placeStartBlock();
+      		jumpFails = 0;
       		Player player = world.getClosestPlayer(244, 71, 258, 5);
       		loadStats(player);
    		}
-   		if(xdruckplatte == 267 && ydruckplatte == 18 && zdruckplatte == 199 && an == true){
+   		if(xdruckplatte == 267 && ydruckplatte == 18 && zdruckplatte == 199 && isEnabled == true){
     		clearbasic(world);
     		Player player = world.getClosestPlayer(267, 18, 199, 5);
-    		loosemessage(player);
+    		displayLoseMessage(player);
     		if(arrayan){
-      			cleararraylist();
+      			eachblock.clear();
       			arrayan = false;
     		}
-    	an = false;
+    	isEnabled = false;
    		}
   	}
 
  @HookHandler
   public void ichlaufe(PlayerMoveHook event) {
-    if (an){
+    if (isEnabled){
     	Player player = event.getPlayer();
       	Location loc = player.getLocation();
       	double x = loc.getX();
@@ -204,25 +200,24 @@ public class DNA extends EZPlugin implements PluginListener{
       	double setof = Math.random() * 10;
       	int ofset = (int)setof;
     	if (b.getType() == BlockType.Glass) {
-    		i = 0;
-      		hohe = y1 + levelhoehe + ofset;
-      		if(hohe > 51){
-        		hohe = 51;
+      		height = y1 + LEVEL_HEIGHT + ofset;
+      		if(height > 51){
+        		height = 51;
       		}
-      		startmessage(player);
+      		displayStartMessage(player);
       		blockuntermir.getWorld().setBlockAt(blockuntermir, BlockType.WhiteGlass);
       		makerightblocks(player);
       		arrayan = true;
       		playSound(blockuntermir, SoundEffect.Type.NOTE_PLING, 2.0f, 3.0f);
     	}
-    	if (b.getType() == zuspringenderblock){
-    		blockuntermir.getWorld().setBlockAt(blockuntermir, gesprungenerblock);
+    	if (b.getType() == BlockToJump){
+    		blockuntermir.getWorld().setBlockAt(blockuntermir, JumpedBlock);
       		absolviertebloecke = absolviertebloecke + 1;
-      		savestats(player);
-      		if (y < hohe){
+      		saveStats(player);
+      		if (y < height){
         	double sprungauswahl = Math.random();
         		if(eachblock.size() > 1 && (eachblock.get(eachblock.size() - 1).getY()  > eachblock.get(eachblock.size() - 2).getY())){
-        			levelanzeige(player);
+        			displayCorrectLevel(player);
 				}
         		if(sprungauswahl < 0.95){
         			makerightblocks(player);
@@ -231,20 +226,20 @@ public class DNA extends EZPlugin implements PluginListener{
          			vierersprung(player);
             	}
         	}
-      		if (y >= hohe) {
+      		if (y >= height) {
         		makelastblock(player);
         	}
 		}  
-    	if (b.getType() == zielblock && b.getY() > 25){
-      		gewinnmessage(player);
+    	if (b.getType() == DestinationBlock && b.getY() > 25){
+      		displayWinMessage(player);
       		absolviertebloecke = absolviertebloecke + 1;
-      		savestats(player);
-      		cleararraylist();
+      		saveStats(player);
+      		eachblock.clear();
       		blockuntermir.getWorld().setBlockAt(blockuntermir, BlockType.DiamondBlock);
       		winteleport(player);
       		clearbasic(world);
       		arrayan = false;
-      		an = false;
+      		isEnabled = false;
     	}
     	while(arrayan){
       		int arraylaenge = eachblock.size();
@@ -261,10 +256,10 @@ public class DNA extends EZPlugin implements PluginListener{
         		float richtung = player.getLocation().getRotation();
         		Location vorletzterblock = new Location(world, xlb, ylb, zlb, 0f, richtung);
         		player.teleportTo(vorletzterblock);
-        		fails = fails + 1;
+        		jumpFails = jumpFails + 1;
         		playSound(vorletzterblock, SoundEffect.Type.BAT_DEATH, 1.0f, 0.75f);
         		gesamtfails = gesamtfails + 1;
-        		savestats(player);
+        		saveStats(player);
         		return;
         	}else{
        			return;
@@ -273,16 +268,14 @@ public class DNA extends EZPlugin implements PluginListener{
 	}
 }
 
-  public void setglassanfang(){
-    FileLoader fl = new FileLoader("C:/Users/R/Desktop/server/config/events.txt");
-    Location nul = new Location(0, 0, 0);
-    Location startglas = new Location(281, 18, 213);
-    startglas.getWorld().setBlockAt(startglas, BlockType.Glass);
-    eachblock.add(nul);
-    eachblock.add(startglas);
-  }
-
-
+	private void placeStartBlock(){
+		FileLoader fl = new FileLoader("C:/Users/R/Desktop/server/config/events.txt");
+		Location zeroLocation = new Location(0, 0, 0);
+		Location startglas = new Location(281, 18, 213);
+		startglas.getWorld().setBlockAt(startglas, BlockType.Glass);
+		eachblock.add(zeroLocation);
+		eachblock.add(startglas);
+	}
 
 	public void makerightblocks(Player player){
 		Location loc = player.getLocation();
@@ -293,10 +286,9 @@ public class DNA extends EZPlugin implements PluginListener{
 		int yplayer = (int) yp;
 		int zplayer = (int) zp;
 		World world = loc.getWorld();
-		luftblock = true;
+		boolean isValidBlock = false;
 
-		while (luftblock){
-
+		while(!isValidBlock){
 			double x = -4.5 + Math.random() * 10;
 			double y = -1.3 + Math.random();
 			double z = -4.5 + Math.random() * 10;
@@ -304,10 +296,10 @@ public class DNA extends EZPlugin implements PluginListener{
 			int ya = (int) y;
 			int za = (int) z;
 		
-			double betrag = (xa*xa) + ((ya-1)*(ya-1)) + (za*za);
-			double wurzel = Math.sqrt(betrag);
+			double magnitude = (xa*xa) + ((ya-1)*(ya-1)) + (za*za);
+			double distance = Math.sqrt(magnitude);
 
-			if(wurzel > 2.5 && wurzel <= 5){
+			if(distance > 2.5 && distance <= 5){
 				int xblock = xplayer + xa;
 				int yblock = yplayer + ya;
 				int zblock = zplayer + za;
@@ -316,19 +308,14 @@ public class DNA extends EZPlugin implements PluginListener{
 				Block b = world.getBlockAt(xblock, yblock + 1, zblock);
 				Block c = world.getBlockAt(xblock, yblock + 2, zblock); 
 
-				if (a.getType() == BlockType.Air && b.getType() == BlockType.Air && c.getType() == BlockType.Air){
-					Location guterblock = new Location(xblock, yblock, zblock);
-					eachblock.add(guterblock);
+				if(a.getType() == BlockType.Air && b.getType() == BlockType.Air && c.getType() == BlockType.Air){
+					Location validBlockLocation = new Location(xblock, yblock, zblock);
+					eachblock.add(validBlockLocation);
 
-					if(eachblock.size() > 3){
-						Location blockweg = eachblock.get(i);
-						blockweg.getWorld().setBlockAt(blockweg, BlockType.Air);
-						i = i + 1;
-					}
-
-					guterblock.getWorld().setBlockAt(guterblock, zuspringenderblock);
-					playSound(guterblock, SoundEffect.Type.NOTE_HAT, 1.0f, 1.0f);
-					luftblock = false;
+					trimJumpedBlocks();
+					validBlockLocation.getWorld().setBlockAt(validBlockLocation, BlockToJump);
+					playSound(validBlockLocation, SoundEffect.Type.NOTE_HAT, 1.0f, 1.0f);
+					isValidBlock = true;
 				}
 			}
 		}
@@ -362,25 +349,27 @@ public class DNA extends EZPlugin implements PluginListener{
 			if(richtungvierersprung > 0.75 && richtungvierersprung <= 1)
 			zanteil = - 5;
 			
-			Location guterblock = new Location(xp + xanteil, yplayer - 1, zp + zanteil);
+			Location validBlockLocation = new Location(xp + xanteil, yplayer - 1, zp + zanteil);
 
-			Block a = world.getBlockAt((int)guterblock.getX(), (int)guterblock.getY(), (int)guterblock.getZ());
-			Block b = world.getBlockAt((int)guterblock.getX(), (int)guterblock.getY() + 1, (int)guterblock.getZ());
-			Block c = world.getBlockAt((int)guterblock.getX(), (int)guterblock.getY() + 2, (int)guterblock.getZ());
+			Block a = world.getBlockAt((int)validBlockLocation.getX(), (int)validBlockLocation.getY(), (int)validBlockLocation.getZ());
+			Block b = world.getBlockAt((int)validBlockLocation.getX(), (int)validBlockLocation.getY() + 1, (int)validBlockLocation.getZ());
+			Block c = world.getBlockAt((int)validBlockLocation.getX(), (int)validBlockLocation.getY() + 2, (int)validBlockLocation.getZ());
 
 			if (a.getType() == BlockType.Air && b.getType() == BlockType.Air && c.getType() == BlockType.Air){
-				eachblock.add(guterblock);
+				eachblock.add(validBlockLocation);
 
-				if(eachblock.size() > 3){
-				Location blockweg = eachblock.get(i);
-				blockweg.getWorld().setBlockAt(blockweg, BlockType.Air);
-				i = i + 1;
-				}
-
-				guterblock.getWorld().setBlockAt(guterblock, zuspringenderblock);
-				playSound(guterblock, SoundEffect.Type.NOTE_HAT, 1.0f, 1.0f);
+				trimJumpedBlocks();
+				validBlockLocation.getWorld().setBlockAt(validBlockLocation, BlockToJump);
+				playSound(validBlockLocation, SoundEffect.Type.NOTE_HAT, 1.0f, 1.0f);
 				viererb = false;
 			}
+		}
+	}
+
+	private void trimJumpedBlocks(){
+		if(eachblock.size() > 3){
+			Location blockToRemove = eachblock.get(eachblock.size() - 4);
+			blockToRemove.getWorld().setBlockAt(blockToRemove, BlockType.Air);
 		}
 	}
 
@@ -418,7 +407,7 @@ public class DNA extends EZPlugin implements PluginListener{
 				if (a.getType() == BlockType.Air && b.getType() == BlockType.Air && c.getType() == BlockType.Air){
 					Location guterblock = new Location(xblock, yblock, zblock);
 					eachblock.add(guterblock);
-					guterblock.getWorld().setBlockAt(guterblock, zielblock);
+					guterblock.getWorld().setBlockAt(guterblock, DestinationBlock);
 					playSound(guterblock, SoundEffect.Type.ORB, 3.0f, 3.0f);
 					letzterblock = false;
 				}
@@ -426,7 +415,7 @@ public class DNA extends EZPlugin implements PluginListener{
 		}
 	}
 
-	public void levelanzeige(Player player){
+	public void displayCorrectLevel(Player player){
 		int levelzahl = player.getLevel();
 		if(levelzahl < 16)
 			player.addExperience(7 + 2 * levelzahl);
@@ -454,31 +443,28 @@ public class DNA extends EZPlugin implements PluginListener{
 	@HookHandler
 	public void ItemUseHookEvent(ItemUseHook event) {
 		Player player = event.getPlayer();
-		if (player.getItemHeld().getType() == ItemType.Feather && player.getItemHeld().getDisplayName().equalsIgnoreCase(ChatFormat.RED + "Hub"))
+		Item heldItem = player.getItemHeld();
+		if (heldItem.getType() == ItemType.Feather && heldItem.getDisplayName().equalsIgnoreCase(ChatFormat.RED + "Hub"))
 			player.teleportTo(Utils.HubLocation); 
   	}
 
-  	public void loosemessage(Player player){
+  	private void displayLoseMessage(Player player){
 		String msg2 = player.getDisplayName();
 		String msg3 = " hat ";
 		String msg4 = "aufgegeben";
 		player.removeExperience(player.getExperience());
 
-		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.BLUE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".");
+		String serverMessage = ChatFormat.BLUE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".";
+		Utils.BroadcastServerMessage(pluginName, serverMessage);
 	}
 
   	public void playerteleportvorstart(Player player){
-		Location where = player.getLocation();
 		Location whereNow = new Location(281, 18, 235);
 		player.teleportTo(new Location(player.getWorld(), 281, 18, 235, 0f, 180f));
 		player.setModeId(Utils.ADVENTURE_MODE);
    	}
 
- 	public void cleararraylist(){
-    	eachblock.clear();
-  	}
-
-	public void loadStats(Player player){
+	private void loadStats(Player player){
 		String playerName = player.getDisplayName();
 		StatsDna sd = new StatsDna();
 		HashMap<String, Object> search = new HashMap<String, Object>();
@@ -490,17 +476,16 @@ public class DNA extends EZPlugin implements PluginListener{
 			logger.info(playerName + " is not online");
 		}
 
-		gespieltespiele = sd.playedgames;
+		totalPlayedGames = sd.playedgames;
 		nullfailrunden = sd.perfectwin;
 		absolviertebloecke = sd.jumpedblocks;
 		gesamtfails = sd.allfails;
   	}
 
-  public void savestats(Player player){
-
+  private void saveStats(Player player){
     StatsDna sd = new StatsDna();
     sd.player_name = player.getDisplayName();
-    sd.playedgames = gespieltespiele;
+    sd.playedgames = totalPlayedGames;
     sd.perfectwin = nullfailrunden;
     sd.jumpedblocks = absolviertebloecke;
     sd.allfails = gesamtfails;
@@ -528,41 +513,50 @@ public class DNA extends EZPlugin implements PluginListener{
 		player.removeExperience(player.getExperience());
 	}                            
 
-  	public void startmessage(Player player) {
+  	private void displayStartMessage(Player player) {
 		String msg2 = "Das Spiel beginnt!";
-		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + msg2);
-		gespieltespiele = gespieltespiele + 1;
-		savestats(player);
+		Utils.BroadcastServerMessage(pluginName, ChatFormat.DARK_GREEN + msg2);
+		totalPlayedGames = totalPlayedGames + 1;
+		saveStats(player);
     }
 
-	public void gewinnmessage(Player player) {
+	private void displayWinMessage(Player player) {
     	clearbasic(player.getWorld());
-    	cleararraylist();
+    	eachblock.clear();
     	String msg2 = player.getDisplayName();
     	String msg3 = " hat DNA mit ";
     	String msg4 = " Fehlern ";
     	String msg5 = "gewonnen ";
-    	if(fails == 1)
+    	if(jumpFails == 1)
       		msg4 = " Fehler ";
-    	if(gespieltespiele == 20)
-       		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + "Du hast 20 Spiele absolviert. Herzlichen Glueckwunsch!");
+    	if(totalPlayedGames == 20){
+			String serverMessage = ChatFormat.DARK_GREEN + "Du hast 20 Spiele absolviert. Herzlichen Glueckwunsch!";
+			Utils.BroadcastServerMessage(pluginName, serverMessage);
+		}
 
-    	Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.BLUE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + fails + ChatFormat.DARK_GREEN + msg4 + ChatFormat.GOLD + msg5 + ChatFormat.DARK_GREEN + "!");
-    	if(fails == 0){
+		String serverMessage = ChatFormat.BLUE + msg2 + ChatFormat.DARK_GREEN + 
+			msg3 + ChatFormat.GOLD + jumpFails + ChatFormat.DARK_GREEN + msg4 + 
+			ChatFormat.GOLD + msg5 + ChatFormat.DARK_GREEN + "!";
+		Utils.BroadcastServerMessage(pluginName, serverMessage);
+
+    	if(jumpFails == 0){
       		if(harrypotterevent){
       			ItemFactory factory = Canary.factory().getItemFactory();
-      			Item hinweisschaufel = factory.newItem(ItemType.GoldSpade);
-      			hinweisschaufel.setDisplayName(ChatFormat.YELLOW + "Hinweis..");
-      			hinweisschaufel.setDamage(32);
-      			player.getInventory().setSlot(7, hinweisschaufel);
+      			Item clueShovel = factory.newItem(ItemType.GoldSpade);
+      			clueShovel.setDisplayName(ChatFormat.YELLOW + "Hinweis..");
+      			clueShovel.setDamage(32);
+      			player.getInventory().setSlot(7, clueShovel);
       			nullfailrunden = nullfailrunden + 1;
-      			savestats(player);
+      			saveStats(player);
       			loadStats(player);
       			String msg6 = "Fuer diese gute Leistung bekommst du einen ";
       			String msg7 = "Hinweis";
       			String msg8 = " fuer ";
       			String msg9 = "[HP-PS1]";
-      			Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + msg6 + ChatFormat.GOLD + msg7 + ChatFormat.DARK_GREEN + msg8 + ChatFormat.DARK_AQUA + msg9 + ChatFormat.DARK_GREEN + ".");
+
+				serverMessage = ChatFormat.DARK_GREEN + msg6 + ChatFormat.GOLD + msg7 + 
+					ChatFormat.DARK_GREEN + msg8 + ChatFormat.DARK_AQUA + msg9 + ChatFormat.DARK_GREEN + ".";
+      			Utils.BroadcastServerMessage(pluginName, serverMessage);
     		}
   		}
     }
