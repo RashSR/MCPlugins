@@ -135,12 +135,12 @@ public class Quidditch extends EZPlugin implements PluginListener {
     if(isEnabled){
       Entity arrow = event.getProjectile();
       World world = arrow.getWorld();
-      Location loc = arrow.getLocation();
+      Location arrowLocation = arrow.getLocation();
       arrow.destroy();
 
-      int x = (int)loc.getX();
-      int y = (int)loc.getY();
-      int z = (int)loc.getZ();
+      int x = (int)arrowLocation.getX();
+      int y = (int)arrowLocation.getY();
+      int z = (int)arrowLocation.getZ();
 
       int zaehlx = x + 3;
       int zahely = y + 3;
@@ -149,14 +149,14 @@ public class Quidditch extends EZPlugin implements PluginListener {
       for (int scanx = x - 3; scanx <= zaehlx ; scanx++) {
         for (int scany = y - 3; scany <= zahely ; scany++){
           for (int scanz = z - 3; scanz <= zahelz ; scanz++){
-            Block vorlauefigerschnatz = world.getBlockAt(scanx, scany, scanz);
+            Block hitBlock = world.getBlockAt(scanx, scany, scanz);
 
-            if(vorlauefigerschnatz.getType() == SNITCH_BLOCK_TYPE){
-              double betrag = (vorlauefigerschnatz.getX() + 0.5 - loc.getX()) * (vorlauefigerschnatz.getX() + 0.5 - loc.getX()) + (vorlauefigerschnatz.getY() + 0.5 - loc.getY()) * (vorlauefigerschnatz.getY() + 0.5 - loc.getY()) + (vorlauefigerschnatz.getZ() + 0.5 - loc.getZ()) * (vorlauefigerschnatz.getZ() + 0.5 - loc.getZ());
-              double abstand = Math.sqrt(betrag);
+            if(hitBlock.getType() == SNITCH_BLOCK_TYPE){
+              double magnitude = (hitBlock.getX() + 0.5 - arrowLocation.getX()) * (hitBlock.getX() + 0.5 - arrowLocation.getX()) + (hitBlock.getY() + 0.5 - arrowLocation.getY()) * (hitBlock.getY() + 0.5 - arrowLocation.getY()) + (hitBlock.getZ() + 0.5 - arrowLocation.getZ()) * (hitBlock.getZ() + 0.5 - arrowLocation.getZ());
+              double distance = Math.sqrt(magnitude);
 
-              if(abstand <= 3.5){
-                world.setBlockAt(vorlauefigerschnatz.getLocation(), BlockType.Air);
+              if(distance <= 3.5){
+                world.setBlockAt(hitBlock.getLocation(), BlockType.Air);
                 currentSnitchCount++;
                 score += POINT_PER_ARROW_HIT;
                 if(currentSnitchCount <= SNITCHES_PER_GAME){
@@ -166,7 +166,6 @@ public class Quidditch extends EZPlugin implements PluginListener {
                 else{
                   displayScoreMessage(POINT_PER_ARROW_HIT);
                   displayWinnerMessage();
-                  currentSnitchCount = 1;
                 }
                 return;
               }
