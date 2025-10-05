@@ -30,6 +30,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private final int POINTS_PER_RIGHTCLICK = 150;
   private final int POINT_PER_ARROW_HIT = 50;
   private boolean isEnabled = false;
+  private Location snitchLocation;
   private Player player;
   int i = 1;
   private int score = 0;
@@ -88,7 +89,8 @@ public class Quidditch extends EZPlugin implements PluginListener {
       Block possibleSnitch = randomLocation.getWorld().getBlockAt((int)randomLocation.getX(), (int)randomLocation.getY(), (int)randomLocation.getZ());
       
       if(possibleSnitch.getType() == BlockType.Air){
-        randomLocation.getWorld().setBlockAt(randomLocation, SNITCH_BLOCK_TYPE);
+        snitchLocation = randomLocation;
+        snitchLocation.getWorld().setBlockAt(snitchLocation, SNITCH_BLOCK_TYPE);
         hasAirBlockBeenSelected = true;
       }
     }
@@ -99,7 +101,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     double y = startLocation.getY() + Math.random() * (endLocation.getY() - startLocation.getY());
     double z = startLocation.getZ() + Math.random() * (endLocation.getZ() - startLocation.getZ());
 
-    Location randomLocation = new Location(x, y, z);
+    Location randomLocation = new Location((int)x, (int)y, (int)z);
     return randomLocation;
   }
 
@@ -109,8 +111,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
       Block clickedBlock = event.getBlockClicked();
       World world = clickedBlock.getLocation().getWorld();
       Player player = event.getPlayer();
-
-      if(this.player == player && clickedBlock.getType() == SNITCH_BLOCK_TYPE){
+      if(this.player == player && clickedBlock.getType() == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(clickedBlock.getLocation(), snitchLocation)){
         world.setBlockAt(clickedBlock.getLocation(), BlockType.Air);
         i = i + 1;
         score += POINTS_PER_RIGHTCLICK;
