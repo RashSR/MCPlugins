@@ -1,0 +1,66 @@
+# ===================================
+# Block Location Configuration
+# Format: <blockType> <x> <y> <z>
+# ===================================
+
+# --- Snow ---
+snow 252 71 263
+snow 251 71 263
+snow 251 71 262
+snow 251 71 261
+snow 250 71 261
+snow 249 71 262
+snow 250 71 263
+snow 250 71 264
+snow 249 71 263
+
+# --- Redstone ---
+redstone 251 74 263
+redstone 243 73 265
+redstone 244 74 262
+
+# --- Gold ---
+gold 251 73 261
+gold 243 74 263
+gold 245 73 260
+gold 246 73 262
+
+# --- Lapis ---
+lapis 244 74 264
+lapis 249 74 262
+lapis 252 71 261
+lapis 245 71 261
+
+# --- Spruce Leaves ---
+spruce_leaves 249 72 264
+spruce_leaves 250 73 261
+spruce_leaves 248 73 262
+spruce_leaves 248 73 263
+spruce_leaves 252 72 262
+spruce_leaves 252 73 262
+spruce_leaves 252 73 263
+spruce_leaves 252 74 263
+spruce_leaves 252 74 262
+spruce_leaves 251 74 262
+spruce_leaves 250 74 262
+spruce_leaves 250 74 263
+spruce_leaves 249 74 263
+spruce_leaves 250 75 263
+spruce_leaves 250 75 262
+spruce_leaves 251 75 262
+spruce_leaves 251 75 263
+spruce_leaves 245 73 265
+spruce_leaves 245 73 264
+spruce_leaves 244 74 263
+spruce_leaves 245 74 263
+spruce_leaves 245 74 262
+spruce_leaves 242 73 263
+spruce_leaves 244 73 262
+spruce_leaves 245 73 261
+spruce_leaves 244 74 261
+spruce_leaves 243 74 262
+spruce_leaves 244 74 260
+spruce_leaves 243 73 260
+spruce_leaves 244 74 259
+spruce_leaves 244 73 258
+spruce_leaves 246 73 263

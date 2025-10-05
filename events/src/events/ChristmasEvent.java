@@ -19,6 +19,7 @@ import java.util.Random;
 import utils.Utils;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ChristmasEvent extends EZPlugin implements IEvent{
@@ -271,11 +272,12 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
     }
 
     private void gatherEventBlocks(){
-		eventBlocks.put(BlockType.Snow, getSnowList());
-		eventBlocks.put(BlockType.RedstoneBlock, getRedstoneList());
-        eventBlocks.put(BlockType.GoldBlock, getGoldList());
-		eventBlocks.put(BlockType.LapisBlock, getLapisList());
-        eventBlocks.put(BlockType.PineLeaves, getSpruceLeaveList());
+        Map<String, ArrayList<Location>> blocks = BlockLocationLoader.load("config/block_locations_christmas.txt");
+		eventBlocks.put(BlockType.Snow, blocks.get("snow"));
+		eventBlocks.put(BlockType.RedstoneBlock, blocks.get("redstone"));
+        eventBlocks.put(BlockType.GoldBlock, blocks.get("gold"));
+		eventBlocks.put(BlockType.LapisBlock, blocks.get("lapis"));
+        eventBlocks.put(BlockType.PineLeaves, blocks.get("spruce_leaves"));
 	}
 
     private void placeEventBlocks(){
@@ -295,89 +297,8 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
 				world.setBlockAt(loc, BlockType.Air);
 		}
 
+        //readd existing decoration
         world.setBlockAt(new Location(252, 71, 261), BlockType.Workbench);
         world.setBlockAt(new Location(245, 71, 261), BlockType.Jukebox);
 	}
-
-    public ArrayList<Location> getSnowList(){
-        ArrayList<Location> snow = new ArrayList<Location>();
-        snow.add(new Location(252, 71, 263));
-        snow.add(new Location(251, 71, 263));
-        snow.add(new Location(251, 71, 262));
-        snow.add(new Location(251, 71, 261));
-        snow.add(new Location(250, 71, 261));
-        snow.add(new Location(249, 71, 262));
-        snow.add(new Location(250, 71, 263));
-        snow.add(new Location(250, 71, 264));
-        snow.add(new Location(249, 71, 263));
-
-        return snow;
-    }
-
-    public ArrayList<Location> getRedstoneList(){
-        ArrayList<Location> redstone = new ArrayList<Location>();
-        redstone.add(new Location(251, 74, 263));
-        redstone.add(new Location(243, 73, 265));
-        redstone.add(new Location(244, 74, 262));
-
-        return redstone;
-    }
-
-    public ArrayList<Location> getGoldList(){
-        ArrayList<Location> gold = new ArrayList<Location>();
-        gold.add(new Location(251, 73, 261));
-        gold.add(new Location(243, 74, 263));
-        gold.add(new Location(245, 73, 260));
-        gold.add(new Location(246, 73, 262));
-
-        return gold;
-    }
-  
-    public ArrayList<Location> getLapisList(){
-        ArrayList<Location> lapis = new ArrayList<Location>();
-        lapis.add(new Location(244, 74, 264));
-        lapis.add(new Location(249, 74, 262));
-        lapis.add(new Location(252, 71, 261));
-        lapis.add(new Location(245, 71, 261));
-
-        return lapis;
-    }
-
-    public ArrayList<Location> getSpruceLeaveList(){
-        ArrayList<Location> spruceLeaves = new ArrayList<Location>();
-        spruceLeaves.add(new Location(249, 72, 264));
-        spruceLeaves.add(new Location(250, 73, 261));
-        spruceLeaves.add(new Location(248, 73, 262));
-        spruceLeaves.add(new Location(248, 73, 263));
-        spruceLeaves.add(new Location(252, 72, 262));
-        spruceLeaves.add(new Location(252, 73, 262));
-        spruceLeaves.add(new Location(252, 73, 263));
-        spruceLeaves.add(new Location(252, 74, 263));
-        spruceLeaves.add(new Location(252, 74, 262));
-        spruceLeaves.add(new Location(251, 74, 262));
-        spruceLeaves.add(new Location(250, 74, 262));
-        spruceLeaves.add(new Location(250, 74, 263));
-        spruceLeaves.add(new Location(249, 74, 263));
-        spruceLeaves.add(new Location(250, 75, 263));
-        spruceLeaves.add(new Location(250, 75, 262));
-        spruceLeaves.add(new Location(251, 75, 262));
-        spruceLeaves.add(new Location(251, 75, 263));
-        spruceLeaves.add(new Location(245, 73, 265));
-        spruceLeaves.add(new Location(245, 73, 264));
-        spruceLeaves.add(new Location(244, 74, 263));
-        spruceLeaves.add(new Location(245, 74, 263));
-        spruceLeaves.add(new Location(245, 74, 262));
-        spruceLeaves.add(new Location(242, 73, 263));
-        spruceLeaves.add(new Location(244, 73, 262));
-        spruceLeaves.add(new Location(245, 73, 261));
-        spruceLeaves.add(new Location(244, 74, 261));
-        spruceLeaves.add(new Location(243, 74, 262));
-        spruceLeaves.add(new Location(244, 74, 260));
-        spruceLeaves.add(new Location(243, 73, 260));
-        spruceLeaves.add(new Location(244, 74, 259));
-        spruceLeaves.add(new Location(244, 73, 258));
-        spruceLeaves.add(new Location(246, 73, 263));
-
-        return spruceLeaves;
-    }
 }
