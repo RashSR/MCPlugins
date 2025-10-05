@@ -29,7 +29,7 @@ public class Utils extends EZPlugin{
   public static Location Location1vs1 = new Location(107, 151, 309);
   public static Location BuildItLocation = new Location(93, 79, 327);
   public static Location CityLocation = new Location(4928, 64, 4899);
-  public static Location QuidditchFieldLocation = new Location(163, 138, 309);
+  public static Location QuidditchFieldLocation = new Location(163, 130, 309);
   public static Location NetherMapLocation = new Location(163, 149, 364);
   public static Location ChristmasMapLocation = new Location(207, 135, 309);
   public static Location ShriekingShackLocation = new Location(145, 157, 276);
@@ -131,5 +131,10 @@ public class Utils extends EZPlugin{
     }catch(Exception e){
       logger.info("[FileWriter] Unhandled IO-Exception.");
     }
+  }
+
+  public static void RefreshInventroyFromPlayer(Player player){
+    //Is needed to update the Inventory
+    Canary.getServer().consoleCommand("clear " + player.getDisplayName() + " minecraft:dirt 0 0");
   }
 }

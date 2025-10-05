@@ -19,13 +19,14 @@ import net.canarymod.api.factory.ItemFactory;
 import net.canarymod.api.inventory.ItemType;
 import net.canarymod.api.inventory.Enchantment;
 import net.canarymod.api.inventory.Enchantment.Type;
-import net.canarymod.api.inventory.Inventory;
+import net.canarymod.api.inventory.PlayerInventory;
 import utils.Utils;
 
 public class Quidditch extends EZPlugin implements PluginListener {
   
   private final String pluginName = "[Quidditch]";
   private final BlockType SNITCH_BLOCK_TYPE = BlockType.GoldBlock;
+  private final int SNITCHES_PER_GAME = 10;
   private final int POINTS_PER_RIGHTCLICK = 150;
   private final int POINT_PER_ARROW_HIT = 50;
   private boolean isEnabled = false;
@@ -72,7 +73,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     Enchantment infinity = factory.newEnchantment(Enchantment.Type.Infinity, enchantmentLevel);
     infinityBow.addEnchantments(infinity);
 
-    Inventory playerInventory = player.getInventory();
+    PlayerInventory playerInventory = player.getInventory();
     playerInventory.setSlot(1, infinityBow);
     playerInventory.setSlot(ItemType.Arrow, 1, 8);
   }
@@ -113,18 +114,14 @@ public class Quidditch extends EZPlugin implements PluginListener {
         world.setBlockAt(clickedBlock.getLocation(), BlockType.Air);
         i = i + 1;
         score += POINTS_PER_RIGHTCLICK;
-        if(i < 11){
+        if(i <= SNITCHES_PER_GAME){
           placeSnitch();
           displayScoreMessage(POINTS_PER_RIGHTCLICK);
         }
-
-        if(i >= 11){
+        else if(i > SNITCHES_PER_GAME){
           displayScoreMessage(POINTS_PER_RIGHTCLICK);
-          Inventory playerInventory = player.getInventory();
-          playerInventory.removeItem(ItemType.Bow);
           displayWinnerMessage();
           i = 1;
-          return;
         }
       }
     } 
@@ -136,7 +133,6 @@ public class Quidditch extends EZPlugin implements PluginListener {
       Entity arrow = event.getProjectile();
       World world = arrow.getWorld();
       Location loc = arrow.getLocation();
-      int bogengetroffenzahl = 2;
       arrow.destroy();
 
       int x = (int)loc.getX();
@@ -160,12 +156,12 @@ public class Quidditch extends EZPlugin implements PluginListener {
                 world.setBlockAt(vorlauefigerschnatz.getLocation(), BlockType.Air);
                 i++;
                 score += POINT_PER_ARROW_HIT;
-                if(i < 11){
+                if(i <= SNITCHES_PER_GAME){
                   placeSnitch();
                   displayScoreMessage(POINT_PER_ARROW_HIT);
                 }
 
-                if(i >= 11){
+                if(i > SNITCHES_PER_GAME){
                   displayScoreMessage(POINT_PER_ARROW_HIT);
                   displayWinnerMessage();
                   i = 1;
@@ -190,7 +186,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private void displayScoreMessage(int scoredPoints){
     int totalCatchedSnitchCount = i - 1;
     String msg2 = "Das war Nummer ";
-    String msg3 = "/10. ";
+    String msg3 = "/" + SNITCHES_PER_GAME + ". ";
     String msg4 ="+" + scoredPoints;
     String msg5 = " Punkte.";
 
@@ -199,16 +195,22 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private void displayWinnerMessage(){
+    removeItemsFromPlayer();
+    
     String msg2 = "Du hast jeden Schnatz ";
     String msg3 = "gefangen ";
     String msg4 = " Punkte geholt.";
     String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + "und " + ChatFormat.GOLD + score + ChatFormat.DARK_GREEN + msg4;
     Utils.BroadcastServerMessage(pluginName, serverMessage);
 
-    Inventory playerInventory = player.getInventory();
-    playerInventory.removeItem(ItemType.Bow);
-    playerInventory.removeItem(ItemType.Arrow);
     score = 0;
     isEnabled = false;
+  }
+
+  private void removeItemsFromPlayer(){
+    PlayerInventory playerInventory = player.getInventory();
+    playerInventory.removeItem(ItemType.Bow);
+    playerInventory.removeItem(ItemType.Arrow);
+    Utils.RefreshInventroyFromPlayer(player);
   }
 }
