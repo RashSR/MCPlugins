@@ -20,19 +20,19 @@ public class HalloweenEvent extends EZPlugin implements IEvent{
 
 	public void startEvent(){
 		logger.info("Das Event Halloween wird gestartet.");
-		Utils.WriteToEventFile("halloween");
 		world.setRaining(true);
 		world.setThundering(true);
 		world.setThunderStrength((float)Math.random());
 		placeEventBlocks();
+		Utils.WriteToEventFile("halloween");
 	}
 
 	public void endEvent(){
 		logger.info("Das Event Halloween wird beendet.");
-		Utils.WriteToEventFile("no"); 
 		removeEventBlocks();
 		world.setRaining(false);
 		world.setThundering(false);
+		Utils.WriteToEventFile("no"); 
 	}
 
 	public EventType getEventType(){

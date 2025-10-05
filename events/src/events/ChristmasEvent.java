@@ -24,11 +24,6 @@ import java.util.Map;
 
 public class ChristmasEvent extends EZPlugin implements IEvent{
     private Map<BlockType, ArrayList<Location>> eventBlocks = new HashMap<>();
-    public static Location[] fichtenbleatter = new Location[32];
-    public static Location[] lapisblocks = new Location[4];
-    public static Location[] goldblocks = new Location[4];
-    public static Location[] redstoneblocks = new Location[3];
-    public static Location[] schnee = new Location[9];
 
     private static ArrayList<Location> dnaSnow;
     private static ArrayList<Location> candyStickElements;
@@ -43,22 +38,22 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
         this.world = world;
     }
 
-    public void endEvent(){
-        removeCandySticks();
-        removeEventBlocks();
-        removeSnow();
-        logger.info("Das Event Christmas wird beendet.");
-        isRunning = false;
-        Utils.WriteToEventFile("no");
-    }
-
     public void startEvent(){
+        logger.info("Das Event Christmas wird gestartet.");
         makeCandySticks(new Location(267, 17, 227), new Location(295, 17, 199), 30);
         placeEventBlocks();
         isRunning = true;
         dnaMakeSnow();
-        logger.info("Das Event Christmas wird gestartet.");
         Utils.WriteToEventFile("christmas");
+    }
+
+    public void endEvent(){
+        logger.info("Das Event Christmas wird beendet.");
+        removeCandySticks();
+        removeEventBlocks();
+        removeSnow();
+        isRunning = false;
+        Utils.WriteToEventFile("no");
     }
 
     public EventType getEventType(){
@@ -250,9 +245,7 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
             while(isRunning){
                 for(Location loc : dnaSnow){
                     if(world.getBlockAt(loc).getType() != BlockType.Snow){
-                        if(isRunning){
-                            world.setBlockAt(loc, BlockType.Snow);
-                        }
+                        world.setBlockAt(loc, BlockType.Snow);
                     }
                 }
             }
