@@ -32,8 +32,8 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private boolean isEnabled = false;
   private Location snitchLocation;
   private Player player;
-  int i = 1;
-  private int score = 0;
+  private int currentSnitchCount;
+  private int score;
   
   @Override 
   public boolean enable() {
@@ -57,6 +57,8 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
   private void startGame(Player player){
     player.teleportTo(Utils.QuidditchFieldLocation);
+    currentSnitchCount = 1;
+    score = 0;
     displayStartMessage();
     isEnabled = true;
     placeSnitch();
@@ -113,16 +115,16 @@ public class Quidditch extends EZPlugin implements PluginListener {
       Player player = event.getPlayer();
       if(this.player == player && clickedBlock.getType() == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(clickedBlock.getLocation(), snitchLocation)){
         world.setBlockAt(clickedBlock.getLocation(), BlockType.Air);
-        i = i + 1;
+        currentSnitchCount = currentSnitchCount + 1;
         score += POINTS_PER_RIGHTCLICK;
-        if(i <= SNITCHES_PER_GAME){
+        if(currentSnitchCount <= SNITCHES_PER_GAME){
           placeSnitch();
           displayScoreMessage(POINTS_PER_RIGHTCLICK);
         }
-        else if(i > SNITCHES_PER_GAME){
+        else{
           displayScoreMessage(POINTS_PER_RIGHTCLICK);
           displayWinnerMessage();
-          i = 1;
+          currentSnitchCount = 1;
         }
       }
     } 
@@ -155,19 +157,18 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
               if(abstand <= 3.5){
                 world.setBlockAt(vorlauefigerschnatz.getLocation(), BlockType.Air);
-                i++;
+                currentSnitchCount++;
                 score += POINT_PER_ARROW_HIT;
-                if(i <= SNITCHES_PER_GAME){
+                if(currentSnitchCount <= SNITCHES_PER_GAME){
                   placeSnitch();
                   displayScoreMessage(POINT_PER_ARROW_HIT);
                 }
-
-                if(i > SNITCHES_PER_GAME){
+                else{
                   displayScoreMessage(POINT_PER_ARROW_HIT);
                   displayWinnerMessage();
-                  i = 1;
-                  return;
+                  currentSnitchCount = 1;
                 }
+                return;
               }
             }
           }
@@ -185,7 +186,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private void displayScoreMessage(int scoredPoints){
-    int totalCatchedSnitchCount = i - 1;
+    int totalCatchedSnitchCount = currentSnitchCount - 1;
     String msg2 = "Das war Nummer ";
     String msg3 = "/" + SNITCHES_PER_GAME + ". ";
     String msg4 ="+" + scoredPoints;
@@ -203,8 +204,6 @@ public class Quidditch extends EZPlugin implements PluginListener {
     String msg4 = " Punkte geholt.";
     String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + "und " + ChatFormat.GOLD + score + ChatFormat.DARK_GREEN + msg4;
     Utils.BroadcastServerMessage(pluginName, serverMessage);
-
-    score = 0;
     isEnabled = false;
   }
 
