@@ -23,13 +23,15 @@ import net.canarymod.api.inventory.Inventory;
 import utils.Utils;
 
 public class Quidditch extends EZPlugin implements PluginListener {
-
-  private BlockType snitchBlockType = BlockType.GoldBlock;
-  int i = 1;
-  int score = 0;
+  
   private final String pluginName = "[Quidditch]";
+  private final BlockType SNITCH_BLOCK_TYPE = BlockType.GoldBlock;
+  private final int POINTS_PER_RIGHTCLICK = 150;
+  private final int POINT_PER_ARROW_HIT = 50;
   private boolean isEnabled = false;
-  Inventory playerinv;
+  private Player player;
+  int i = 1;
+  private int score = 0;
   
   @Override 
   public boolean enable() {
@@ -45,85 +47,82 @@ public class Quidditch extends EZPlugin implements PluginListener {
     if (caller instanceof Player player) {
       if(args.length == 2){
         if(args[1].equalsIgnoreCase("schnatz")){
-            displayStartMessage();
-            placeSnitch();
-            giveEquipToPlayer(player);
-            isEnabled = true;
+            startGame(player);
         }
       }
     }
   }
 
-  private void giveEquipToPlayer(Player player){
-    playerinv = player.getInventory();
-
-    ItemFactory factory = Canary.factory().getItemFactory();
-    Item infinitybogen = factory.newItem(ItemType.Bow);
-    short f = 1;
-
-    ItemFactory infinityfactory = Canary.factory().getItemFactory();
-    Enchantment infinity = infinityfactory.newEnchantment(Enchantment.Type.Infinity, f);
-
-    infinitybogen.setDisplayName(ChatFormat.GOLD + "Schnatzfaenger");
-    infinitybogen.addEnchantments(infinity);
-
-    playerinv.setSlot(1, infinitybogen);
-    playerinv.setSlot(ItemType.Arrow, 1, 8);
+  private void startGame(Player player){
+    player.teleportTo(Utils.QuidditchFieldLocation);
+    displayStartMessage();
+    isEnabled = true;
+    placeSnitch();
+    this.player = player;
+    giveEquipToPlayer();
     player.setModeId(Utils.ADVENTURE_MODE);
   }
 
+  private void giveEquipToPlayer(){
+    ItemFactory factory = Canary.factory().getItemFactory();
+    Item infinityBow = factory.newItem(ItemType.Bow);
+    infinityBow.setDisplayName(ChatFormat.GOLD + "Schnatzfaenger");
+
+    short enchantmentLevel = 1;
+    Enchantment infinity = factory.newEnchantment(Enchantment.Type.Infinity, enchantmentLevel);
+    infinityBow.addEnchantments(infinity);
+
+    Inventory playerInventory = player.getInventory();
+    playerInventory.setSlot(1, infinityBow);
+    playerInventory.setSlot(ItemType.Arrow, 1, 8);
+  }
+
   private void placeSnitch(){
-    boolean solangkeinluftblock = true;
+    boolean hasAirBlockBeenSelected = false;
 
-    double anfangswertx = 136;
-    double anfangswerty = 122;
-    double anfangswertz = 290;
-    double endwertx = 190;
-    double endwerty = 154;
-    double endwertz = 328;
-
-    while(solangkeinluftblock){
-      double schnatzx = anfangswertx + Math.random() * (endwertx - anfangswertx);
-      double schnatzy = anfangswerty + Math.random() * (endwerty - anfangswerty);
-      double schnatzz = anfangswertz + Math.random() * (endwertz - anfangswertz);
-
-      int xschnatz = (int)schnatzx;
-      int yschnatz = (int)schnatzy;
-      int zschnatz = (int)schnatzz;
-
-      Location snitch = new Location(schnatzx, schnatzy, schnatzz);
-      Block temporarySnitch = snitch.getWorld().getBlockAt(xschnatz, yschnatz, zschnatz);
-
-      if(temporarySnitch.getType() == BlockType.Air){
-        snitch.getWorld().setBlockAt(snitch, snitchBlockType);
-        solangkeinluftblock = false;
+    while(!hasAirBlockBeenSelected){
+      Location startLocation = new Location(136, 122, 290);
+      Location endLocation = new Location(190, 154, 328);
+      Location randomLocation = getRandomLocationInsideVolume(startLocation, endLocation);
+      Block possibleSnitch = randomLocation.getWorld().getBlockAt((int)randomLocation.getX(), (int)randomLocation.getY(), (int)randomLocation.getZ());
+      
+      if(possibleSnitch.getType() == BlockType.Air){
+        randomLocation.getWorld().setBlockAt(randomLocation, SNITCH_BLOCK_TYPE);
+        hasAirBlockBeenSelected = true;
       }
     }
+  }
+
+  private Location getRandomLocationInsideVolume(Location startLocation, Location endLocation){
+    double x = startLocation.getX() + Math.random() * (endLocation.getX() - startLocation.getX());
+    double y = startLocation.getY() + Math.random() * (endLocation.getY() - startLocation.getY());
+    double z = startLocation.getZ() + Math.random() * (endLocation.getZ() - startLocation.getZ());
+
+    Location randomLocation = new Location(x, y, z);
+    return randomLocation;
   }
 
   @HookHandler
   public void BlockRightClickHookEvent(BlockRightClickHook event){
     if(isEnabled){
-      Block geklickterblock = event.getBlockClicked();
-      Location loc = geklickterblock.getLocation();
-      World world = loc.getWorld();
-      int rechtsklickzahl = 1;
+      Block clickedBlock = event.getBlockClicked();
+      World world = clickedBlock.getLocation().getWorld();
       Player player = event.getPlayer();
 
-      if(geklickterblock.getType() == snitchBlockType){
-        world.setBlockAt(geklickterblock.getLocation(), BlockType.Air);
+      if(this.player == player && clickedBlock.getType() == SNITCH_BLOCK_TYPE){
+        world.setBlockAt(clickedBlock.getLocation(), BlockType.Air);
         i = i + 1;
-        score = score + 150;
+        score += POINTS_PER_RIGHTCLICK;
         if(i < 11){
           placeSnitch();
-          displayScoreMessage(rechtsklickzahl);
+          displayScoreMessage(POINTS_PER_RIGHTCLICK);
         }
 
         if(i >= 11){
-          displayScoreMessage(rechtsklickzahl);
-          playerinv = player.getInventory();
-          playerinv.removeItem(ItemType.Bow);
-          displayWinnerMessage(player);
+          displayScoreMessage(POINTS_PER_RIGHTCLICK);
+          Inventory playerInventory = player.getInventory();
+          playerInventory.removeItem(ItemType.Bow);
+          displayWinnerMessage();
           i = 1;
           return;
         }
@@ -132,14 +131,13 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   @HookHandler
-  public void schnatzmitbogengetroffen(ProjectileHitHook event){
+  public void ProjectileHitHookEvent(ProjectileHitHook event){
     if(isEnabled){
       Entity arrow = event.getProjectile();
       World world = arrow.getWorld();
       Location loc = arrow.getLocation();
       int bogengetroffenzahl = 2;
       arrow.destroy();
-      Player player = world.getClosestPlayer(loc.getX(), loc.getY(), loc.getZ(), 100);
 
       int x = (int)loc.getX();
       int y = (int)loc.getY();
@@ -154,22 +152,22 @@ public class Quidditch extends EZPlugin implements PluginListener {
           for (int scanz = z - 3; scanz <= zahelz ; scanz++){
             Block vorlauefigerschnatz = world.getBlockAt(scanx, scany, scanz);
 
-            if(vorlauefigerschnatz.getType() == snitchBlockType){
+            if(vorlauefigerschnatz.getType() == SNITCH_BLOCK_TYPE){
               double betrag = (vorlauefigerschnatz.getX() + 0.5 - loc.getX()) * (vorlauefigerschnatz.getX() + 0.5 - loc.getX()) + (vorlauefigerschnatz.getY() + 0.5 - loc.getY()) * (vorlauefigerschnatz.getY() + 0.5 - loc.getY()) + (vorlauefigerschnatz.getZ() + 0.5 - loc.getZ()) * (vorlauefigerschnatz.getZ() + 0.5 - loc.getZ());
               double abstand = Math.sqrt(betrag);
 
               if(abstand <= 3.5){
                 world.setBlockAt(vorlauefigerschnatz.getLocation(), BlockType.Air);
-                i = i + 1;
-                score = score + 50;
+                i++;
+                score += POINT_PER_ARROW_HIT;
                 if(i < 11){
                   placeSnitch();
-                  displayScoreMessage(bogengetroffenzahl);
+                  displayScoreMessage(POINT_PER_ARROW_HIT);
                 }
 
                 if(i >= 11){
-                  displayScoreMessage(bogengetroffenzahl);
-                  displayWinnerMessage(player);
+                  displayScoreMessage(POINT_PER_ARROW_HIT);
+                  displayWinnerMessage();
                   i = 1;
                   return;
                 }
@@ -184,38 +182,32 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private void displayStartMessage(){
     String msg2 = "Versuche jeden ";
     String msg3 = "goldenen Schnatz";
-    String msg4 = " zu fangen.";
+    String msg4 = "zu fangen.";
     String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + msg4;
     Utils.BroadcastServerMessage(pluginName, serverMessage);
   }
 
-  private void displayScoreMessage(int zahl){
-    int blockanzahl = i - 1;
+  private void displayScoreMessage(int scoredPoints){
+    int totalCatchedSnitchCount = i - 1;
     String msg2 = "Das war Nummer ";
     String msg3 = "/10. ";
-    String msg4 ="";
+    String msg4 ="+" + scoredPoints;
     String msg5 = " Punkte.";
-    
-    if(zahl == 1)
-      msg4 = "+150";
-    else if(zahl == 2)
-      msg4 = "+50";
 
-    String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + blockanzahl + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + msg5;
+    String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + totalCatchedSnitchCount + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + msg5;
     Utils.BroadcastServerMessage(pluginName, serverMessage);
   }
 
-  private void displayWinnerMessage(Player player){
+  private void displayWinnerMessage(){
     String msg2 = "Du hast jeden Schnatz ";
     String msg3 = "gefangen ";
     String msg4 = " Punkte geholt.";
     String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + "und " + ChatFormat.GOLD + score + ChatFormat.DARK_GREEN + msg4;
     Utils.BroadcastServerMessage(pluginName, serverMessage);
 
-    playerinv = player.getInventory();
-    playerinv.removeItem(ItemType.Bow);
-    playerinv = player.getInventory();
-    playerinv.removeItem(ItemType.Arrow);
+    Inventory playerInventory = player.getInventory();
+    playerInventory.removeItem(ItemType.Bow);
+    playerInventory.removeItem(ItemType.Arrow);
     score = 0;
     isEnabled = false;
   }

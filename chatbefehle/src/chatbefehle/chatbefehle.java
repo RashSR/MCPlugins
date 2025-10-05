@@ -32,8 +32,8 @@ public class chatbefehle extends EZPlugin implements PluginListener{
             toolTip = "/hub")
   public void TeleportToHub(MessageReceiver caller, String[] parameters){
     if(caller instanceof Player player){ 
-        player.teleportTo(Utils.HubLocation);
-        player.setModeId(Utils.ADVENTURE_MODE);
+      player.teleportTo(Utils.HubLocation);
+      player.setModeId(Utils.ADVENTURE_MODE);
     }
   }                                                                     
 
@@ -43,8 +43,8 @@ public class chatbefehle extends EZPlugin implements PluginListener{
            toolTip = "/zombie")
   public void TeleportToZombie(MessageReceiver caller, String[] parameters){
     if(caller instanceof Player player){
-       player.teleportTo(Utils.ZombieLocation);
-       player.setModeId(Utils.ADVENTURE_MODE);
+      player.teleportTo(Utils.ZombieLocation);
+      player.setModeId(Utils.ADVENTURE_MODE);
     }
   }
 
@@ -60,7 +60,7 @@ public class chatbefehle extends EZPlugin implements PluginListener{
         givePlayer1vs1TeleportItems(player);
       }
       else if(args.length == 2 && args[1].equalsIgnoreCase("maps"))
-          display1vs1MapOptions();
+        display1vs1MapOptions();
       else if(args.length == 3 && args[1].equalsIgnoreCase("map")){
         if(args[2].equalsIgnoreCase("quidditch") || args[2].equalsIgnoreCase("1")){
           player.teleportTo(Utils.QuidditchFieldLocation);
@@ -90,8 +90,8 @@ public class chatbefehle extends EZPlugin implements PluginListener{
 
     if(heldItemType == ItemType.GoldNugget && heldItemName.equalsIgnoreCase(ChatFormat.GREEN + "Quidditch-Map besichtigen")) 
     {
-     player.setModeId(Utils.CREATIVE_MODE);
-     player.teleportTo(Utils.QuidditchFieldLocation);
+      player.setModeId(Utils.CREATIVE_MODE);
+      player.teleportTo(Utils.QuidditchFieldLocation);
     }
     else if(heldItemType == ItemType.NetherWart && heldItemName.equalsIgnoreCase(ChatFormat.GREEN + "Nether-Map besichtigen")) 
     {
