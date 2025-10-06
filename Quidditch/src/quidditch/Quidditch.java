@@ -21,6 +21,7 @@ import net.canarymod.api.inventory.Enchantment;
 import net.canarymod.api.inventory.Enchantment.Type;
 import net.canarymod.api.inventory.PlayerInventory;
 import utils.Utils;
+import utils.Map;
 
 public class Quidditch extends EZPlugin implements PluginListener {
   
@@ -35,6 +36,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private Player player;
   private int currentSnitchCount;
   private int score;
+  private Map SELECTED_MAP = Map.QUIDDITCH;
   
   @Override 
   public boolean enable() {
@@ -57,7 +59,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private void startGame(Player player){
-    player.teleportTo(Utils.QuidditchFieldLocation);
+    player.teleportTo(SELECTED_MAP.getSpawnLocation());
     currentSnitchCount = 1;
     score = 0;
     displayStartMessage();
@@ -86,8 +88,8 @@ public class Quidditch extends EZPlugin implements PluginListener {
     boolean hasAirBlockBeenSelected = false;
 
     while(!hasAirBlockBeenSelected){
-      Location startLocation = new Location(136, 122, 290);
-      Location endLocation = new Location(190, 154, 328);
+      Location startLocation = SELECTED_MAP.getStartLocation();
+      Location endLocation = SELECTED_MAP.getEndLocation();
       Location randomLocation = getRandomLocationInsideVolume(startLocation, endLocation);
       Block possibleSnitch = randomLocation.getWorld().getBlockAt((int)randomLocation.getX(), (int)randomLocation.getY(), (int)randomLocation.getZ());
       
