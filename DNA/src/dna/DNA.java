@@ -289,6 +289,7 @@ public class DNA extends EZPlugin implements PluginListener{
 		boolean isValidBlock = false;
 
 		while(!isValidBlock){
+			//These coordinates are relative to the player's current position
 			double x = -4.5 + Math.random() * 10;
 			double y = -1.3 + Math.random();
 			double z = -4.5 + Math.random() * 10;

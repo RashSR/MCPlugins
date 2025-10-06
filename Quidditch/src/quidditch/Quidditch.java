@@ -29,6 +29,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private final int SNITCHES_PER_GAME = 10;
   private final int POINTS_PER_RIGHTCLICK = 150;
   private final int POINT_PER_ARROW_HIT = 50;
+  private final double MAX_HIT_DISTANCE = 3.25;
   private boolean isEnabled = false;
   private Location snitchLocation;
   private Player player;
@@ -111,21 +112,9 @@ public class Quidditch extends EZPlugin implements PluginListener {
   public void BlockRightClickHookEvent(BlockRightClickHook event){
     if(isEnabled){
       Block clickedBlock = event.getBlockClicked();
-      World world = clickedBlock.getLocation().getWorld();
       Player player = event.getPlayer();
       if(this.player == player && clickedBlock.getType() == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(clickedBlock.getLocation(), snitchLocation)){
-        world.setBlockAt(clickedBlock.getLocation(), BlockType.Air);
-        currentSnitchCount = currentSnitchCount + 1;
-        score += POINTS_PER_RIGHTCLICK;
-        if(currentSnitchCount <= SNITCHES_PER_GAME){
-          placeSnitch();
-          displayScoreMessage(POINTS_PER_RIGHTCLICK);
-        }
-        else{
-          displayScoreMessage(POINTS_PER_RIGHTCLICK);
-          displayWinnerMessage();
-          currentSnitchCount = 1;
-        }
+        snitchCatched(POINTS_PER_RIGHTCLICK);
       }
     } 
   }
@@ -151,22 +140,12 @@ public class Quidditch extends EZPlugin implements PluginListener {
           for (int scanz = z - 3; scanz <= zahelz ; scanz++){
             Block hitBlock = world.getBlockAt(scanx, scany, scanz);
 
-            if(hitBlock.getType() == SNITCH_BLOCK_TYPE){
-              double magnitude = (hitBlock.getX() + 0.5 - arrowLocation.getX()) * (hitBlock.getX() + 0.5 - arrowLocation.getX()) + (hitBlock.getY() + 0.5 - arrowLocation.getY()) * (hitBlock.getY() + 0.5 - arrowLocation.getY()) + (hitBlock.getZ() + 0.5 - arrowLocation.getZ()) * (hitBlock.getZ() + 0.5 - arrowLocation.getZ());
-              double distance = Math.sqrt(magnitude);
-
-              if(distance <= 3.5){
-                world.setBlockAt(hitBlock.getLocation(), BlockType.Air);
-                currentSnitchCount++;
-                score += POINT_PER_ARROW_HIT;
-                if(currentSnitchCount <= SNITCHES_PER_GAME){
-                  placeSnitch();
-                  displayScoreMessage(POINT_PER_ARROW_HIT);
-                }
-                else{
-                  displayScoreMessage(POINT_PER_ARROW_HIT);
-                  displayWinnerMessage();
-                }
+            if(hitBlock.getType() == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(hitBlock.getLocation(), snitchLocation)){
+              //arrow.getLocation() is very inaccurate!
+              double distance = Utils.CalculateDistanceBetweenLocations(hitBlock.getLocation(), arrowLocation, true);
+              Utils.BroadcastServerMessage(pluginName, "Distance: " + distance);
+              if(distance <= MAX_HIT_DISTANCE){
+                snitchCatched(POINT_PER_ARROW_HIT);
                 return;
               }
             }
@@ -174,6 +153,18 @@ public class Quidditch extends EZPlugin implements PluginListener {
         }
       }
     }
+  }
+
+  private void snitchCatched(int pointsScored){
+    snitchLocation.getWorld().setBlockAt(snitchLocation, BlockType.Air);
+    currentSnitchCount++;
+    score += pointsScored;
+    displayScoreMessage(pointsScored);
+
+    if(currentSnitchCount <= SNITCHES_PER_GAME)
+      placeSnitch();
+    else
+      displayWinnerMessage();
   }
 
   private void displayStartMessage(){

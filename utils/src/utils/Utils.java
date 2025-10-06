@@ -137,4 +137,23 @@ public class Utils extends EZPlugin{
     //Is needed to update the Inventory
     Canary.getServer().consoleCommand("clear " + player.getDisplayName() + " minecraft:dirt 0 0");
   }
+
+  public static double CalculateDistanceBetweenLocations(Location firstLocation, Location secondLocation, boolean withCenterCalculation) {
+    double centerX = firstLocation.getX();
+    double centerY = firstLocation.getY();
+    double centerZ = firstLocation.getZ();
+
+    if(withCenterCalculation){
+      centerX += 0.5;
+      centerY += 0.5;
+      centerZ += 0.5;
+    }
+
+    double dx = centerX - secondLocation.getX();
+    double dy = centerY - secondLocation.getY();
+    double dz = centerZ - secondLocation.getZ();
+
+    return Math.sqrt(dx * dx + dy * dy + dz * dz);
+}
+
 }
