@@ -91,7 +91,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     this.scoreboard = manager.getScoreboard("gameboard");
 
     // Create or get the objective
-    this.objective = scoreboard.addScoreObjective("Quidditch");
+    this.objective = scoreboard.addScoreObjective("catchSnitch");
 
     // Set display name and position
     this.objective.setDisplayName("§6§lGame Info");
@@ -118,6 +118,10 @@ public class Quidditch extends EZPlugin implements PluginListener {
     this.totalScore = scoreboard.getScore("§eScore: " + score, this.objective);
     this.totalScore.setScore(5);
     this.totalScore.update();
+
+    //Can be used to show it for the first session (check for file) or restart server. 
+    //Requirement -> manager.getScoreboard(); must have no argument, this will use the default scoreboard
+    //Canary.getServer().consoleCommand("scoreboard objectives setdisplay sidebar scoreboard_catchSnitch");
   }
 
   private void giveEquipToPlayer(){
