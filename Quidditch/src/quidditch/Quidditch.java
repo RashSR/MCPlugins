@@ -22,6 +22,7 @@ import net.canarymod.api.inventory.Enchantment.Type;
 import net.canarymod.api.inventory.PlayerInventory;
 import utils.Utils;
 import utils.Map;
+import net.canarymod.api.scoreboard.*;
 
 public class Quidditch extends EZPlugin implements PluginListener {
   
@@ -36,8 +37,14 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private Player player;
   private int currentSnitchCount;
   private int score;
-  private Map SELECTED_MAP = Map.SHRIEKING_SHACK;
-  
+  private Map SELECTED_MAP = Map.QUIDDITCH;
+
+  private Scoreboard scoreboard;
+  private ScoreObjective objective;
+  private Score mapScore;
+  private Score countScore;
+  private Score totalScore;
+
   @Override 
   public boolean enable() {
     Canary.hooks().registerListener(this, this);
@@ -68,6 +75,37 @@ public class Quidditch extends EZPlugin implements PluginListener {
     this.player = player;
     giveEquipToPlayer();
     player.setModeId(Utils.ADVENTURE_MODE);
+    createScoreboard();
+  }
+
+  private void createScoreboard(){
+    ScoreboardManager manager = Canary.scoreboards();
+
+    // Gets or create the scoreboard
+    this.scoreboard = manager.getScoreboard("gameboard");
+
+    // Create or get the objective
+    this.objective = scoreboard.addScoreObjective("Quidditch");
+
+    // Set display name and position
+    this.objective.setDisplayName("§6§lGame Info");
+
+    //Set Position and the player it is targetted to
+    this.scoreboard.setScoreboardPosition(ScorePosition.SIDEBAR, this.objective, player);
+
+    // Initialize score entries
+    this.countScore = scoreboard.getScore("§bCount:", this.objective);
+    this.countScore.setScore(0);
+    this.countScore.update();
+
+    this.totalScore = scoreboard.getScore("§eScore:", this.objective);
+    this.totalScore.setScore(0);
+    this.totalScore.update();
+
+    String label = "§aMap: §f" + SELECTED_MAP.toString();
+    this.mapScore = scoreboard.getScore(label, this.objective);
+    this.mapScore.setScore(0);
+    this.mapScore.update();
   }
 
   private void giveEquipToPlayer(){
@@ -165,8 +203,12 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
     if(currentSnitchCount <= SNITCHES_PER_GAME)
       placeSnitch();
-    else
+    else{
       displayWinnerMessage();
+      removeItemsFromPlayer();
+      this.scoreboard.clearScoreboardPosition(ScorePosition.SIDEBAR);
+    }
+      
   }
 
   private void displayStartMessage(){
@@ -179,6 +221,10 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
   private void displayScoreMessage(int scoredPoints){
     int totalCatchedSnitchCount = currentSnitchCount - 1;
+    this.countScore.setScore(totalCatchedSnitchCount);
+    this.countScore.update();
+    this.totalScore.setScore(this.totalScore.getScore() + scoredPoints);
+    this.totalScore.update();
     String msg2 = "Das war Nummer ";
     String msg3 = "/" + SNITCHES_PER_GAME + ". ";
     String msg4 ="+" + scoredPoints;
@@ -189,8 +235,6 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private void displayWinnerMessage(){
-    removeItemsFromPlayer();
-    
     String msg2 = "Du hast jeden Schnatz ";
     String msg3 = "gefangen ";
     String msg4 = " Punkte geholt.";
