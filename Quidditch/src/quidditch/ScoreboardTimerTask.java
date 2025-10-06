@@ -19,7 +19,7 @@ public class ScoreboardTimerTask extends ServerTask{
         this.scoreboard = scoreboard;
         this.objective = objective;
         this.timeScore = timeScore;
-        this.timeScore = scoreboard.getScore("§aTime: §f0", this.objective);
+        this.timeScore = scoreboard.getScore("§aTime: §f00:00", this.objective);
         this.timeScore.setScore(2);
         this.timeScore.update();
     }
@@ -27,8 +27,31 @@ public class ScoreboardTimerTask extends ServerTask{
     public void run(){
         passedSeconds++;
         this.scoreboard.removeScore(this.timeScore.getName(), this.objective);
-        this.timeScore = scoreboard.getScore("§aTime: §f" + passedSeconds, this.objective);
+        this.timeScore = scoreboard.getScore("§aTime: §f" + formatPassedTime(), this.objective);
         this.timeScore.setScore(2);
         this.timeScore.update();
-    } 
+    }
+
+    private String formatPassedTime(){
+        String result = "";
+
+        int minutes = 0;
+        int mySeconds = passedSeconds;
+        while(mySeconds >= 60){
+            mySeconds -= 60;
+            minutes++;
+        }
+        
+        //Add leading zero for mm:ss
+        if(minutes < 10)
+            result += "0";
+
+        result += minutes + ":";
+
+        if(mySeconds < 10)
+            result += "0";
+
+        result += mySeconds;
+        return result;
+    }
 }
