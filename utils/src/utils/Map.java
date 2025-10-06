@@ -8,13 +8,25 @@ public enum Map {
         Utils.QuidditchFieldLocation //spawn
     ), 
     SNOW(
-        null, 
-        null, 
+        new Location(12, 105, 221), 
+        new Location(45, 121, 285),
         Utils.SnowMapLocation
     ), 
-    NETHER(null, null, null), 
-    CHRISTMAS(null, null, null), 
-    SHRIEKING_SHACK(null, null, null);
+    NETHER(
+        new Location(136, 129, 329), 
+        new Location(190, 159, 401),
+        Utils.NetherMapLocation
+    ), 
+    CHRISTMAS(
+        new Location(191, 122, 294), 
+        new Location(227, 140, 327), 
+        Utils.ChristmasMapLocation
+    ), 
+    SHRIEKING_SHACK(
+        new Location(136, 132, 260),
+        new Location(221, 160, 290), 
+        Utils.ShriekingShackLocation
+    );
 
     private final Location startLocation;
     private final Location endLocation;

@@ -36,7 +36,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private Player player;
   private int currentSnitchCount;
   private int score;
-  private Map SELECTED_MAP = Map.QUIDDITCH;
+  private Map SELECTED_MAP = Map.SHRIEKING_SHACK;
   
   @Override 
   public boolean enable() {
