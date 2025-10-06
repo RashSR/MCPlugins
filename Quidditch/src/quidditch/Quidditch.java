@@ -22,6 +22,7 @@ import net.canarymod.api.inventory.Enchantment.Type;
 import net.canarymod.api.inventory.PlayerInventory;
 import utils.Utils;
 import utils.Map;
+import java.util.List;
 import net.canarymod.api.scoreboard.*;
 
 public class Quidditch extends EZPlugin implements PluginListener {
@@ -31,19 +32,21 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private final int SNITCHES_PER_GAME = 10;
   private final int POINTS_PER_RIGHTCLICK = 150;
   private final int POINT_PER_ARROW_HIT = 50;
-  private final double MAX_HIT_DISTANCE = 3.25;
+  private final double MAX_HIT_DISTANCE = 3.5;
   private boolean isEnabled = false;
   private Location snitchLocation;
   private Player player;
   private int currentSnitchCount;
+  private int rightClickCatches;
   private int score;
-  private Map SELECTED_MAP = Map.QUIDDITCH;
+  private Map SELECTED_MAP = Map.SNOW;
 
   private Scoreboard scoreboard;
   private ScoreObjective objective;
   private Score mapScore;
   private Score countScore;
   private Score totalScore;
+  private Score rightClickScore;
 
   @Override 
   public boolean enable() {
@@ -69,6 +72,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     player.teleportTo(SELECTED_MAP.getSpawnLocation());
     currentSnitchCount = 1;
     score = 0;
+    rightClickCatches = 0;
     displayStartMessage();
     isEnabled = true;
     placeSnitch();
@@ -94,18 +98,22 @@ public class Quidditch extends EZPlugin implements PluginListener {
     this.scoreboard.setScoreboardPosition(ScorePosition.SIDEBAR, this.objective, player);
 
     // Initialize score entries
-    this.countScore = scoreboard.getScore("§bCount:", this.objective);
-    this.countScore.setScore(0);
-    this.countScore.update();
-
-    this.totalScore = scoreboard.getScore("§eScore:", this.objective);
-    this.totalScore.setScore(0);
-    this.totalScore.update();
-
     String label = "§aMap: §f" + SELECTED_MAP.toString();
     this.mapScore = scoreboard.getScore(label, this.objective);
-    this.mapScore.setScore(0);
+    this.mapScore.setScore(1);
     this.mapScore.update();
+
+    this.rightClickScore = scoreboard.getScore("§bHandCatches: §4" + rightClickCatches, this.objective);
+    this.rightClickScore.setScore(2);
+    this.rightClickScore.update();
+
+    this.countScore = scoreboard.getScore("§bCatches: " + (currentSnitchCount - 1), this.objective);
+    this.countScore.setScore(3);
+    this.countScore.update();
+
+    this.totalScore = scoreboard.getScore("§eScore: " + score, this.objective);
+    this.totalScore.setScore(4);
+    this.totalScore.update();
   }
 
   private void giveEquipToPlayer(){
@@ -154,6 +162,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
       Block clickedBlock = event.getBlockClicked();
       Player player = event.getPlayer();
       if(this.player == player && clickedBlock.getType() == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(clickedBlock.getLocation(), snitchLocation)){
+        rightClickCatches++;
         snitchCatched(POINTS_PER_RIGHTCLICK);
       }
     } 
@@ -206,9 +215,8 @@ public class Quidditch extends EZPlugin implements PluginListener {
     else{
       displayWinnerMessage();
       removeItemsFromPlayer();
-      this.scoreboard.clearScoreboardPosition(ScorePosition.SIDEBAR);
+      clearScoreboard();
     }
-      
   }
 
   private void displayStartMessage(){
@@ -220,18 +228,32 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private void displayScoreMessage(int scoredPoints){
-    int totalCatchedSnitchCount = currentSnitchCount - 1;
-    this.countScore.setScore(totalCatchedSnitchCount);
-    this.countScore.update();
-    this.totalScore.setScore(this.totalScore.getScore() + scoredPoints);
-    this.totalScore.update();
+    updateScoreboard();
+    
     String msg2 = "Das war Nummer ";
     String msg3 = "/" + SNITCHES_PER_GAME + ". ";
     String msg4 ="+" + scoredPoints;
     String msg5 = " Punkte.";
 
-    String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + totalCatchedSnitchCount + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + msg5;
+    String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + (currentSnitchCount - 1) + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + msg5;
     Utils.BroadcastServerMessage(pluginName, serverMessage);
+  }
+
+  private void updateScoreboard(){
+    scoreboard.removeScore(this.rightClickScore.getName(), this.objective);
+    this.rightClickScore = scoreboard.getScore("§bHandCatches: §4" + rightClickCatches, this.objective);
+    this.rightClickScore.setScore(2);
+    this.rightClickScore.update();
+
+    scoreboard.removeScore(this.countScore.getName(), this.objective);
+    this.countScore = scoreboard.getScore("§bCatches: " + (currentSnitchCount - 1), this.objective);
+    this.countScore.setScore(3);
+    this.countScore.update();
+
+    scoreboard.removeScore(this.totalScore.getName(), this.objective);
+    this.totalScore = scoreboard.getScore("§eScore: " + score, this.objective);
+    this.totalScore.setScore(4);
+    this.totalScore.update();
   }
 
   private void displayWinnerMessage(){
@@ -248,5 +270,16 @@ public class Quidditch extends EZPlugin implements PluginListener {
     playerInventory.removeItem(ItemType.Bow);
     playerInventory.removeItem(ItemType.Arrow);
     Utils.RefreshInventroyFromPlayer(player);
+  }
+
+  private void clearScoreboard(){
+    //make it invisible
+    this.scoreboard.clearScoreboardPosition(ScorePosition.SIDEBAR);
+
+    List<Score> scores = scoreboard.getAllScores();
+    for(Score s : scores){
+      scoreboard.removeScore(s.getName(), this.objective);
+    }
+    scoreboard.removeScoreObjective(this.objective);
   }
 }
