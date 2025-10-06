@@ -22,6 +22,7 @@ import net.canarymod.api.inventory.Enchantment.Type;
 import net.canarymod.api.inventory.PlayerInventory;
 import utils.Utils;
 import utils.Map;
+import utils.ScoreboardTimerTask;
 import java.util.List;
 import net.canarymod.api.scoreboard.*;
 
@@ -29,7 +30,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   
   private final String pluginName = "[Quidditch]";
   private final BlockType SNITCH_BLOCK_TYPE = BlockType.GoldBlock;
-  private final int SNITCHES_PER_GAME = 1;
+  private final int SNITCHES_PER_GAME = 10;
   private final int POINTS_PER_RIGHTCLICK = 150;
   private final int POINT_PER_ARROW_HIT = 50;
   private final double MAX_HIT_DISTANCE = 3.5;
@@ -104,7 +105,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     this.mapScore.setScore(1);
     this.mapScore.update();
 
-    this.timerTask = new ScoreboardTimerTask(this.scoreboard, this.objective, this.timeScore);
+    this.timerTask = new ScoreboardTimerTask(this.scoreboard, this.objective, this.timeScore, 2);
     Canary.getServer().addSynchronousTask(timerTask);
 
     this.rightClickScore = scoreboard.getScore("§bHandCatches: §4" + rightClickCatches, this.objective);
@@ -223,7 +224,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     else{
       displayWinnerMessage();
       removeItemsFromPlayer();
-      clearScoreboard();
+      Utils.clearScoreboard(scoreboard, timerTask, objective);
     }
   }
 
@@ -267,8 +268,9 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private void displayWinnerMessage(){
     String msg2 = "Du hast jeden Schnatz ";
     String msg3 = "gefangen ";
-    String msg4 = " Punkte geholt.";
-    String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + "und " + ChatFormat.GOLD + score + ChatFormat.DARK_GREEN + msg4;
+    String msg4 = " Punkte geholt in ";
+    String msg5 = ChatFormat.GOLD + timerTask.getElapsedTime() + ChatFormat.DARK_GREEN + " Minuten.";
+    String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + "und " + ChatFormat.GOLD + score + ChatFormat.DARK_GREEN + msg4 + msg5;
     Utils.BroadcastServerMessage(pluginName, serverMessage);
     isEnabled = false;
   }
@@ -278,18 +280,5 @@ public class Quidditch extends EZPlugin implements PluginListener {
     playerInventory.removeItem(ItemType.Bow);
     playerInventory.removeItem(ItemType.Arrow);
     Utils.RefreshInventroyFromPlayer(player);
-  }
-
-  private void clearScoreboard(){
-    Canary.getServer().removeSynchronousTask(this.timerTask);
-
-    //make it invisible
-    this.scoreboard.clearScoreboardPosition(ScorePosition.SIDEBAR);
-
-    List<Score> scores = scoreboard.getAllScores();
-    for(Score s : scores){
-      scoreboard.removeScore(s.getName(), this.objective);
-    }
-    scoreboard.removeScoreObjective(this.objective);
   }
 }

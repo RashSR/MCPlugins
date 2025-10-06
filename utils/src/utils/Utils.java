@@ -6,12 +6,14 @@ import java.io.FileWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import com.pragprog.ahmine.ez.EZPlugin;
 import net.canarymod.Canary;
 import net.canarymod.chat.ChatFormat;
 import net.canarymod.api.world.position.Location;
 import net.canarymod.api.inventory.Item;
 import net.canarymod.api.world.blocks.Block;
+import net.canarymod.api.scoreboard.*;
 
 public class Utils extends EZPlugin{
   
@@ -155,6 +157,19 @@ public class Utils extends EZPlugin{
     double dz = centerZ - secondLocation.getZ();
 
     return Math.sqrt(dx * dx + dy * dy + dz * dz);
-}
+  }
+
+  public static void clearScoreboard(Scoreboard scoreboard,  ScoreboardTimerTask timerTask, ScoreObjective objective){
+    Canary.getServer().removeSynchronousTask(timerTask);
+
+    //make it invisible
+    scoreboard.clearScoreboardPosition(ScorePosition.SIDEBAR);
+
+    List<Score> scores = scoreboard.getAllScores();
+    for(Score s : scores){
+      scoreboard.removeScore(s.getName(), objective);
+    }
+    scoreboard.removeScoreObjective(objective);
+  }
 
 }
