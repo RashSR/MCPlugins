@@ -29,7 +29,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   
   private final String pluginName = "[Quidditch]";
   private final BlockType SNITCH_BLOCK_TYPE = BlockType.GoldBlock;
-  private final int SNITCHES_PER_GAME = 10;
+  private final int SNITCHES_PER_GAME = 5;
   private final int POINTS_PER_RIGHTCLICK = 150;
   private final int POINT_PER_ARROW_HIT = 50;
   private final double MAX_HIT_DISTANCE = 3.5;
@@ -47,6 +47,8 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private Score countScore;
   private Score totalScore;
   private Score rightClickScore;
+  private Score timeScore;
+  private ScoreboardTimerTask timerTask;
 
   @Override 
   public boolean enable() {
@@ -98,21 +100,23 @@ public class Quidditch extends EZPlugin implements PluginListener {
     this.scoreboard.setScoreboardPosition(ScorePosition.SIDEBAR, this.objective, player);
 
     // Initialize score entries
-    String label = "§aMap: §f" + SELECTED_MAP.toString();
-    this.mapScore = scoreboard.getScore(label, this.objective);
+    this.mapScore = scoreboard.getScore("§aMap: §f" + SELECTED_MAP.toString(), this.objective);
     this.mapScore.setScore(1);
     this.mapScore.update();
 
+    this.timerTask = new ScoreboardTimerTask(this.scoreboard, this.objective, this.timeScore);
+    Canary.getServer().addSynchronousTask(timerTask);
+
     this.rightClickScore = scoreboard.getScore("§bHandCatches: §4" + rightClickCatches, this.objective);
-    this.rightClickScore.setScore(2);
+    this.rightClickScore.setScore(3);
     this.rightClickScore.update();
 
     this.countScore = scoreboard.getScore("§bCatches: " + (currentSnitchCount - 1), this.objective);
-    this.countScore.setScore(3);
+    this.countScore.setScore(4);
     this.countScore.update();
 
     this.totalScore = scoreboard.getScore("§eScore: " + score, this.objective);
-    this.totalScore.setScore(4);
+    this.totalScore.setScore(5);
     this.totalScore.update();
   }
 
@@ -242,17 +246,17 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private void updateScoreboard(){
     scoreboard.removeScore(this.rightClickScore.getName(), this.objective);
     this.rightClickScore = scoreboard.getScore("§bHandCatches: §4" + rightClickCatches, this.objective);
-    this.rightClickScore.setScore(2);
+    this.rightClickScore.setScore(3);
     this.rightClickScore.update();
 
     scoreboard.removeScore(this.countScore.getName(), this.objective);
     this.countScore = scoreboard.getScore("§bCatches: " + (currentSnitchCount - 1), this.objective);
-    this.countScore.setScore(3);
+    this.countScore.setScore(4);
     this.countScore.update();
 
     scoreboard.removeScore(this.totalScore.getName(), this.objective);
     this.totalScore = scoreboard.getScore("§eScore: " + score, this.objective);
-    this.totalScore.setScore(4);
+    this.totalScore.setScore(5);
     this.totalScore.update();
   }
 
@@ -273,6 +277,8 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private void clearScoreboard(){
+    Canary.getServer().removeSynchronousTask(this.timerTask);
+
     //make it invisible
     this.scoreboard.clearScoreboardPosition(ScorePosition.SIDEBAR);
 
