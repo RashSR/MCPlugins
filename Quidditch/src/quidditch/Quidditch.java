@@ -26,6 +26,7 @@ import utils.Map;
 import utils.ScoreboardTimerTask;
 import java.util.List;
 import net.canarymod.api.scoreboard.*;
+import net.canarymod.hook.player.TeleportHook;
 
 public class Quidditch extends EZPlugin implements PluginListener {
   
@@ -71,7 +72,6 @@ public class Quidditch extends EZPlugin implements PluginListener {
     if (caller instanceof Player player) {
       if(args.length == 1){
         player.teleportTo(Utils.quidditchHubLocation);
-        isEnabled = true;
       }
     }
   }
@@ -88,6 +88,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     player.setModeId(Utils.ADVENTURE_MODE);
     createScoreboard();
     Utils.RefreshInventroyFromPlayer(player);
+    isEnabled = true;
   }
 
   private void createScoreboard(){
@@ -172,33 +173,31 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
   @HookHandler
   public void BlockRightClickHookEvent(BlockRightClickHook event){
-    if(isEnabled){
-      Block clickedBlock = event.getBlockClicked();
-      Location clickedLocation = clickedBlock.getLocation();
-      Player player = event.getPlayer();
-      BlockType clickedType = clickedBlock.getType();
+    Block clickedBlock = event.getBlockClicked();
+    Location clickedLocation = clickedBlock.getLocation();
+    Player playerClicked = event.getPlayer();
+    BlockType clickedType = clickedBlock.getType();
 
-      if(clickedType == BlockType.WallSign){
-        if(EZPlugin.locEqual(clickedLocation, QuidditchMapSignLocation))
-          SELECTED_MAP = Map.QUIDDITCH;
-        else if(EZPlugin.locEqual(clickedLocation, NetherMapSignLocation))
-          SELECTED_MAP = Map.NETHER;
-        else if(EZPlugin.locEqual(clickedLocation, SnowMapSignLocation))
-          SELECTED_MAP = Map.SNOW;
-        else if(EZPlugin.locEqual(clickedLocation, ShriekingShackMapSignLocation))
-          SELECTED_MAP = Map.SHRIEKING_SHACK;
-        else if(EZPlugin.locEqual(clickedLocation, ChristmasMapSignLocation))
-          SELECTED_MAP = Map.CHRISTMAS;
-        else
-          return;
-        
-        startGame(player);
-      }
-      if(this.player == player && clickedType == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(clickedLocation, snitchLocation)){
-        rightClickCatches++;
-        snitchCatched(POINTS_PER_RIGHTCLICK, SoundEffect.Type.NOTE_PLING);
-      }
-    } 
+    if(clickedType == BlockType.WallSign){
+      if(EZPlugin.locEqual(clickedLocation, QuidditchMapSignLocation))
+        SELECTED_MAP = Map.QUIDDITCH;
+      else if(EZPlugin.locEqual(clickedLocation, NetherMapSignLocation))
+        SELECTED_MAP = Map.NETHER;
+      else if(EZPlugin.locEqual(clickedLocation, SnowMapSignLocation))
+        SELECTED_MAP = Map.SNOW;
+      else if(EZPlugin.locEqual(clickedLocation, ShriekingShackMapSignLocation))
+        SELECTED_MAP = Map.SHRIEKING_SHACK;
+      else if(EZPlugin.locEqual(clickedLocation, ChristmasMapSignLocation))
+        SELECTED_MAP = Map.CHRISTMAS;
+      else
+        return;
+      
+      startGame(playerClicked);
+    }
+    else if(isEnabled && this.player == playerClicked && clickedType == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(clickedLocation, snitchLocation)){
+      rightClickCatches++;
+      snitchCatched(POINTS_PER_RIGHTCLICK, SoundEffect.Type.NOTE_PLING);
+    }
   }
 
   @HookHandler
@@ -250,8 +249,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     else{
       Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.LEVEL_UP, 3.0f, 1.0f);
       displayWinnerMessage();
-      removeItemsFromPlayer();
-      Utils.clearScoreboard(scoreboard, timerTask, objective);
+      cleanUpAfterGame();
     }
   }
 
@@ -302,6 +300,13 @@ public class Quidditch extends EZPlugin implements PluginListener {
     player.teleportTo(Utils.quidditchHubLocation);
   }
 
+  private void cleanUpAfterGame(){
+    removeItemsFromPlayer();
+    Utils.clearScoreboard(scoreboard, timerTask, objective);
+    isEnabled = false;
+    snitchLocation.getWorld().setBlockAt(snitchLocation, BlockType.Air);
+  }
+
   private void removeItemsFromPlayer(){
     PlayerInventory playerInventory = player.getInventory();
     playerInventory.removeItem(ItemType.Bow);
@@ -309,5 +314,23 @@ public class Quidditch extends EZPlugin implements PluginListener {
     Utils.RefreshInventroyFromPlayer(player);
   }
 
-  //TODO: set isEnabled to false if player leaves. 
+  @HookHandler
+  public void TeleportHookEvent(TeleportHook event){
+    if(isEnabled && event.getPlayer() == player && !EZPlugin.locEqual(event.getDestination(), SELECTED_MAP.getSpawnLocation())){
+      cleanUpAfterGame();
+      displayLoseMessage();
+    }
+  }
+
+  private void displayLoseMessage(){
+		String msg2 = player.getDisplayName();
+		String msg3 = " hat ";
+		String msg4 = "aufgegeben";
+		player.removeExperience(player.getExperience());
+
+		String serverMessage = ChatFormat.BLUE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".";
+		Utils.BroadcastServerMessage(pluginName, serverMessage);
+	}
+
+  //TODO: set isEnabled to false if player leaves. Death and ServerShutdown, play sound at teleportlocation or wait some seconds to teleport.
 }
