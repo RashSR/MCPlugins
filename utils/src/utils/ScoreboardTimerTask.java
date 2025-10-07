@@ -5,7 +5,7 @@ import utils.Utils;
 import net.canarymod.api.scoreboard.*;
 
 public class ScoreboardTimerTask extends ServerTask{
-    private static final long TaskDelay = 1 * Utils.TICKS_PER_SECOND; //20 Ticks -> 1 second -> repeats all 5 Seconds
+    private static final long TaskDelay = 1 * Utils.TICKS_PER_SECOND / 400; //20 Ticks -> 1 second -> repeats all 5 Seconds
     private static final boolean isContinousTask = true;
 
     private Scoreboard scoreboard;
@@ -40,8 +40,21 @@ public class ScoreboardTimerTask extends ServerTask{
     private String formatPassedTime(){
         String result = "";
 
-        int minutes = 0;
+        int hours = 0; 
         int mySeconds = passedSeconds;
+        while(mySeconds >= 3600){
+            mySeconds -= 3600;
+            hours++;
+        }
+
+        if(hours > 0){
+            if(hours < 10)
+                result += "0";
+        
+            result += hours + ":";
+        }
+        
+        int minutes = 0;
         while(mySeconds >= 60){
             mySeconds -= 60;
             minutes++;
