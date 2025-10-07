@@ -29,6 +29,7 @@ import net.canarymod.api.scoreboard.*;
 import net.canarymod.hook.player.TeleportHook;
 import net.canarymod.hook.player.DisconnectionHook;
 import net.canarymod.hook.system.ServerShutdownHook;
+import net.canarymod.hook.entity.DamageHook;
 
 public class Quidditch extends EZPlugin implements PluginListener {
   
@@ -317,6 +318,19 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   @HookHandler
+  public void DamageHookEvent(DamageHook event){
+    if(isEnabled && event.getDefender() instanceof Player player){
+      if(event.getDamageDealt() >= player.getHealth()){
+        player.setFireTicks(0);
+        player.setHealth(20f);
+        event.setCanceled();
+        //the teleport hook is doing the rest of it cleans up the rest 
+        player.teleportTo(Utils.quidditchHubLocation);
+      }
+    }
+  }
+
+  @HookHandler
   public void TeleportHookEvent(TeleportHook event){
     if(isEnabled && event.getPlayer() == player && !EZPlugin.locEqual(event.getDestination(), SELECTED_MAP.getSpawnLocation())){
       cleanUpAfterGame();
@@ -345,11 +359,10 @@ public class Quidditch extends EZPlugin implements PluginListener {
 		String msg2 = player.getDisplayName();
 		String msg3 = " hat ";
 		String msg4 = "aufgegeben";
-		player.removeExperience(player.getExperience());
 
 		String serverMessage = ChatFormat.BLUE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".";
 		Utils.BroadcastServerMessage(pluginName, serverMessage);
 	}
 
-  //TODO: set isEnabled to false if playerDeath, play sound at teleportlocation or wait some seconds to teleport.
+  //TODO: play sound at teleportlocation or wait some seconds to teleport.
 }
