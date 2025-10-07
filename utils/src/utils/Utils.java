@@ -179,4 +179,24 @@ public class Utils extends EZPlugin{
     loc.getWorld().playSound(sound);
   }
 
+  public static void setPlayerLevel(Player player, int targetLevel){
+    if(targetLevel < 0)
+      targetLevel = 0;
+    
+    player.removeExperience(player.getExperience());
+    player.setLevel(0);
+
+    int totalExp = getTotalExpForLevel(targetLevel);
+
+    player.addExperience(totalExp);
+	}
+
+  private static int getTotalExpForLevel(int level){
+    if(level <= 16)
+      return level * level + 6 * level;
+    else if(level <= 31)
+      return (int)(2.5 * level * level - 40.5 * level + 360);
+
+    return (int)(4.5 * level * level - 162.5 * level + 2220);
+  }
 }

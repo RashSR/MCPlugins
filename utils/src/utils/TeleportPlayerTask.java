@@ -18,6 +18,7 @@ public class TeleportPlayerTask extends ServerTask{
         this.player = player;
         this.destinationLocation = destinationLocation;
         this.delayInSeconds = delayInSeconds;
+        Utils.setPlayerLevel(player, delayInSeconds);
     }
 
     public void run(){
@@ -26,6 +27,8 @@ public class TeleportPlayerTask extends ServerTask{
             Canary.getServer().removeSynchronousTask(this);
         }
         
+        Utils.setPlayerLevel(player, delayInSeconds - passedSeconds);
         passedSeconds++;
+        //TODO: add sounds for waiting
     }
 }

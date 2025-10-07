@@ -81,6 +81,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private void startGame(Player player){
+    //TODO: add start sound
     player.teleportTo(SELECTED_MAP.getSpawnLocation());
     currentSnitchCount = 1;
     score = 0;
