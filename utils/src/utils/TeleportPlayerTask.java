@@ -3,6 +3,7 @@ import net.canarymod.Canary;
 import net.canarymod.tasks.ServerTask;
 import net.canarymod.api.entity.living.humanoid.Player;
 import net.canarymod.api.world.position.Location;
+import net.canarymod.api.world.effects.SoundEffect;
 
 public class TeleportPlayerTask extends ServerTask{
     private static final long TaskDelay = 1 * Utils.TICKS_PER_SECOND;
@@ -24,11 +25,16 @@ public class TeleportPlayerTask extends ServerTask{
     public void run(){
         if(passedSeconds >= delayInSeconds){
             player.teleportTo(destinationLocation);
+            
+            //make sure player hears the soundeffects
+            Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.NOTE_PLING, 1.0f, 1.0f);
+            Utils.playSoundAtLocation(destinationLocation, SoundEffect.Type.NOTE_PLING, 1.0f, 1.0f);
             Canary.getServer().removeSynchronousTask(this);
         }
         
         Utils.setPlayerLevel(player, delayInSeconds - passedSeconds);
         passedSeconds++;
-        //TODO: add sounds for waiting
+        if(delayInSeconds - passedSeconds > -1)
+            Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.NOTE_BASS, delayInSeconds, TaskDelay);
     }
 }
