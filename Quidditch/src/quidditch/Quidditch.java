@@ -81,7 +81,6 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private void startGame(Player player){
-    Canary.getServer().addSynchronousTask(new TeleportPlayerTask(player, SELECTED_MAP.getSpawnLocation(), 3));
     currentSnitchCount = 1;
     score = 0;
     rightClickCatches = 0;
@@ -196,7 +195,10 @@ public class Quidditch extends EZPlugin implements PluginListener {
       else
         return;
       
-      startGame(playerClicked);
+      //starts the game from teleport hook
+      //TODO: ensure that player can only click once on the sign, after teleport the scoreboard should be cleared as well, add DB support and best score signs
+      this.player = playerClicked;
+      Canary.getServer().addSynchronousTask(new TeleportPlayerTask(playerClicked, SELECTED_MAP.getSpawnLocation(), 3));
     }
     else if(isEnabled && this.player == playerClicked && clickedType == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(clickedLocation, snitchLocation)){
       rightClickCatches++;
@@ -308,6 +310,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     removeItemsFromPlayer();
     Utils.clearScoreboard(scoreboard, timerTask, objective);
     isEnabled = false;
+    isFirstStartPort = true;
     snitchLocation.getWorld().setBlockAt(snitchLocation, BlockType.Air);
   }
 
@@ -331,9 +334,15 @@ public class Quidditch extends EZPlugin implements PluginListener {
     }
   }
 
+  private boolean isFirstStartPort = true;
   @HookHandler
   public void TeleportHookEvent(TeleportHook event){
-    if(isEnabled && event.getPlayer() == player && !EZPlugin.locEqual(event.getDestination(), SELECTED_MAP.getSpawnLocation())){
+    Player teleportedPlayer = event.getPlayer();
+    if(teleportedPlayer == player && EZPlugin.locEqual(event.getDestination(), SELECTED_MAP.getSpawnLocation()) && isFirstStartPort){
+      isFirstStartPort = false;
+      startGame(player);
+    }
+    else if(isEnabled && event.getPlayer() == player && !EZPlugin.locEqual(event.getDestination(), SELECTED_MAP.getSpawnLocation())){
       cleanUpAfterGame();
       displayLoseMessage();
     }
