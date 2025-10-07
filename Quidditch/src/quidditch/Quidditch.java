@@ -24,6 +24,7 @@ import net.canarymod.api.world.effects.SoundEffect;
 import utils.Utils;
 import utils.Map;
 import utils.ScoreboardTimerTask;
+import utils.TeleportPlayerTask;
 import java.util.List;
 import net.canarymod.api.scoreboard.*;
 import net.canarymod.hook.player.TeleportHook;
@@ -300,7 +301,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     String msg5 = ChatFormat.GOLD + timerTask.getElapsedTime() + ChatFormat.DARK_GREEN + " Minuten.";
     String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + "und " + ChatFormat.GOLD + score + ChatFormat.DARK_GREEN + msg4 + msg5;
     Utils.BroadcastServerMessage(pluginName, serverMessage);
-    player.teleportTo(Utils.quidditchHubLocation);
+    Canary.getServer().addSynchronousTask(new TeleportPlayerTask(player, Utils.quidditchHubLocation, 5));
   }
 
   private void cleanUpAfterGame(){
@@ -335,7 +336,6 @@ public class Quidditch extends EZPlugin implements PluginListener {
     if(isEnabled && event.getPlayer() == player && !EZPlugin.locEqual(event.getDestination(), SELECTED_MAP.getSpawnLocation())){
       cleanUpAfterGame();
       displayLoseMessage();
-      //TODO triggers after win.
     }
   }
 
@@ -363,6 +363,4 @@ public class Quidditch extends EZPlugin implements PluginListener {
 		String serverMessage = ChatFormat.BLUE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".";
 		Utils.BroadcastServerMessage(pluginName, serverMessage);
 	}
-
-  //TODO: play sound at teleportlocation or wait some seconds to teleport.
 }
