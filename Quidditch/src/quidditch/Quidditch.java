@@ -35,6 +35,11 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private final int POINTS_PER_RIGHTCLICK = 150;
   private final int POINT_PER_ARROW_HIT = 50;
   private final double MAX_HIT_DISTANCE = 3.25;
+  private final static Location QuidditchMapSignLocation = new Location(252, 54, 266);
+  private final static Location SnowMapSignLocation = new Location(252, 54, 267);
+  private final static Location NetherMapSignLocation = new Location(252, 54, 268);
+  private final static Location ShriekingShackMapSignLocation = new Location(252, 54, 269);
+  private final static Location ChristmasMapSignLocation = new Location(252, 54, 270);
   private boolean isEnabled = false;
   private Location snitchLocation;
   private Player player;
@@ -64,10 +69,9 @@ public class Quidditch extends EZPlugin implements PluginListener {
             toolTip = "/quidditch schnatz")
   public void quidditchschnatzCommand(MessageReceiver caller, String[] args) {
     if (caller instanceof Player player) {
-      if(args.length == 2){
-        if(args[1].equalsIgnoreCase("schnatz")){
-            startGame(player);
-        }
+      if(args.length == 1){
+        player.teleportTo(Utils.quidditchHubLocation);
+        isEnabled = true;
       }
     }
   }
@@ -78,12 +82,12 @@ public class Quidditch extends EZPlugin implements PluginListener {
     score = 0;
     rightClickCatches = 0;
     displayStartMessage();
-    isEnabled = true;
     placeSnitch();
     this.player = player;
     giveEquipToPlayer();
     player.setModeId(Utils.ADVENTURE_MODE);
     createScoreboard();
+    Utils.RefreshInventroyFromPlayer(player);
   }
 
   private void createScoreboard(){
@@ -170,8 +174,27 @@ public class Quidditch extends EZPlugin implements PluginListener {
   public void BlockRightClickHookEvent(BlockRightClickHook event){
     if(isEnabled){
       Block clickedBlock = event.getBlockClicked();
+      Location clickedLocation = clickedBlock.getLocation();
       Player player = event.getPlayer();
-      if(this.player == player && clickedBlock.getType() == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(clickedBlock.getLocation(), snitchLocation)){
+      BlockType clickedType = clickedBlock.getType();
+
+      if(clickedType == BlockType.WallSign){
+        if(EZPlugin.locEqual(clickedLocation, QuidditchMapSignLocation))
+          SELECTED_MAP = Map.QUIDDITCH;
+        else if(EZPlugin.locEqual(clickedLocation, NetherMapSignLocation))
+          SELECTED_MAP = Map.NETHER;
+        else if(EZPlugin.locEqual(clickedLocation, SnowMapSignLocation))
+          SELECTED_MAP = Map.SNOW;
+        else if(EZPlugin.locEqual(clickedLocation, ShriekingShackMapSignLocation))
+          SELECTED_MAP = Map.SHRIEKING_SHACK;
+        else if(EZPlugin.locEqual(clickedLocation, ChristmasMapSignLocation))
+          SELECTED_MAP = Map.CHRISTMAS;
+        else
+          return;
+        
+        startGame(player);
+      }
+      if(this.player == player && clickedType == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(clickedLocation, snitchLocation)){
         rightClickCatches++;
         snitchCatched(POINTS_PER_RIGHTCLICK, SoundEffect.Type.NOTE_PLING);
       }
@@ -276,7 +299,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     String msg5 = ChatFormat.GOLD + timerTask.getElapsedTime() + ChatFormat.DARK_GREEN + " Minuten.";
     String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + "und " + ChatFormat.GOLD + score + ChatFormat.DARK_GREEN + msg4 + msg5;
     Utils.BroadcastServerMessage(pluginName, serverMessage);
-    isEnabled = false;
+    player.teleportTo(Utils.quidditchHubLocation);
   }
 
   private void removeItemsFromPlayer(){
@@ -285,4 +308,6 @@ public class Quidditch extends EZPlugin implements PluginListener {
     playerInventory.removeItem(ItemType.Arrow);
     Utils.RefreshInventroyFromPlayer(player);
   }
+
+  //TODO: set isEnabled to false if player leaves. 
 }

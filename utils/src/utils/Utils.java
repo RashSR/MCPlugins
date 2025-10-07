@@ -29,6 +29,7 @@ public class Utils extends EZPlugin{
 
   public static Location HubLocation = new Location(251, 71, 262);
   public static Location ZombieLocation = new Location(256, 71, 546);
+  public static Location quidditchHubLocation = new Location(HubLocation.getWorld(), 246.5, 53, 268.5, 0f, -90f);
   public static Location Location1vs1 = new Location(107, 151, 309);
   public static Location BuildItLocation = new Location(93, 79, 327);
   public static Location CityLocation = new Location(4928, 64, 4899);

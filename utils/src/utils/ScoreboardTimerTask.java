@@ -5,7 +5,7 @@ import utils.Utils;
 import net.canarymod.api.scoreboard.*;
 
 public class ScoreboardTimerTask extends ServerTask{
-    private static final long TaskDelay = 1 * Utils.TICKS_PER_SECOND / 400; //20 Ticks -> 1 second -> repeats all 5 Seconds
+    private static final long TaskDelay = 1 * Utils.TICKS_PER_SECOND;
     private static final boolean isContinousTask = true;
 
     private Scoreboard scoreboard;
