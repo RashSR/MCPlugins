@@ -20,6 +20,7 @@ public class TeleportPlayerTask extends ServerTask{
         this.destinationLocation = destinationLocation;
         this.delayInSeconds = delayInSeconds;
         Utils.setPlayerLevel(player, delayInSeconds);
+        Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.NOTE_BASS, 1.0f, 1.0f);
     }
 
     public void run(){
@@ -35,6 +36,6 @@ public class TeleportPlayerTask extends ServerTask{
         Utils.setPlayerLevel(player, delayInSeconds - passedSeconds);
         passedSeconds++;
         if(delayInSeconds - passedSeconds > -1)
-            Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.NOTE_BASS, delayInSeconds, TaskDelay);
+            Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.NOTE_BASS, 1.0f, 1.0f);
     }
 }

@@ -81,7 +81,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private void startGame(Player player){
-    player.teleportTo(SELECTED_MAP.getSpawnLocation());
+    Canary.getServer().addSynchronousTask(new TeleportPlayerTask(player, SELECTED_MAP.getSpawnLocation(), 3));
     currentSnitchCount = 1;
     score = 0;
     rightClickCatches = 0;
