@@ -14,6 +14,7 @@ import net.canarymod.api.world.position.Location;
 import net.canarymod.api.inventory.Item;
 import net.canarymod.api.world.blocks.Block;
 import net.canarymod.api.scoreboard.*;
+import net.canarymod.api.world.effects.SoundEffect;
 
 public class Utils extends EZPlugin{
   
@@ -170,6 +171,11 @@ public class Utils extends EZPlugin{
       scoreboard.removeScore(s.getName(), objective);
     }
     scoreboard.removeScoreObjective(objective);
+  }
+
+  public static void playSoundAtLocation(Location loc, SoundEffect.Type soundType, float volume, float pitch){
+    SoundEffect sound = new SoundEffect(soundType, loc.getX(), loc.getY(), loc.getZ(), volume, pitch);
+    loc.getWorld().playSound(sound);
   }
 
 }

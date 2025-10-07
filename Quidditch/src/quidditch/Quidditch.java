@@ -20,6 +20,7 @@ import net.canarymod.api.inventory.ItemType;
 import net.canarymod.api.inventory.Enchantment;
 import net.canarymod.api.inventory.Enchantment.Type;
 import net.canarymod.api.inventory.PlayerInventory;
+import net.canarymod.api.world.effects.SoundEffect;
 import utils.Utils;
 import utils.Map;
 import utils.ScoreboardTimerTask;
@@ -30,10 +31,10 @@ public class Quidditch extends EZPlugin implements PluginListener {
   
   private final String pluginName = "[Quidditch]";
   private final BlockType SNITCH_BLOCK_TYPE = BlockType.GoldBlock;
-  private final int SNITCHES_PER_GAME = 10;
+  private final int SNITCHES_PER_GAME = 2;
   private final int POINTS_PER_RIGHTCLICK = 150;
   private final int POINT_PER_ARROW_HIT = 50;
-  private final double MAX_HIT_DISTANCE = 3.5;
+  private final double MAX_HIT_DISTANCE = 3.25;
   private boolean isEnabled = false;
   private Location snitchLocation;
   private Player player;
@@ -172,7 +173,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
       Player player = event.getPlayer();
       if(this.player == player && clickedBlock.getType() == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(clickedBlock.getLocation(), snitchLocation)){
         rightClickCatches++;
-        snitchCatched(POINTS_PER_RIGHTCLICK);
+        snitchCatched(POINTS_PER_RIGHTCLICK, SoundEffect.Type.NOTE_PLING);
       }
     } 
   }
@@ -203,7 +204,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
               double distance = Utils.CalculateDistanceBetweenLocations(hitBlock.getLocation(), arrowLocation, true);
               Utils.BroadcastServerMessage(pluginName, "Distance: " + distance);
               if(distance <= MAX_HIT_DISTANCE){
-                snitchCatched(POINT_PER_ARROW_HIT);
+                snitchCatched(POINT_PER_ARROW_HIT, SoundEffect.Type.ORB);
                 return;
               }
             }
@@ -213,15 +214,18 @@ public class Quidditch extends EZPlugin implements PluginListener {
     }
   }
 
-  private void snitchCatched(int pointsScored){
+  private void snitchCatched(int pointsScored, SoundEffect.Type soundType){
     snitchLocation.getWorld().setBlockAt(snitchLocation, BlockType.Air);
     currentSnitchCount++;
     score += pointsScored;
     displayScoreMessage(pointsScored);
 
-    if(currentSnitchCount <= SNITCHES_PER_GAME)
+    if(currentSnitchCount <= SNITCHES_PER_GAME){
+      Utils.playSoundAtLocation(player.getLocation(), soundType, 1.0f, 3.0f);
       placeSnitch();
+    }
     else{
+      Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.LEVEL_UP, 3.0f, 1.0f);
       displayWinnerMessage();
       removeItemsFromPlayer();
       Utils.clearScoreboard(scoreboard, timerTask, objective);
