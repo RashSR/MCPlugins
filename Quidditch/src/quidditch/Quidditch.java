@@ -27,6 +27,8 @@ import utils.ScoreboardTimerTask;
 import java.util.List;
 import net.canarymod.api.scoreboard.*;
 import net.canarymod.hook.player.TeleportHook;
+import net.canarymod.hook.player.DisconnectionHook;
+import net.canarymod.hook.system.ServerShutdownHook;
 
 public class Quidditch extends EZPlugin implements PluginListener {
   
@@ -319,6 +321,23 @@ public class Quidditch extends EZPlugin implements PluginListener {
     if(isEnabled && event.getPlayer() == player && !EZPlugin.locEqual(event.getDestination(), SELECTED_MAP.getSpawnLocation())){
       cleanUpAfterGame();
       displayLoseMessage();
+      //TODO triggers after win.
+    }
+  }
+
+  @HookHandler
+  public void DisconnectionHookEvent(DisconnectionHook event){
+    if(isEnabled && event.getPlayer() == player){
+      cleanUpAfterGame();
+      displayLoseMessage();
+    }
+  }
+
+  @HookHandler
+  public void ServerShutdownHook(ServerShutdownHook event){
+    if(isEnabled){
+      cleanUpAfterGame();
+      displayLoseMessage();
     }
   }
 
@@ -332,5 +351,5 @@ public class Quidditch extends EZPlugin implements PluginListener {
 		Utils.BroadcastServerMessage(pluginName, serverMessage);
 	}
 
-  //TODO: set isEnabled to false if player leaves. Death and ServerShutdown, play sound at teleportlocation or wait some seconds to teleport.
+  //TODO: set isEnabled to false if playerDeath, play sound at teleportlocation or wait some seconds to teleport.
 }
