@@ -36,7 +36,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   
   private final String pluginName = "[Quidditch]";
   private final BlockType SNITCH_BLOCK_TYPE = BlockType.GoldBlock;
-  private final int SNITCHES_PER_GAME = 2;
+  private final int SNITCHES_PER_GAME = 10;
   private final int POINTS_PER_RIGHTCLICK = 150;
   private final int POINT_PER_ARROW_HIT = 50;
   private final double MAX_HIT_DISTANCE = 3.25;
@@ -61,6 +61,13 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private Score rightClickScore;
   private Score timeScore;
   private ScoreboardTimerTask timerTask;
+
+  //TODO: starts the game from teleport hook, after teleport the scoreboard should be cleared as well, add DB support and best score signs, add level for each collected snitch
+  //Ideen: punkte für bessere zeit, weitere distanz, anzahl an pfeieln verbraucht, partikel für schnatz nach zeit, schnatz verschwindet nach zeit, schnatz bewegt sich, falls 30 sekunden nicht gefunden -> kompass?
+  //vllt anfangs nur 5 pfeile und man muss sich hoch grinden und sachen freischalten in nem Shop.
+  //Nether Spawn ändern bzw generell vllt random spawn? zwischen lapis blocken oder mitte.
+  //KompassItem 1 mal benutzen, PartikelEffektItem einmal benutzen für Vorteil
+  //Zeitlimit, Im scoreboard bei Catches ?/10, Scoreboard schöner gestalten, not possible to drop items.
 
   @Override 
   public boolean enable() {
@@ -92,6 +99,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     createScoreboard();
     Utils.RefreshInventroyFromPlayer(player);
     isEnabled = true;
+    hasStartedGame = false;
   }
 
   private void createScoreboard(){
@@ -174,6 +182,8 @@ public class Quidditch extends EZPlugin implements PluginListener {
     return randomLocation;
   }
 
+  private boolean hasStartedGame = false;
+
   @HookHandler
   public void BlockRightClickHookEvent(BlockRightClickHook event){
     Block clickedBlock = event.getBlockClicked();
@@ -182,6 +192,12 @@ public class Quidditch extends EZPlugin implements PluginListener {
     BlockType clickedType = clickedBlock.getType();
 
     if(clickedType == BlockType.WallSign){
+      //early return to avoid multiple starts
+      if(hasStartedGame){
+        Utils.BroadcastServerMessage(pluginName, ChatFormat.RED + "Du hast bereits ein Spiel gestartet!");
+        return;
+      }
+
       if(EZPlugin.locEqual(clickedLocation, QuidditchMapSignLocation))
         SELECTED_MAP = Map.QUIDDITCH;
       else if(EZPlugin.locEqual(clickedLocation, NetherMapSignLocation))
@@ -195,8 +211,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
       else
         return;
       
-      //starts the game from teleport hook
-      //TODO: ensure that player can only click once on the sign, after teleport the scoreboard should be cleared as well, add DB support and best score signs
+      hasStartedGame = true;
       this.player = playerClicked;
       Canary.getServer().addSynchronousTask(new TeleportPlayerTask(playerClicked, SELECTED_MAP.getSpawnLocation(), 3));
     }
