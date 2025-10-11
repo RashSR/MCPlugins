@@ -84,15 +84,15 @@ public class Quidditch extends EZPlugin implements PluginListener {
     rightClickCatches = 0;
     missedArrowCount = 0;
     lastCatchTimeInSeconds = 0;
+    this.player = player;
+    hasStartedGame = false;
+    player.setModeId(Utils.ADVENTURE_MODE);
     displayStartMessage();
     placeSnitch();
-    this.player = player;
     giveEquipToPlayer();
-    player.setModeId(Utils.ADVENTURE_MODE);
     createScoreboard();
     Utils.RefreshInventroyFromPlayer(player);
     isEnabled = true;
-    hasStartedGame = false;
   }
 
   private Scoreboard scoreboard;
@@ -164,7 +164,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     while(!hasAirBlockBeenSelected){
       Location startLocation = SELECTED_MAP.getStartLocation();
       Location endLocation = SELECTED_MAP.getEndLocation();
-      Location randomLocation = getRandomLocationInsideVolume(startLocation, endLocation);
+      Location randomLocation = Utils.GetRandomLocationInsideVolume(startLocation, endLocation);
       Block possibleSnitch = randomLocation.getWorld().getBlockAt((int)randomLocation.getX(), (int)randomLocation.getY(), (int)randomLocation.getZ());
       
       if(possibleSnitch.getType() == BlockType.Air){
@@ -173,15 +173,6 @@ public class Quidditch extends EZPlugin implements PluginListener {
         hasAirBlockBeenSelected = true;
       }
     }
-  }
-
-  private Location getRandomLocationInsideVolume(Location startLocation, Location endLocation){
-    double x = startLocation.getX() + Math.random() * (endLocation.getX() - startLocation.getX());
-    double y = startLocation.getY() + Math.random() * (endLocation.getY() - startLocation.getY());
-    double z = startLocation.getZ() + Math.random() * (endLocation.getZ() - startLocation.getZ());
-
-    Location randomLocation = new Location((int)x, (int)y, (int)z);
-    return randomLocation;
   }
 
   private boolean hasStartedGame = false;
@@ -356,11 +347,14 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private void displayWinnerMessage(){
-    String msg2 = "Du hast jeden Schnatz ";
-    String msg3 = "gefangen ";
-    String msg4 = " Punkte geholt in ";
-    String msg5 = ChatFormat.GOLD + timerTask.getFormatedElapsedTime() + ChatFormat.DARK_GREEN + " Minuten.";
-    String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + "und " + ChatFormat.GOLD + score + ChatFormat.DARK_GREEN + msg4 + msg5;
+    String msg2 = ChatFormat.DARK_GREEN + "Du hast jeden Schnatz ";
+    String msg3 = ChatFormat.GOLD + "gefangen";
+
+    String msg4 = "\nPunkte: " + ChatFormat.GOLD + score + ChatFormat.DARK_GREEN;
+    String msg5 = "\nZeit: " + ChatFormat.GOLD + timerTask.getFormatedElapsedTime() + ChatFormat.DARK_GREEN + " Minuten";
+    String msg6 = "\nFehlschüsse: " + ChatFormat.RED + missedArrowCount;
+
+    String serverMessage =  msg2 + msg3 + ChatFormat.DARK_GREEN + "!" + msg4 + msg5 + msg6;
     Utils.BroadcastServerMessage(pluginName, serverMessage);
     Canary.getServer().addSynchronousTask(new TeleportPlayerTask(player, Utils.quidditchHubLocation, 5));
   }
@@ -387,7 +381,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
         player.setFireTicks(0);
         player.setHealth(20f);
         event.setCanceled();
-        //the teleport hook is doing the rest of it cleans up the rest 
+        //the teleport hook cleans up the rest 
         player.teleportTo(Utils.quidditchHubLocation);
       }
     }
@@ -397,6 +391,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   @HookHandler
   public void TeleportHookEvent(TeleportHook event){
     Player teleportedPlayer = event.getPlayer();
+    //TODO: if the player moves after teleport he looses directly -> instead of loc equal calulate distance from getSpawnLocation?
     if(teleportedPlayer == player && EZPlugin.locEqual(event.getDestination(), SELECTED_MAP.getSpawnLocation()) && isFirstStartPort){
       isFirstStartPort = false;
       startGame(player);

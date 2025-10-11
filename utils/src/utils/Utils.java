@@ -199,4 +199,13 @@ public class Utils extends EZPlugin{
 
     return (int)(4.5 * level * level - 162.5 * level + 2220);
   }
+
+  public static Location GetRandomLocationInsideVolume(Location startLocation, Location endLocation){
+    double x = startLocation.getX() + Math.random() * (endLocation.getX() - startLocation.getX());
+    double y = startLocation.getY() + Math.random() * (endLocation.getY() - startLocation.getY());
+    double z = startLocation.getZ() + Math.random() * (endLocation.getZ() - startLocation.getZ());
+
+    Location randomLocation = new Location((int)x, (int)y, (int)z);
+    return randomLocation;
+  }
 }
