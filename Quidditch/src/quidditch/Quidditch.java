@@ -36,15 +36,17 @@ public class Quidditch extends EZPlugin implements PluginListener {
   
   private final String pluginName = "[Quidditch]";
   private final BlockType SNITCH_BLOCK_TYPE = BlockType.GoldBlock;
-  private final int SNITCHES_PER_GAME = 10;
+  private final int SNITCHES_PER_GAME = 4;
   private final int POINTS_PER_RIGHTCLICK = 150;
   private final int POINT_PER_ARROW_HIT = 50;
-  private final double MAX_HIT_DISTANCE = 3.25;
+  private final double MAX_HIT_DISTANCE = 3.5;
+
   private final static Location QuidditchMapSignLocation = new Location(252, 54, 266);
   private final static Location SnowMapSignLocation = new Location(252, 54, 267);
   private final static Location NetherMapSignLocation = new Location(252, 54, 268);
   private final static Location ShriekingShackMapSignLocation = new Location(252, 54, 269);
   private final static Location ChristmasMapSignLocation = new Location(252, 54, 270);
+
   private boolean isEnabled = false;
   private Location snitchLocation;
   private Player player;
@@ -244,10 +246,10 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
             if(hitBlock.getType() == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(hitBlock.getLocation(), snitchLocation)){
               //arrow.getLocation() is very inaccurate!
-              double distance = Utils.CalculateDistanceBetweenLocations(hitBlock.getLocation(), arrowLocation, true);
-              Utils.BroadcastServerMessage(pluginName, "Distance: " + distance);
-              if(distance <= MAX_HIT_DISTANCE){
-                snitchCatched(POINT_PER_ARROW_HIT, SoundEffect.Type.ORB);
+              double arrowSnitchDistance = Utils.CalculateDistanceBetweenLocations(hitBlock.getLocation(), arrowLocation, true);
+              Utils.BroadcastServerMessage(pluginName, "Distance: " + arrowSnitchDistance);
+              if(arrowSnitchDistance <= MAX_HIT_DISTANCE){
+                snitchCatched(calcualateBowPoints(), SoundEffect.Type.ORB);
                 return;
               }
             }
@@ -255,6 +257,13 @@ public class Quidditch extends EZPlugin implements PluginListener {
         }
       }
     }
+  }
+
+  private int calcualateBowPoints(){
+    double playerSnitchDistance = Utils.CalculateDistanceBetweenLocations(player.getLocation(), snitchLocation, false);
+    int roundedPoints = (int)Math.round(playerSnitchDistance / 10);
+    int points = POINT_PER_ARROW_HIT + (int)playerSnitchDistance;
+    return points;
   }
 
   private void snitchCatched(int pointsScored, SoundEffect.Type soundType){
@@ -284,6 +293,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
   private void displayScoreMessage(int scoredPoints){
     updateScoreboard();
+    //TODO: could add time bonus here.
     
     String msg2 = "Das war Nummer ";
     String msg3 = "/" + SNITCHES_PER_GAME + ". ";
