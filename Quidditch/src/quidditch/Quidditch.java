@@ -61,7 +61,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   //TODO: starts the game from teleport hook, after teleport the scoreboard should be cleared as well, add DB support and best score signs, add level for each collected snitch
   //Ideen:partikel für schnatz nach zeit, schnatz verschwindet nach zeit, schnatz bewegt sich, falls 30 sekunden nicht gefunden -> kompass?
   //vllt anfangs nur 5 pfeile und man muss sich hoch grinden und sachen freischalten in nem Shop.
-  //KompassItem 1 mal benutzen, PartikelEffektItem einmal benutzen für Vorteil, Zeitlimit, Scoreboard schöner gestalten
+  //KompassItem 1 mal benutzen, PartikelEffektItem einmal benutzen für Vorteil, Zeitlimit
 
   @Override 
   public boolean enable() {
@@ -131,15 +131,15 @@ public class Quidditch extends EZPlugin implements PluginListener {
     this.timerTask = new ScoreboardTimerTask(this.scoreboard, this.objective, this.timeScore, 2);
     Canary.getServer().addSynchronousTask(timerTask);
 
-    this.rightClickScore = scoreboard.getScore("§bHandCatches: §4" + rightClickCatches, this.objective);
+    this.rightClickScore = scoreboard.getScore("§cHandCatches: §f" + rightClickCatches, this.objective);
     this.rightClickScore.setScore(3);
     this.rightClickScore.update();
 
-    this.countScore = scoreboard.getScore("§bCatches: " + (currentSnitchCount - 1) + "/" + SNITCHES_PER_GAME, this.objective);
+    this.countScore = scoreboard.getScore("§bCatches: §f" + (currentSnitchCount - 1) + "/" + SNITCHES_PER_GAME, this.objective);
     this.countScore.setScore(4);
     this.countScore.update();
 
-    this.totalScore = scoreboard.getScore("§eScore: " + score, this.objective);
+    this.totalScore = scoreboard.getScore("§dScore: §e" + score, this.objective);
     this.totalScore.setScore(5);
     this.totalScore.update();
 
@@ -346,17 +346,17 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
   private void updateScoreboard(){
     scoreboard.removeScore(this.rightClickScore.getName(), this.objective);
-    this.rightClickScore = scoreboard.getScore("§bHandCatches: §4" + rightClickCatches, this.objective);
+    this.rightClickScore = scoreboard.getScore("§3HandCatches: §f" + rightClickCatches, this.objective);
     this.rightClickScore.setScore(3);
     this.rightClickScore.update();
 
     scoreboard.removeScore(this.countScore.getName(), this.objective);
-    this.countScore = scoreboard.getScore("§bCatches: " + (currentSnitchCount - 1) + "/" + SNITCHES_PER_GAME, this.objective);
+    this.countScore = scoreboard.getScore("§bCatches: §f" + (currentSnitchCount - 1) + "/" + SNITCHES_PER_GAME, this.objective);
     this.countScore.setScore(4);
     this.countScore.update();
 
     scoreboard.removeScore(this.totalScore.getName(), this.objective);
-    this.totalScore = scoreboard.getScore("§eScore: " + score, this.objective);
+    this.totalScore = scoreboard.getScore("§dScore: §e" + score, this.objective);
     this.totalScore.setScore(5);
     this.totalScore.update();
   }
