@@ -32,6 +32,9 @@ import net.canarymod.hook.player.DisconnectionHook;
 import net.canarymod.hook.system.ServerShutdownHook;
 import net.canarymod.hook.entity.DamageHook;
 import net.canarymod.hook.player.ItemUseHook;
+import net.canarymod.hook.player.ItemDropHook;
+import net.canarymod.hook.player.SlotClickHook;
+import net.canarymod.api.inventory.slot.ButtonPress;
 
 public class Quidditch extends EZPlugin implements PluginListener {
   
@@ -56,11 +59,10 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private Map SELECTED_MAP = Map.SNOW;
 
   //TODO: starts the game from teleport hook, after teleport the scoreboard should be cleared as well, add DB support and best score signs, add level for each collected snitch
-  //Ideen: punkte für bessere zeit, weitere distanz, anzahl an pfeieln verbraucht, partikel für schnatz nach zeit, schnatz verschwindet nach zeit, schnatz bewegt sich, falls 30 sekunden nicht gefunden -> kompass?
+  //Ideen:partikel für schnatz nach zeit, schnatz verschwindet nach zeit, schnatz bewegt sich, falls 30 sekunden nicht gefunden -> kompass?
   //vllt anfangs nur 5 pfeile und man muss sich hoch grinden und sachen freischalten in nem Shop.
   //Nether Spawn ändern bzw generell vllt random spawn? zwischen lapis blocken oder mitte.
-  //KompassItem 1 mal benutzen, PartikelEffektItem einmal benutzen für Vorteil
-  //Zeitlimit, Im scoreboard bei Catches ?/10, Scoreboard schöner gestalten, not possible to drop items.
+  //KompassItem 1 mal benutzen, PartikelEffektItem einmal benutzen für Vorteil, Zeitlimit, Scoreboard schöner gestalten
 
   @Override 
   public boolean enable() {
@@ -440,4 +442,26 @@ public class Quidditch extends EZPlugin implements PluginListener {
 		String serverMessage = ChatFormat.BLUE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".";
 		Utils.BroadcastServerMessage(pluginName, serverMessage);
 	}
+
+  @HookHandler
+  public void ItemDropHook(ItemDropHook event){
+    if(isEnabled && event.getPlayer() == player){}
+      event.setCanceled();
+      PlayerInventory playerInventory = player.getInventory();
+      int hotbarSlotId = playerInventory.getSelectedHotbarSlotId();
+      playerInventory.setSlot(hotbarSlotId, event.getItem().getItem());
+      Utils.RefreshInventroyFromPlayer(player);
+  }
+
+  @HookHandler
+  public void SlotClickHook(SlotClickHook event){
+    if(isEnabled && event.getPlayer() == player){
+      ButtonPress buttonPress = event.getButtonPress();
+      //allows only to rearrange hotbar
+      if(event.getSlotId() < 36)
+        event.setCanceled();
+      else if(buttonPress == ButtonPress.KEY_DROP || buttonPress == ButtonPress.CTRL_DROP)
+        event.setCanceled();
+    }
+  }
 }
