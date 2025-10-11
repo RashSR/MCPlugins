@@ -40,13 +40,8 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private final int SNITCHES_PER_GAME = 4;
   private final int POINTS_PER_RIGHTCLICK = 150;
   private final int POINT_PER_ARROW_HIT = 50;
+  private final int POINTS_FOR_MISSED_ARROW = -5;
   private final double MAX_HIT_DISTANCE = 3.5;
-
-  private final static Location QuidditchMapSignLocation = new Location(252, 54, 266);
-  private final static Location SnowMapSignLocation = new Location(252, 54, 267);
-  private final static Location NetherMapSignLocation = new Location(252, 54, 268);
-  private final static Location ShriekingShackMapSignLocation = new Location(252, 54, 269);
-  private final static Location ChristmasMapSignLocation = new Location(252, 54, 270);
 
   private boolean isEnabled = false;
   private Location snitchLocation;
@@ -55,15 +50,6 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private int rightClickCatches;
   private int score;
   private Map SELECTED_MAP = Map.SNOW;
-
-  private Scoreboard scoreboard;
-  private ScoreObjective objective;
-  private Score mapScore;
-  private Score countScore;
-  private Score totalScore;
-  private Score rightClickScore;
-  private Score timeScore;
-  private ScoreboardTimerTask timerTask;
 
   //TODO: starts the game from teleport hook, after teleport the scoreboard should be cleared as well, add DB support and best score signs, add level for each collected snitch
   //Ideen: punkte für bessere zeit, weitere distanz, anzahl an pfeieln verbraucht, partikel für schnatz nach zeit, schnatz verschwindet nach zeit, schnatz bewegt sich, falls 30 sekunden nicht gefunden -> kompass?
@@ -94,6 +80,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     currentSnitchCount = 1;
     score = 0;
     rightClickCatches = 0;
+    missedArrowCount = 0;
     displayStartMessage();
     placeSnitch();
     this.player = player;
@@ -104,6 +91,15 @@ public class Quidditch extends EZPlugin implements PluginListener {
     isEnabled = true;
     hasStartedGame = false;
   }
+
+  private Scoreboard scoreboard;
+  private ScoreObjective objective;
+  private Score mapScore;
+  private Score countScore;
+  private Score totalScore;
+  private Score rightClickScore;
+  private Score timeScore;
+  private ScoreboardTimerTask timerTask;
 
   private void createScoreboard(){
     ScoreboardManager manager = Canary.scoreboards();
@@ -187,6 +183,12 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
   private boolean hasStartedGame = false;
 
+  private final Location QuidditchMapSignLocation = new Location(252, 54, 266);
+  private final Location SnowMapSignLocation = new Location(252, 54, 267);
+  private final Location NetherMapSignLocation = new Location(252, 54, 268);
+  private final Location ShriekingShackMapSignLocation = new Location(252, 54, 269);
+  private final Location ChristmasMapSignLocation = new Location(252, 54, 270);
+
   @HookHandler
   public void BlockRightClickHookEvent(BlockRightClickHook event){
     Block clickedBlock = event.getBlockClicked();
@@ -248,7 +250,6 @@ public class Quidditch extends EZPlugin implements PluginListener {
             if(hitBlock.getType() == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(hitBlock.getLocation(), snitchLocation)){
               //arrow.getLocation() is very inaccurate!
               double arrowSnitchDistance = Utils.CalculateDistanceBetweenLocations(hitBlock.getLocation(), arrowLocation, true);
-              Utils.BroadcastServerMessage(pluginName, "Distance: " + arrowSnitchDistance);
               if(arrowSnitchDistance <= MAX_HIT_DISTANCE){
                 snitchCatched(calcualateBowPoints(), SoundEffect.Type.ORB);
                 return;
@@ -257,6 +258,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
           }
         }
       }
+      decreaseScoreForMissedArrow();
     }
   }
 
@@ -267,9 +269,17 @@ public class Quidditch extends EZPlugin implements PluginListener {
     return points;
   }
 
+  private int missedArrowCount;
+  private void decreaseScoreForMissedArrow(){
+    score += POINTS_FOR_MISSED_ARROW;
+    displayScoreMessage(POINTS_FOR_MISSED_ARROW);
+    missedArrowCount++;
+  }
+
   private void snitchCatched(int pointsScored, SoundEffect.Type soundType){
     snitchLocation.getWorld().setBlockAt(snitchLocation, BlockType.Air);
     currentSnitchCount++;
+    //TODO: could add time bonus here.
     score += pointsScored;
     displayScoreMessage(pointsScored);
 
@@ -305,17 +315,14 @@ public class Quidditch extends EZPlugin implements PluginListener {
     Utils.BroadcastServerMessage(pluginName, serverMessage);
   }
 
-  private void displayScoreMessage(int scoredPoints){
+  private void displayScoreMessage(int pointsScored){
     updateScoreboard();
-    //TODO: could add time bonus here.
 
-    String msg2 = "Das war Nummer ";
-    String msg3 = "/" + SNITCHES_PER_GAME + ". ";
-    String msg4 ="+" + scoredPoints;
-    String msg5 = " Punkte.";
+    String sign = ChatFormat.GOLD + "+";
+    if(pointsScored < 0)
+      sign = ChatFormat.RED + "";
 
-    String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + (currentSnitchCount - 1) + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + msg5;
-    Utils.BroadcastServerMessage(pluginName, serverMessage);
+    Utils.BroadcastServerMessage(pluginName, sign + pointsScored + ChatFormat.DARK_GREEN + " Punkte.");
   }
 
   private void updateScoreboard(){
