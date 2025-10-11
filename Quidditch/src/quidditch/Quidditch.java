@@ -58,7 +58,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private int score;
   private Map SELECTED_MAP = Map.SNOW;
 
-  //TODO: starts the game from teleport hook, after teleport the scoreboard should be cleared as well, add DB support and best score signs, add level for each collected snitch
+  //TODO: add DB support and best score signs, add level for each collected snitch
   //Ideen:partikel für schnatz nach zeit, schnatz verschwindet nach zeit, schnatz bewegt sich, falls 30 sekunden nicht gefunden -> kompass?
   //vllt anfangs nur 5 pfeile und man muss sich hoch grinden und sachen freischalten in nem Shop.
   //KompassItem 1 mal benutzen, PartikelEffektItem einmal benutzen für Vorteil, Zeitlimit
@@ -296,6 +296,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     if(fastCatchStreak == FAST_CATCHES_IN_ROW_FOR_BONUS){
       score += POINTS_FOR_FAST_CATCH_STREAK; 
       Utils.BroadcastServerMessage(pluginName, ChatFormat.YELLOW + "Blitzfang streak!");
+      Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.WITHER_SHOOT, 2.0f, 1.0f);
       displayScoreMessage(POINTS_FOR_FAST_CATCH_STREAK, false);
     }
 
