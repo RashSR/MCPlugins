@@ -37,13 +37,15 @@ public class Quidditch extends EZPlugin implements PluginListener {
   
   private final String pluginName = "[Quidditch]";
   private final BlockType SNITCH_BLOCK_TYPE = BlockType.GoldBlock;
-  private final int SNITCHES_PER_GAME = 4;
+  private final int SNITCHES_PER_GAME = 10;
   private final int POINTS_PER_RIGHTCLICK = 150;
   private final int BASE_POINTS_PER_ARROW_HIT = 50;
   private final int POINTS_FOR_MISSED_ARROW = -5;
   private final int POINTS_FOR_FAST_CATCH = 20;
-  private final int TIME_FOR_FAST_CATCH_IN_SECONDS = 15;
-  private final double MAX_HIT_DISTANCE = 3.5;  
+  private final int TIME_FOR_FAST_CATCH_IN_SECONDS = 10;
+  private final int FAST_CATCHES_IN_ROW_FOR_BONUS = 3;
+  private final int POINTS_FOR_FAST_CATCH_STREAK = 30;
+  private final double MAX_HIT_DISTANCE = 3.5;
 
   private boolean isEnabled = false;
   private Location snitchLocation;
@@ -84,6 +86,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     rightClickCatches = 0;
     missedArrowCount = 0;
     lastCatchTimeInSeconds = 0;
+    fastCatchStreak = 0;
     this.player = player;
     hasStartedGame = false;
     player.setModeId(Utils.ADVENTURE_MODE);
@@ -270,6 +273,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private int lastCatchTimeInSeconds;
+  private int fastCatchStreak;
   private void snitchCatched(int pointsScored, SoundEffect.Type soundType){
     snitchLocation.getWorld().setBlockAt(snitchLocation, BlockType.Air);
     currentSnitchCount++;
@@ -278,11 +282,21 @@ public class Quidditch extends EZPlugin implements PluginListener {
     int catchTimeInSeconds = timerTask.getElapsedTimeInSeconds() - lastCatchTimeInSeconds;
     lastCatchTimeInSeconds = timerTask.getElapsedTimeInSeconds();
     boolean isFastCatch = catchTimeInSeconds < TIME_FOR_FAST_CATCH_IN_SECONDS;
-    if(isFastCatch)
+    if(isFastCatch){
       pointsScored += POINTS_FOR_FAST_CATCH;
+      fastCatchStreak++;
+    }
+    else
+      fastCatchStreak = 0;
 
     score += pointsScored;
     displayScoreMessage(pointsScored, isFastCatch);
+
+    if(fastCatchStreak == FAST_CATCHES_IN_ROW_FOR_BONUS){
+      score += POINTS_FOR_FAST_CATCH_STREAK; 
+      Utils.BroadcastServerMessage(pluginName, ChatFormat.YELLOW + "Blitzfang streak!");
+      displayScoreMessage(POINTS_FOR_FAST_CATCH_STREAK, false);
+    }
 
     if(currentSnitchCount <= SNITCHES_PER_GAME){
       Utils.playSoundAtLocation(player.getLocation(), soundType, 1.0f, 3.0f);
