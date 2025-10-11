@@ -61,7 +61,6 @@ public class Quidditch extends EZPlugin implements PluginListener {
   //TODO: starts the game from teleport hook, after teleport the scoreboard should be cleared as well, add DB support and best score signs, add level for each collected snitch
   //Ideen:partikel für schnatz nach zeit, schnatz verschwindet nach zeit, schnatz bewegt sich, falls 30 sekunden nicht gefunden -> kompass?
   //vllt anfangs nur 5 pfeile und man muss sich hoch grinden und sachen freischalten in nem Shop.
-  //Nether Spawn ändern bzw generell vllt random spawn? zwischen lapis blocken oder mitte.
   //KompassItem 1 mal benutzen, PartikelEffektItem einmal benutzen für Vorteil, Zeitlimit, Scoreboard schöner gestalten
 
   @Override 
@@ -167,8 +166,8 @@ public class Quidditch extends EZPlugin implements PluginListener {
     boolean hasAirBlockBeenSelected = false;
 
     while(!hasAirBlockBeenSelected){
-      Location startLocation = SELECTED_MAP.getStartLocation();
-      Location endLocation = SELECTED_MAP.getEndLocation();
+      Location startLocation = SELECTED_MAP.GetStartLocation();
+      Location endLocation = SELECTED_MAP.GetEndLocation();
       Location randomLocation = Utils.GetRandomLocationInsideVolume(startLocation, endLocation);
       Block possibleSnitch = randomLocation.getWorld().getBlockAt((int)randomLocation.getX(), (int)randomLocation.getY(), (int)randomLocation.getZ());
       
@@ -216,7 +215,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
       
       hasStartedGame = true;
       this.player = playerClicked;
-      Canary.getServer().addSynchronousTask(new TeleportPlayerTask(playerClicked, SELECTED_MAP.getSpawnLocation(), 3));
+      Canary.getServer().addSynchronousTask(new TeleportPlayerTask(playerClicked, SELECTED_MAP.GetRandomSpawnPosition(), 3));
     }
     else if(isEnabled && this.player == playerClicked && clickedType == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(clickedLocation, snitchLocation)){
       rightClickCatches++;
@@ -407,12 +406,11 @@ public class Quidditch extends EZPlugin implements PluginListener {
   @HookHandler
   public void TeleportHookEvent(TeleportHook event){
     Player teleportedPlayer = event.getPlayer();
-    //TODO: if the player moves after teleport he looses directly -> instead of loc equal calulate distance from getSpawnLocation?
-    if(teleportedPlayer == player && EZPlugin.locEqual(event.getDestination(), SELECTED_MAP.getSpawnLocation()) && isFirstStartPort){
+    if(teleportedPlayer == player && SELECTED_MAP.IsLocationInsideMap(event.getDestination()) && isFirstStartPort){
       isFirstStartPort = false;
       startGame(player);
     }
-    else if(isEnabled && event.getPlayer() == player && !EZPlugin.locEqual(event.getDestination(), SELECTED_MAP.getSpawnLocation())){
+    else if(isEnabled && event.getPlayer() == player && !SELECTED_MAP.IsLocationInsideMap(event.getDestination())){
       cleanUpAfterGame();
       displayLoseMessage();
     }
