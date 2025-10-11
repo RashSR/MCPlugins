@@ -33,8 +33,12 @@ public class ScoreboardTimerTask extends ServerTask{
         this.timeScore.update();
     }
 
-    public String getElapsedTime(){
+    public String getFormatedElapsedTime(){
         return formatPassedTime();
+    }
+
+    public int getElapsedTimeInSeconds(){
+        return passedSeconds;
     }
 
     private String formatPassedTime(){

@@ -39,9 +39,11 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private final BlockType SNITCH_BLOCK_TYPE = BlockType.GoldBlock;
   private final int SNITCHES_PER_GAME = 4;
   private final int POINTS_PER_RIGHTCLICK = 150;
-  private final int POINT_PER_ARROW_HIT = 50;
+  private final int BASE_POINTS_PER_ARROW_HIT = 50;
   private final int POINTS_FOR_MISSED_ARROW = -5;
-  private final double MAX_HIT_DISTANCE = 3.5;
+  private final int POINTS_FOR_FAST_CATCH = 20;
+  private final int TIME_FOR_FAST_CATCH_IN_SECONDS = 15;
+  private final double MAX_HIT_DISTANCE = 3.5;  
 
   private boolean isEnabled = false;
   private Location snitchLocation;
@@ -81,6 +83,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     score = 0;
     rightClickCatches = 0;
     missedArrowCount = 0;
+    lastCatchTimeInSeconds = 0;
     displayStartMessage();
     placeSnitch();
     this.player = player;
@@ -182,7 +185,6 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private boolean hasStartedGame = false;
-
   private final Location QuidditchMapSignLocation = new Location(252, 54, 266);
   private final Location SnowMapSignLocation = new Location(252, 54, 267);
   private final Location NetherMapSignLocation = new Location(252, 54, 268);
@@ -265,23 +267,31 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private int calcualateBowPoints(){
     double playerSnitchDistance = Utils.CalculateDistanceBetweenLocations(playerBowStartLocation, snitchLocation, false);
     int roundedPoints = (int)Math.round(playerSnitchDistance / 10);
-    int points = POINT_PER_ARROW_HIT + (int)playerSnitchDistance;
+    int points = BASE_POINTS_PER_ARROW_HIT + (int)playerSnitchDistance;
     return points;
   }
 
   private int missedArrowCount;
   private void decreaseScoreForMissedArrow(){
     score += POINTS_FOR_MISSED_ARROW;
-    displayScoreMessage(POINTS_FOR_MISSED_ARROW);
+    displayScoreMessage(POINTS_FOR_MISSED_ARROW, false);
     missedArrowCount++;
   }
 
+  private int lastCatchTimeInSeconds;
   private void snitchCatched(int pointsScored, SoundEffect.Type soundType){
     snitchLocation.getWorld().setBlockAt(snitchLocation, BlockType.Air);
     currentSnitchCount++;
-    //TODO: could add time bonus here.
+    
+    //TODO: save fastest catch?
+    int catchTimeInSeconds = timerTask.getElapsedTimeInSeconds() - lastCatchTimeInSeconds;
+    lastCatchTimeInSeconds = timerTask.getElapsedTimeInSeconds();
+    boolean isFastCatch = catchTimeInSeconds < TIME_FOR_FAST_CATCH_IN_SECONDS;
+    if(isFastCatch)
+      pointsScored += POINTS_FOR_FAST_CATCH;
+
     score += pointsScored;
-    displayScoreMessage(pointsScored);
+    displayScoreMessage(pointsScored, isFastCatch);
 
     if(currentSnitchCount <= SNITCHES_PER_GAME){
       Utils.playSoundAtLocation(player.getLocation(), soundType, 1.0f, 3.0f);
@@ -315,14 +325,17 @@ public class Quidditch extends EZPlugin implements PluginListener {
     Utils.BroadcastServerMessage(pluginName, serverMessage);
   }
 
-  private void displayScoreMessage(int pointsScored){
+  private void displayScoreMessage(int pointsScored, boolean isFastCatch){
     updateScoreboard();
 
     String sign = ChatFormat.GOLD + "+";
     if(pointsScored < 0)
       sign = ChatFormat.RED + "";
 
-    Utils.BroadcastServerMessage(pluginName, sign + pointsScored + ChatFormat.DARK_GREEN + " Punkte.");
+    String serverMessage = sign + pointsScored + ChatFormat.DARK_GREEN + " Punkte.";
+    if(isFastCatch)
+      serverMessage = ChatFormat.YELLOW + "Blitzfang! " + serverMessage; 
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
   }
 
   private void updateScoreboard(){
@@ -346,7 +359,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     String msg2 = "Du hast jeden Schnatz ";
     String msg3 = "gefangen ";
     String msg4 = " Punkte geholt in ";
-    String msg5 = ChatFormat.GOLD + timerTask.getElapsedTime() + ChatFormat.DARK_GREEN + " Minuten.";
+    String msg5 = ChatFormat.GOLD + timerTask.getFormatedElapsedTime() + ChatFormat.DARK_GREEN + " Minuten.";
     String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + "und " + ChatFormat.GOLD + score + ChatFormat.DARK_GREEN + msg4 + msg5;
     Utils.BroadcastServerMessage(pluginName, serverMessage);
     Canary.getServer().addSynchronousTask(new TeleportPlayerTask(player, Utils.quidditchHubLocation, 5));
