@@ -31,6 +31,7 @@ import net.canarymod.hook.player.TeleportHook;
 import net.canarymod.hook.player.DisconnectionHook;
 import net.canarymod.hook.system.ServerShutdownHook;
 import net.canarymod.hook.entity.DamageHook;
+import net.canarymod.hook.player.ItemUseHook;
 
 public class Quidditch extends EZPlugin implements PluginListener {
   
@@ -131,7 +132,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     this.rightClickScore.setScore(3);
     this.rightClickScore.update();
 
-    this.countScore = scoreboard.getScore("§bCatches: " + (currentSnitchCount - 1), this.objective);
+    this.countScore = scoreboard.getScore("§bCatches: " + (currentSnitchCount - 1) + "/" + SNITCHES_PER_GAME, this.objective);
     this.countScore.setScore(4);
     this.countScore.update();
 
@@ -260,7 +261,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private int calcualateBowPoints(){
-    double playerSnitchDistance = Utils.CalculateDistanceBetweenLocations(player.getLocation(), snitchLocation, false);
+    double playerSnitchDistance = Utils.CalculateDistanceBetweenLocations(playerBowStartLocation, snitchLocation, false);
     int roundedPoints = (int)Math.round(playerSnitchDistance / 10);
     int points = POINT_PER_ARROW_HIT + (int)playerSnitchDistance;
     return points;
@@ -283,6 +284,19 @@ public class Quidditch extends EZPlugin implements PluginListener {
     }
   }
 
+  private Location playerBowStartLocation;
+  @HookHandler
+  public void ItemUseHookEvent(ItemUseHook event){
+    if(isEnabled && event.getPlayer() == player){
+      Item usedItem = event.getItem();
+      ItemType itemType = usedItem.getType();
+
+      if(itemType == ItemType.Bow)
+        playerBowStartLocation = player.getLocation();
+
+    }
+  }
+
   private void displayStartMessage(){
     String msg2 = "Versuche jeden ";
     String msg3 = "goldenen Schnatz";
@@ -294,7 +308,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private void displayScoreMessage(int scoredPoints){
     updateScoreboard();
     //TODO: could add time bonus here.
-    
+
     String msg2 = "Das war Nummer ";
     String msg3 = "/" + SNITCHES_PER_GAME + ". ";
     String msg4 ="+" + scoredPoints;
@@ -311,7 +325,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     this.rightClickScore.update();
 
     scoreboard.removeScore(this.countScore.getName(), this.objective);
-    this.countScore = scoreboard.getScore("§bCatches: " + (currentSnitchCount - 1), this.objective);
+    this.countScore = scoreboard.getScore("§bCatches: " + (currentSnitchCount - 1) + "/" + SNITCHES_PER_GAME, this.objective);
     this.countScore.setScore(4);
     this.countScore.update();
 
