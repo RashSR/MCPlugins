@@ -296,7 +296,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     if(fastCatchStreak == FAST_CATCHES_IN_ROW_FOR_BONUS){
       score += POINTS_FOR_FAST_CATCH_STREAK; 
       Utils.BroadcastServerMessage(pluginName, ChatFormat.YELLOW + "Blitzfang streak!");
-      Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.WITHER_SHOOT, 2.0f, 1.0f);
+      Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.WITHER_SHOOT, 1.0f, 1.0f);
       displayScoreMessage(POINTS_FOR_FAST_CATCH_STREAK, false);
     }
 
@@ -347,7 +347,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
   private void updateScoreboard(){
     scoreboard.removeScore(this.rightClickScore.getName(), this.objective);
-    this.rightClickScore = scoreboard.getScore("§3HandCatches: §f" + rightClickCatches, this.objective);
+    this.rightClickScore = scoreboard.getScore("§cHandCatches: §f" + rightClickCatches, this.objective);
     this.rightClickScore.setScore(3);
     this.rightClickScore.update();
 
