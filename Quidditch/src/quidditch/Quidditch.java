@@ -35,6 +35,7 @@ import net.canarymod.hook.player.ItemUseHook;
 import net.canarymod.hook.player.ItemDropHook;
 import net.canarymod.hook.player.SlotClickHook;
 import net.canarymod.api.inventory.slot.ButtonPress;
+import utils.DatabaseUtils;
 
 public class Quidditch extends EZPlugin implements PluginListener {
   
@@ -82,6 +83,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private void startGame(Player player){
+    DatabaseUtils.InitDatabase();
     currentSnitchCount = 1;
     score = 0;
     rightClickCatches = 0;
@@ -294,6 +296,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     displayScoreMessage(pointsScored, isFastCatch);
 
     if(fastCatchStreak == FAST_CATCHES_IN_ROW_FOR_BONUS){
+      fastCatchStreak = 0;
       score += POINTS_FOR_FAST_CATCH_STREAK; 
       Utils.BroadcastServerMessage(pluginName, ChatFormat.YELLOW + "Blitzfang streak!");
       Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.WITHER_SHOOT, 1.0f, 1.0f);

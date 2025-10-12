@@ -26,6 +26,10 @@ if [ ! -r "$EZ" ]; then
     exit 1
 fi
 
+
+#include all JARs from utils/lib (like sqlite-jdbc)
+UTIL_LIBS=$(echo ../utils/lib/*.jar | tr ' ' "$OSPS")
+
 # Make the build directories if they aren't there.
 # Throw away any error if they are.
 mkdir bin 2>/dev/null
@@ -45,7 +49,7 @@ echo "Compiling with javac..."
 javac -Xlint:deprecation \
   $(find src ../utils -name "*.java") \
   -d bin \
-  -classpath "$MODS$OSPS$EZ" \
+  -classpath "$MODS$OSPS$EZ$OSPS$UTIL_LIBS" \
   -g:lines,vars,source || exit 2
 
 # 2. Build the jar
@@ -58,5 +62,3 @@ test ! -d "$MCSERVER/plugins" && mkdir "$MCSERVER/plugins"
 cp dist/$NAME.jar "$MCSERVER/plugins" || exit 4
 
 echo "Completed Successfully."
-
-
