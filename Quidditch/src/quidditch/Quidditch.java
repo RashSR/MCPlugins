@@ -37,6 +37,11 @@ import net.canarymod.hook.player.SlotClickHook;
 import net.canarymod.api.inventory.slot.ButtonPress;
 import utils.DatabaseUtils;
 
+import net.canarymod.api.world.blocks.Sign;
+import net.canarymod.api.world.World;
+import net.canarymod.api.factory.ChatComponentFactory;
+import net.canarymod.api.chat.ChatComponent;
+
 public class Quidditch extends EZPlugin implements PluginListener {
   
   private final String pluginName = "[Quidditch]";
@@ -76,9 +81,8 @@ public class Quidditch extends EZPlugin implements PluginListener {
             toolTip = "/quidditch schnatz")
   public void quidditchschnatzCommand(MessageReceiver caller, String[] args) {
     if (caller instanceof Player player) {
-      if(args.length == 1){
+      if(args.length == 1)
         player.teleportTo(Utils.quidditchHubLocation);
-      }
     }
   }
 
@@ -277,6 +281,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
   private int lastCatchTimeInSeconds;
   private int fastCatchStreak;
+
   private void snitchCatched(int pointsScored, SoundEffect.Type soundType){
     snitchLocation.getWorld().setBlockAt(snitchLocation, BlockType.Air);
     currentSnitchCount++;
@@ -309,12 +314,26 @@ public class Quidditch extends EZPlugin implements PluginListener {
     }
     else{
       Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.LEVEL_UP, 3.0f, 1.0f);
-      displayWinnerMessage();
+      displayWinMessage();
       cleanUpAfterGame();
+      updateHighscores();
     }
   }
 
+  private final Location QuidditchMapHighScoreSignLocation = new Location(244, 55, 270);
+
+  private void updateHighscores(){
+    String[] signText = new String[4];
+    signText[0] = "Quidditch";
+    signText[1] = "1. Rash 4354";
+    signText[2] = "2. Rash 4300";
+    signText[3] = "3. Rash " + score;
+    
+    Utils.UpdateSignText(QuidditchMapHighScoreSignLocation, signText);
+  }
+
   private Location playerBowStartLocation;
+
   @HookHandler
   public void ItemUseHookEvent(ItemUseHook event){
     if(isEnabled && event.getPlayer() == player){
@@ -323,7 +342,6 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
       if(itemType == ItemType.Bow)
         playerBowStartLocation = player.getLocation();
-
     }
   }
 
@@ -365,7 +383,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     this.totalScore.update();
   }
 
-  private void displayWinnerMessage(){
+  private void displayWinMessage(){
     String msg2 = ChatFormat.DARK_GREEN + "Du hast jeden Schnatz ";
     String msg3 = ChatFormat.GOLD + "gefangen";
 
@@ -407,6 +425,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private boolean isFirstStartPort = true;
+
   @HookHandler
   public void TeleportHookEvent(TeleportHook event){
     Player teleportedPlayer = event.getPlayer();

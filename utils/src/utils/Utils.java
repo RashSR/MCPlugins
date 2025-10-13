@@ -15,6 +15,10 @@ import net.canarymod.api.inventory.Item;
 import net.canarymod.api.world.blocks.Block;
 import net.canarymod.api.scoreboard.*;
 import net.canarymod.api.world.effects.SoundEffect;
+import net.canarymod.api.world.blocks.Sign;
+import net.canarymod.api.world.World;
+import net.canarymod.api.factory.ChatComponentFactory;
+import net.canarymod.api.chat.ChatComponent;
 
 public class Utils extends EZPlugin{
   
@@ -208,4 +212,25 @@ public class Utils extends EZPlugin{
     Location randomLocation = new Location((int)x, (int)y, (int)z);
     return randomLocation;
   }
+
+  public static void UpdateSignText(Location loc, String[] text){
+    World world = loc.getWorld();
+    Block block = world.getBlockAt(loc);
+    Sign sign = (Sign)block.getTileEntity();
+
+    //Canary signs are very buggy in 1.8 -> use server commands
+    for (int i = 1; i <= 4; i++) {
+      updateSignLine(i, loc, text[i-1]);
+    }
+  }
+
+  private static void updateSignLine(int index, Location loc, String text){ 
+    //for some reason it does not work if in the string is a normal space -> replace with ASCII space character
+    String safeText = text.replace(" ", "\\u0020");
+    String jsonText = "{\"text\":\"" + safeText + "\"}";
+    String command = "blockdata " + (int) loc.getX() + " "  + (int) loc.getY() + " " + (int) loc.getZ() + " "
+        + "{Text" + index + ":\"" + jsonText.replace("\"", "\\\"") + "\"}";
+    Canary.getServer().consoleCommand(command);
+  }
+
 }
