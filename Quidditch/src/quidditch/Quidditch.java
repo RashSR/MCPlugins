@@ -461,12 +461,13 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
   @HookHandler
   public void ItemDropHook(ItemDropHook event){
-    if(isEnabled && event.getPlayer() == player){}
+    if(isEnabled && event.getPlayer() == player){
       event.setCanceled();
       PlayerInventory playerInventory = player.getInventory();
       int hotbarSlotId = playerInventory.getSelectedHotbarSlotId();
       playerInventory.setSlot(hotbarSlotId, event.getItem().getItem());
       Utils.RefreshInventroyFromPlayer(player);
+    }
   }
 
   @HookHandler
