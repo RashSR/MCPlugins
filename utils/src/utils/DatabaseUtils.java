@@ -1,84 +1,112 @@
 package utils;
-
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import com.pragprog.ahmine.ez.EZPlugin;
 
 public class DatabaseUtils extends EZPlugin{
+    private String dbFolderPath;
+    private String dbFilePath;
+    private String dbUrl;
+    private Connection connection;
 
-    private static final String DB_FOLDER = "plugins/Quidditch";
-    private static final String DB_FILE = "quidditch.db";
-    private static final String DB_URL = "jdbc:sqlite:" + DB_FOLDER + "/" + DB_FILE;
+    public DatabaseUtils(String dbFolderPath, String dbFilePath){
+        this.dbFolderPath = dbFolderPath;
+        this.dbFilePath = dbFilePath;
+        this.dbUrl = "jdbc:sqlite:" + dbFolderPath + "/" + dbFilePath;
+    }
 
-    public static void InitDatabase(){
+    public void InitDatabase(){
         try {
-            // Ensure the folder exists
-            File folder = new File(DB_FOLDER);
-            if (!folder.exists()) {
-                if (folder.mkdirs()) {
-                    logger.info("[Quidditch] Created plugin data folder: " + folder.getPath());
+            File folder = new File(dbFolderPath);
+            if(!folder.exists()){
+                if(folder.mkdirs()){
+                    logger.info("[DatabaseUtils] Created plugin data folder: " + folder.getPath());
                 } else {
-                    System.err.println("[Quidditch] Failed to create plugin folder: " + folder.getPath());
+                    logger.info("[DatabaseUtils] Failed to create plugin folder: " + folder.getPath());
                 }
             }
 
-            // Load SQLite driver
             Class.forName("org.sqlite.JDBC");
-            logger.info("[Quidditch] SQLite JDBC driver loaded successfully.");
-
-            // Initialize the database structure
+            logger.info("[DatabaseUtils] SQLite JDBC driver loaded successfully.");
             initDatabase();
-
         } catch (Exception e) {
-            logger.info("[Quidditch] Database initialization failed:");
+            logger.info("[DatabaseUtils] Database initialization failed:");
             e.printStackTrace();
         }
     }
 
-    /**
-     * Opens a new connection to the SQLite database.
-     */
-    public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(DB_URL);
-    }
-
-    /**
-     * Closes a connection safely.
-     */
-    public static void close(Connection conn) {
-        if (conn != null) {
+    public void CloseConnection() {
+        if (connection != null) {
             try {
-                conn.close();
+                connection.close();
+                logger.info("[DatabaseUtils] Closed DB connection: " + dbFilePath);
             } catch (SQLException e) {
-                System.err.println("[Quidditch] Failed to close DB connection: " + e.getMessage());
+                logger.info("[DatabaseUtils] Failed to close DB connection: " + e.getMessage());
             }
         }
     }
 
-    /**
-     * Creates the database tables if they don't exist yet.
-     */
-    private static void initDatabase() {
-        try (Connection conn = getConnection();
-             Statement stmt = conn.createStatement()) {
+    private void initDatabase() {
+        try {
+            connection = DriverManager.getConnection(dbUrl);
+            Statement stmt = connection.createStatement();
 
-            String sql = "CREATE TABLE IF NOT EXISTS player_scores (" +
-                    "player TEXT PRIMARY KEY," +
-                    "points INTEGER DEFAULT 0," +
-                    "hand_catches INTEGER DEFAULT 0," +
-                    "bow_hits INTEGER DEFAULT 0," +
-                    "fast_catches INTEGER DEFAULT 0," +
-                    "last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
-                    ");";
+        String sql = "CREATE TABLE IF NOT EXISTS game_sessions (" +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "player_name TEXT NOT NULL," +
+            "score INTEGER DEFAULT 0," +
+            "hand_catches INTEGER DEFAULT 0," +
+            "bow_hits INTEGER DEFAULT 0," +
+            "fastest_catch INTEGER DEFAULT 0," +
+            "slowest_catch INTEGER," +
+            "fast_catches INTEGER DEFAULT 0," +
+            "fast_catch_streaks INTEGER DEFAULT 0," +
+            "missed_arrows INTEGER DEFAULT 0," +
+            "map_played TEXT," +
+            "game_duration INTEGER DEFAULT 0," +
+            "session_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+            ");";
 
             stmt.executeUpdate(sql);
-            System.out.println("[Quidditch] Database initialized successfully.");
+            logger.info("[DatabaseUtils] Database initialized successfully: " + dbFilePath);
 
         } catch (SQLException e) {
-            System.err.println("[Quidditch] Failed to initialize database: " + e.getMessage());
+            logger.info("[DatabaseUtils] Failed to initialize database: " + e.getMessage());
         }
     }
+
+    public void insertGameSession(String playerName, int score, int handCatches, int bowHits,
+                              int fastestCatch, int slowestCatch, int fastCatches, int fastCatchStreaks, int missedArrows,
+                              String mapPlayed, int gameDuration) {
+    String sql = "INSERT INTO game_sessions (" +
+            "player_name, score, hand_catches, bow_hits, fastest_catch, slowest_catch, fast_catches, " +
+            "fast_catch_streaks, missed_arrows, map_played, game_duration, session_timestamp" +
+            ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);";
+    try{
+        PreparedStatement pstmt = connection.prepareStatement(sql);
+        pstmt.setString(1, playerName);
+        pstmt.setInt(2, score);
+        pstmt.setInt(3, handCatches);
+        pstmt.setInt(4, bowHits);
+        pstmt.setInt(5, fastestCatch);
+        pstmt.setInt(6, slowestCatch);
+        pstmt.setInt(7, fastCatches);
+        pstmt.setInt(8, fastCatchStreaks);
+        pstmt.setInt(9, missedArrows);
+        pstmt.setString(10, mapPlayed);
+        pstmt.setInt(11, gameDuration);
+
+        pstmt.executeUpdate();
+        logger.info("[DatabaseUtils] Successfully inserted game session for player: " + playerName);
+
+    } catch (SQLException e) {
+        logger.info("[DatabaseUtils] Error inserting game session: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
+
 }

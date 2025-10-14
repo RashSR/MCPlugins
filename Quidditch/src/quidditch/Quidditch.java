@@ -57,7 +57,8 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private int currentSnitchCount;
   private int rightClickCatches;
   private int score;
-  private Map SELECTED_MAP = Map.SNOW;
+  private Map SELECTED_MAP;
+  private DatabaseUtils database;
 
   //TODO: add DB support and best score signs, add level for each collected snitch
   //Ideen:partikel für schnatz nach zeit, schnatz verschwindet nach zeit, schnatz bewegt sich, falls 30 sekunden nicht gefunden -> kompass?
@@ -82,14 +83,18 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private void startGame(Player player){
-    DatabaseUtils.InitDatabase();
     currentSnitchCount = 1;
     score = 0;
     rightClickCatches = 0;
     missedArrowCount = 0;
     lastCatchTimeInSeconds = 0;
     fastCatchStreak = 0;
+    totalFastCatches = 0;
+    totalFastCatchStreaks = 0;
+    fastestCatch = Integer.MAX_VALUE;
+    slowestCatch = 0;
     this.player = player;
+    setUpDatabase();
     hasStartedGame = false;
     player.setModeId(Utils.ADVENTURE_MODE);
     displayStartMessage();
@@ -98,6 +103,14 @@ public class Quidditch extends EZPlugin implements PluginListener {
     createScoreboard();
     Utils.RefreshInventroyFromPlayer(player);
     isEnabled = true;
+  }
+
+  private final String DB_FOLDER = "plugins/Quidditch";
+  private final String DB_FILE = "quidditch.db";
+
+  private void setUpDatabase(){
+    database = new DatabaseUtils(DB_FOLDER, DB_FILE);
+    database.InitDatabase();
   }
 
   private Scoreboard scoreboard;
@@ -276,18 +289,28 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
   private int lastCatchTimeInSeconds;
   private int fastCatchStreak;
+  private int totalFastCatches;
+  private int totalFastCatchStreaks;
+  private int fastestCatch;
+  private int slowestCatch;
 
   private void snitchCatched(int pointsScored, SoundEffect.Type soundType){
     snitchLocation.getWorld().setBlockAt(snitchLocation, BlockType.Air);
     currentSnitchCount++;
     
-    //TODO: save fastest catch?
     int catchTimeInSeconds = timerTask.getElapsedTimeInSeconds() - lastCatchTimeInSeconds;
+    if(catchTimeInSeconds < fastestCatch)
+      fastestCatch = catchTimeInSeconds;
+    
+    if(catchTimeInSeconds > slowestCatch)
+      slowestCatch = catchTimeInSeconds;
+    
     lastCatchTimeInSeconds = timerTask.getElapsedTimeInSeconds();
     boolean isFastCatch = catchTimeInSeconds < TIME_FOR_FAST_CATCH_IN_SECONDS;
     if(isFastCatch){
       pointsScored += POINTS_FOR_FAST_CATCH;
       fastCatchStreak++;
+      totalFastCatches++;
     }
     else
       fastCatchStreak = 0;
@@ -296,6 +319,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     displayScoreMessage(pointsScored, isFastCatch);
 
     if(fastCatchStreak == FAST_CATCHES_IN_ROW_FOR_BONUS){
+      totalFastCatchStreaks++;
       fastCatchStreak = 0;
       score += POINTS_FOR_FAST_CATCH_STREAK; 
       Utils.BroadcastServerMessage(pluginName, ChatFormat.YELLOW + "Blitzfang streak!");
@@ -308,11 +332,22 @@ public class Quidditch extends EZPlugin implements PluginListener {
       placeSnitch();
     }
     else{
-      Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.LEVEL_UP, 3.0f, 1.0f);
-      displayWinMessage();
-      cleanUpAfterGame();
-      updateHighscores();
+      initializeWin();
     }
+  }
+
+  private void initializeWin(){
+    Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.LEVEL_UP, 3.0f, 1.0f);
+    displayWinMessage();
+    insertGameSessionIntoDb();
+    cleanUpAfterGame();
+    updateHighscores();
+  }
+
+  private void insertGameSessionIntoDb(){
+    String playerName = player.getDisplayName();
+    int bowHits = SNITCHES_PER_GAME - rightClickCatches;
+    database.insertGameSession(playerName, score, rightClickCatches, bowHits, fastestCatch, slowestCatch, totalFastCatches, totalFastCatchStreaks, missedArrowCount, SELECTED_MAP.toString(), timerTask.getElapsedTimeInSeconds());
   }
 
   private final Location QuidditchMapHighScoreSignLocation = new Location(244, 55, 270);
@@ -397,6 +432,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     isEnabled = false;
     isFirstStartPort = true;
     snitchLocation.getWorld().setBlockAt(snitchLocation, BlockType.Air);
+    database.CloseConnection();
   }
 
   private void removeItemsFromPlayer(){

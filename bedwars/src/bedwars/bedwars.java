@@ -28,7 +28,7 @@ import utils.Utils;
 public class bedwars extends EZPlugin implements PluginListener{
 
   private static Map<String,String> teamColor = new HashMap<String,String>();
-  public static List<Player> spielerliste = new ArrayList<Player>();
+  public static List<Player> playerList = new ArrayList<Player>();
   public static boolean farm = false;
   public static List<String> voteList = new ArrayList<String>();
   int farmcounter = 0;
@@ -101,8 +101,8 @@ public class bedwars extends EZPlugin implements PluginListener{
       farm = true;
 
     if(farm){ 
-      if(spielerliste.size() > 1){
-        for(Player player : spielerliste){
+      if(playerList.size() > 1){
+        for(Player player : playerList){
           String farbe = teamColor.get(player.getDisplayName());
 
           if(farbe.equalsIgnoreCase("red")){
@@ -422,7 +422,7 @@ public class bedwars extends EZPlugin implements PluginListener{
 
     if(clickedBlock.getType() == BlockType.BedBlock){
       if(teamColor.size() > 1){
-        spielerliste = Canary.getServer().getPlayerList();
+        playerList = Canary.getServer().getPlayerList();
       }
 
       if(x == 293 && y == 20){
@@ -431,7 +431,7 @@ public class bedwars extends EZPlugin implements PluginListener{
 
           if(!teamColor.get(player.getDisplayName()).equalsIgnoreCase("red")){
             if(teamColor.size() > 1){
-              for(Player spieler : spielerliste){
+              for(Player spieler : playerList){
                 double xs = spieler.getX();
                 double zs = spieler.getZ();
                 if(xs >= 283 && xs <= 306 && zs >= 254 && zs <= 272){
@@ -454,7 +454,7 @@ public class bedwars extends EZPlugin implements PluginListener{
 
           if(!teamColor.get(player.getDisplayName()).equalsIgnoreCase("yellow")){
             if(teamColor.size() > 1){
-              for(Player spieler : spielerliste){
+              for(Player spieler : playerList){
                 double xs = spieler.getX();
                 double zs = spieler.getZ();
                 if(xs >= 283 && xs <= 306 && zs >= 254 && zs <= 272){
@@ -479,7 +479,7 @@ public class bedwars extends EZPlugin implements PluginListener{
 
           if(!teamColor.get(player.getDisplayName()).equalsIgnoreCase("green")){
             if(teamColor.size() > 1){
-              for(Player spieler : spielerliste){
+              for(Player spieler : playerList){
                 double xs = spieler.getX();
                 double zs = spieler.getZ();
                 if(xs >= 283 && xs <= 306 && zs >= 254 && zs <= 272){
@@ -502,7 +502,7 @@ public class bedwars extends EZPlugin implements PluginListener{
 
           if(!teamColor.get(player.getDisplayName()).equalsIgnoreCase("purple")){
             if(teamColor.size() > 1){
-              for(Player spieler : spielerliste){
+              for(Player spieler : playerList){
                 double xs = spieler.getX();
                 double zs = spieler.getZ();
                 if(xs >= 283 && xs <= 306 && zs >= 254 && zs <= 272){
