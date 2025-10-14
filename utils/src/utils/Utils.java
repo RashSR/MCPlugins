@@ -19,6 +19,7 @@ import net.canarymod.api.world.blocks.Sign;
 import net.canarymod.api.world.World;
 import net.canarymod.api.factory.ChatComponentFactory;
 import net.canarymod.api.chat.ChatComponent;
+import net.canarymod.api.world.position.Position;
 
 public class Utils extends EZPlugin{
   
@@ -231,6 +232,10 @@ public class Utils extends EZPlugin{
     String command = "blockdata " + (int) loc.getX() + " "  + (int) loc.getY() + " " + (int) loc.getZ() + " "
         + "{Text" + index + ":\"" + jsonText.replace("\"", "\\\"") + "\"}";
     Canary.getServer().consoleCommand(command);
+  }
+
+  public static Position ConvertLocationToPosition(Location loc){
+    return new Position((int)loc.getX(), (int)loc.getY(), (int)loc.getZ());
   }
 
 }
