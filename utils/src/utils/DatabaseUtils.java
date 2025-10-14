@@ -3,8 +3,12 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.pragprog.ahmine.ez.EZPlugin;
 
 public class DatabaseUtils extends EZPlugin{
@@ -82,31 +86,53 @@ public class DatabaseUtils extends EZPlugin{
     public void insertGameSession(String playerName, int score, int handCatches, int bowHits,
                               int fastestCatch, int slowestCatch, int fastCatches, int fastCatchStreaks, int missedArrows,
                               String mapPlayed, int gameDuration) {
-    String sql = "INSERT INTO game_sessions (" +
-            "player_name, score, hand_catches, bow_hits, fastest_catch, slowest_catch, fast_catches, " +
-            "fast_catch_streaks, missed_arrows, map_played, game_duration, session_timestamp" +
-            ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);";
-    try{
-        PreparedStatement pstmt = connection.prepareStatement(sql);
-        pstmt.setString(1, playerName);
-        pstmt.setInt(2, score);
-        pstmt.setInt(3, handCatches);
-        pstmt.setInt(4, bowHits);
-        pstmt.setInt(5, fastestCatch);
-        pstmt.setInt(6, slowestCatch);
-        pstmt.setInt(7, fastCatches);
-        pstmt.setInt(8, fastCatchStreaks);
-        pstmt.setInt(9, missedArrows);
-        pstmt.setString(10, mapPlayed);
-        pstmt.setInt(11, gameDuration);
+        String sqlCommand = "INSERT INTO game_sessions (" +
+                "player_name, score, hand_catches, bow_hits, fastest_catch, slowest_catch, fast_catches, " +
+                "fast_catch_streaks, missed_arrows, map_played, game_duration, session_timestamp" +
+                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);";
+        try{
+            PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
+            pstmt.setString(1, playerName);
+            pstmt.setInt(2, score);
+            pstmt.setInt(3, handCatches);
+            pstmt.setInt(4, bowHits);
+            pstmt.setInt(5, fastestCatch);
+            pstmt.setInt(6, slowestCatch);
+            pstmt.setInt(7, fastCatches);
+            pstmt.setInt(8, fastCatchStreaks);
+            pstmt.setInt(9, missedArrows);
+            pstmt.setString(10, mapPlayed);
+            pstmt.setInt(11, gameDuration);
 
-        pstmt.executeUpdate();
-        logger.info("[DatabaseUtils] Successfully inserted game session for player: " + playerName);
+            pstmt.executeUpdate();
+            logger.info("[DatabaseUtils] Successfully inserted game session for player: " + playerName);
 
-    } catch (SQLException e) {
-        logger.info("[DatabaseUtils] Error inserting game session: " + e.getMessage());
-        e.printStackTrace();
+        } catch (SQLException e) {
+            logger.info("[DatabaseUtils] Error inserting game session: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
-}
+
+    public List<String> GetTop3ScoresFromMap(Map map){ //TODO: add to map something like highscore sign.
+        List<String> topPlayers = new ArrayList<>();
+        String sqlCommand = "SELECT player_name, score FROM game_sessions WHERE map_played = ? ORDER BY score DESC LIMIT 3;";
+        try{
+            PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
+            pstmt.setString(1, map.toString());
+
+            ResultSet rs = pstmt.executeQuery();
+            while(rs.next()){
+                String playerName = rs.getString("player_name");
+                logger.info(playerName);
+                int score = rs.getInt("score");
+                topPlayers.add(playerName + " " + score);
+            }
+        }
+        catch(SQLException e){
+            return null;
+        }
+
+        return topPlayers;
+    }
 
 }

@@ -64,6 +64,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   //Ideen:partikel für schnatz nach zeit, schnatz verschwindet nach zeit, schnatz bewegt sich, falls 30 sekunden nicht gefunden -> kompass?
   //vllt anfangs nur 5 pfeile und man muss sich hoch grinden und sachen freischalten in nem Shop.
   //KompassItem 1 mal benutzen, PartikelEffektItem einmal benutzen für Vorteil, Zeitlimit
+  //Achievements -> block spawned in der nähe, keinen pfeil verschossen, nur hand catches, ...
 
   @Override 
   public boolean enable() {
@@ -343,8 +344,8 @@ public class Quidditch extends EZPlugin implements PluginListener {
     Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.LEVEL_UP, 3.0f, 1.0f);
     displayWinMessage();
     insertGameSessionIntoDb();
-    cleanUpAfterGame();
     updateHighscores();
+    cleanUpAfterGame();
   }
 
   private void insertGameSessionIntoDb(){
@@ -357,12 +358,20 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
   private void updateHighscores(){
     String[] signText = new String[4];
-    signText[0] = "Quidditch";
-    signText[1] = "1. Rash 4354";
-    signText[2] = "2. Rash 4300";
-    signText[3] = "3. Rash " + score;
+    List<String> top3Scores = database.GetTop3ScoresFromMap(SELECTED_MAP);
+    if(top3Scores != null){
+      signText[0] = "Quidditch";
+      for(int i = 1; i <= top3Scores.size(); i++){
+        signText[i] = i + ". " + top3Scores.get(i-1);
+      }
+      //signText[1] = "1. Rash 4354";
+      //signText[2] = "2. Rash 4300";
+      //signText[3] = "3. Rash " + score;
     
-    Utils.UpdateSignText(QuidditchMapHighScoreSignLocation, signText);
+      Utils.UpdateSignText(QuidditchMapHighScoreSignLocation, signText);
+    }
+    else
+      logger.info(pluginName + " ERROR while reading TOP3 Highscores");
   }
 
   private Location playerBowStartLocation;
