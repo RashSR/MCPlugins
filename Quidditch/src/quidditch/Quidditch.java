@@ -60,7 +60,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private Map SELECTED_MAP;
   private DatabaseUtils database;
 
-  //TODO: add DB support and best score signs, add level for each collected snitch
+  //TODO: high score signs, give player speed after streak, stats im chat zeigen
   //Ideen:partikel für schnatz nach zeit, schnatz verschwindet nach zeit, schnatz bewegt sich, falls 30 sekunden nicht gefunden -> kompass?
   //vllt anfangs nur 5 pfeile und man muss sich hoch grinden und sachen freischalten in nem Shop.
   //KompassItem 1 mal benutzen, PartikelEffektItem einmal benutzen für Vorteil, Zeitlimit
@@ -199,6 +199,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private final Location NetherMapSignLocation = new Location(252, 54, 268);
   private final Location ShriekingShackMapSignLocation = new Location(252, 54, 269);
   private final Location ChristmasMapSignLocation = new Location(252, 54, 270);
+  private final Location RandomMapSignLocation = new Location(252, 54, 265);
 
   @HookHandler
   public void BlockRightClickHookEvent(BlockRightClickHook event){
@@ -224,6 +225,8 @@ public class Quidditch extends EZPlugin implements PluginListener {
         SELECTED_MAP = Map.SHRIEKING_SHACK;
       else if(EZPlugin.locEqual(clickedLocation, ChristmasMapSignLocation))
         SELECTED_MAP = Map.CHRISTMAS;
+      else if(EZPlugin.locEqual(clickedLocation, RandomMapSignLocation))
+        SELECTED_MAP = Map.GetRandomMap();
       else
         return;
       

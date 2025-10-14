@@ -5,7 +5,7 @@ import net.canarymod.api.world.position.Location;
 public enum Map {
     QUIDDITCH(
         new Location(136, 122, 290), //start
-        new Location(190, 160, 328), //end
+        new Location(190, 154, 328), //end
         Utils.QuidditchFieldLocation, //middle
         new Location(Utils.QuidditchFieldLocation.getWorld(), 139.5, 130.5, 309.5, 0f, -90f), //first spawn position on lapis block
         new Location(Utils.QuidditchFieldLocation.getWorld(), 187.5, 130.5, 309.5, 0f, 90f) //second Position
@@ -52,6 +52,12 @@ public enum Map {
         this.middleLocation = middle;
         this.firstPosition = firstPosition;
         this.secondPosition = secondPosition;
+    }
+
+    public static Map GetRandomMap(){
+        Map[] maps = Map.values();
+        Random random = new Random();
+        return maps[random.nextInt(maps.length)];
     }
 
     public Location GetStartLocation() {
