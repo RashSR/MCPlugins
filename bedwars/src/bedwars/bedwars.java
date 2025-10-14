@@ -23,6 +23,7 @@ import net.canarymod.hook.player.BlockRightClickHook;
 import net.canarymod.hook.world.RedstoneChangeHook;
 import net.canarymod.hook.player.TeleportHook;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import utils.SpawnItemsTask;
 
@@ -333,24 +334,40 @@ public void bedwarsstart(){
     if(caller instanceof Player player){
       Location loc = player.getLocation();
       World world = loc.getWorld();
-
-      ItemFactory factory = Canary.factory().getItemFactory();
-      Item customBronze = factory.newItem(ItemType.ClayBrick);
-      customBronze.setDisplayName(ChatFormat.GRAY + "Bronze");
-
-      Location bronzeYellowSpawner = new Location(427, 227, 493);
-      Location bronzeRedSpawner = new Location(430, 227, 298);
-      Location bronzePurpleSpawner = new Location(332, 227, 393);
-      Location bronzeGreenSpawner = new Location(525, 227, 397);
-      ArrayList<Location> locs = new ArrayList<>();
-      locs.add(bronzeGreenSpawner);
-      locs.add(bronzeYellowSpawner);
-      locs.add(bronzeRedSpawner);
-      locs.add(bronzePurpleSpawner);
-
-      SpawnItemsTask bronzeTask = new SpawnItemsTask(customBronze, locs, 2, true);
+      createCustomItems();
+      SpawnItemsTask bronzeTask = new SpawnItemsTask(customBronze, getBronzeSpawner(), 2, true);
       Canary.getServer().addSynchronousTask(bronzeTask);
     }
+  }
+
+  private ArrayList<Location> getBronzeSpawner(){
+    Location bronzeYellowSpawner = new Location(427, 227, 493);
+    Location bronzeRedSpawner = new Location(430, 227, 298);
+    Location bronzePurpleSpawner = new Location(332, 227, 393);
+    Location bronzeGreenSpawner = new Location(525, 227, 397);
+    ArrayList<Location> locs = new ArrayList<>();
+    locs.add(bronzeYellowSpawner);
+    locs.add(bronzeRedSpawner);
+    locs.add(bronzePurpleSpawner);
+    locs.add(bronzeGreenSpawner);
+    
+    return locs;
+  }
+
+  private Item customBronze;
+  private Item customIron;
+  private Item customGold;
+  
+  private void createCustomItems(){
+    ItemFactory factory = Canary.factory().getItemFactory();
+    customBronze = factory.newItem(ItemType.ClayBrick);
+    customBronze.setDisplayName(ChatFormat.GRAY + "Bronze");
+
+    customGold = factory.newItem(ItemType.GoldIngot);
+    customGold.setDisplayName(ChatFormat.GOLD + "Gold");
+
+    customIron = factory.newItem(ItemType.IronIngot);
+    customIron.setDisplayName(ChatFormat.DARK_AQUA + "Eisen");
   }
 
   @Command(aliases = {"bwsilber"},
