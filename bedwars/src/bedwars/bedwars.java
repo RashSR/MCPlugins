@@ -36,6 +36,9 @@ public class bedwars extends EZPlugin implements PluginListener{
   int farmcounter = 0;
   int mapcounter = 0;
   private final String pluginName = "[Bedwars] ";
+  private final int BRONZE_SPAWN_DELAY_IN_SECONDS = 2;
+  private final int IRON_SPAWN_DELAY_IN_SECONDS = 17;
+  private final int GOLD_SPAWN_DELAY_IN_SECONDS = 25;
 
   @Override
   public boolean enable() {  
@@ -259,40 +262,27 @@ public void bedwarsstart(){
  } 
 }
 
-
-    @Command(aliases = { "bedwars"},
+  @Command(aliases = { "bedwars"},
            description = "Teleportiert den Spieler zur Bedwarsmap.",
            permissions = {""},
            toolTip = "/bedwars maps, or /bedwars map Farm")
-
   public void teleporttobwmap(MessageReceiver caller, String[] args) {
-    
-    if (caller instanceof Player) {
-      Player player = (Player)caller;
-
+    if (caller instanceof Player player) {
       if(args.length == 1){
-
         Location bedwarshub = new Location(304, 20, 263);
         player.teleportTo(bedwarshub);
         teamfarbe.put(player.getDisplayName(), "");
         return;
-
-                          }
-
+      }
       if(args.length == 2 && args[1].equalsIgnoreCase("maps")){
-
-      tellbwmaps();
-
-                          }
+        tellbwmaps();
+      }
       if(args[1].equalsIgnoreCase("map") && args[2].equalsIgnoreCase("farm")){
-
-       Location whereNow = new Location(424, 227, 395);
-       player.teleportTo(whereNow);
-
-       }
-
-                                  }
-                                                                            }    
+        Location whereNow = new Location(424, 227, 395);
+        player.teleportTo(whereNow);
+      }
+    }
+  }    
 
   @Command(aliases = {"bwstart"},
           description = "startet bedwars",
@@ -304,9 +294,9 @@ public void bedwarsstart(){
       World world = loc.getWorld();
       bedwarsstart();
       if(farm){
-        Canary.getServer().addSynchronousTask(new BwTaskGold(world));
-        Canary.getServer().addSynchronousTask(new BwTaskBronze(world));
-        Canary.getServer().addSynchronousTask(new BwTaskSilber(world));
+        startGoldSpawning();
+        startBronzeSpawning();
+        startIronSpawning();
         bettcheck(world, player);
       }
     }
@@ -316,14 +306,27 @@ public void bedwarsstart(){
            description = "goldspawner",
            permissions = { "*" },
            toolTip = "/bwgold")
-
   public void bwgoldCommand(MessageReceiver caller, String[] parameters){
     if (caller instanceof Player) {
       Player player = (Player)caller;
-      Location loc = player.getLocation();
-      World world = loc.getWorld();
-      Canary.getServer().addSynchronousTask(new BwTaskGold(world)); 
+      startGoldSpawning();
     }
+  }
+
+  private SpawnItemsTask goldTask;
+
+  private void startGoldSpawning(){
+    createCustomItems();
+    goldTask = new SpawnItemsTask(customGold, getGoldSpawner(), GOLD_SPAWN_DELAY_IN_SECONDS, true);
+    Canary.getServer().addSynchronousTask(goldTask);
+  }
+
+  private ArrayList<Location> getGoldSpawner(){
+    ArrayList<Location> locs = new ArrayList<>();
+    locs.add(new Location(430, 230, 396));
+    locs.add(new Location(431, 228, 395));
+    locs.add(new Location(428, 228, 395));
+    return locs;
   }
 
   @Command(aliases = {"bwbronze"},
@@ -332,12 +335,16 @@ public void bedwarsstart(){
            toolTip = "/bwbronze")
   public void bwbronzeCommand(MessageReceiver caller, String[] parameters){
     if(caller instanceof Player player){
-      Location loc = player.getLocation();
-      World world = loc.getWorld();
-      createCustomItems();
-      SpawnItemsTask bronzeTask = new SpawnItemsTask(customBronze, getBronzeSpawner(), 2, true);
-      Canary.getServer().addSynchronousTask(bronzeTask);
+      startBronzeSpawning();
     }
+  }
+
+  private SpawnItemsTask bronzeTask;
+
+  private void startBronzeSpawning(){
+    createCustomItems();
+    bronzeTask = new SpawnItemsTask(customBronze, getBronzeSpawner(), BRONZE_SPAWN_DELAY_IN_SECONDS, true);
+    Canary.getServer().addSynchronousTask(bronzeTask);
   }
 
   private ArrayList<Location> getBronzeSpawner(){
@@ -345,12 +352,12 @@ public void bedwarsstart(){
     Location bronzeRedSpawner = new Location(430, 227, 298);
     Location bronzePurpleSpawner = new Location(332, 227, 393);
     Location bronzeGreenSpawner = new Location(525, 227, 397);
+
     ArrayList<Location> locs = new ArrayList<>();
     locs.add(bronzeYellowSpawner);
     locs.add(bronzeRedSpawner);
     locs.add(bronzePurpleSpawner);
     locs.add(bronzeGreenSpawner);
-    
     return locs;
   }
 
@@ -376,10 +383,30 @@ public void bedwarsstart(){
          toolTip = "/bwsilber")
   public void bwsilberCommand(MessageReceiver caller, String[] parameters){
     if(caller instanceof Player player){
-      Location loc = player.getLocation();
-      World world = loc.getWorld();
-      Canary.getServer().addSynchronousTask(new BwTaskSilber(world));
+      startIronSpawning();
     }
+  }
+
+  private SpawnItemsTask ironTask;
+
+  private void startIronSpawning(){
+    createCustomItems();
+    ironTask = new SpawnItemsTask(customIron, getIronSpawner(), IRON_SPAWN_DELAY_IN_SECONDS, true);
+    Canary.getServer().addSynchronousTask(ironTask);
+  }
+
+  private ArrayList<Location> getIronSpawner(){
+    Location bronzeYellowSpawner = new Location(436, 228, 502);
+    Location bronzeRedSpawner = new Location(421, 228, 289);
+    Location bronzePurpleSpawner = new Location(323, 228, 402);
+    Location bronzeGreenSpawner = new Location(534, 228, 388);
+
+    ArrayList<Location> locs = new ArrayList<>();
+    locs.add(bronzeYellowSpawner);
+    locs.add(bronzeRedSpawner);
+    locs.add(bronzePurpleSpawner);
+    locs.add(bronzeGreenSpawner);
+    return locs;
   }
 
   @Command(aliases = { "bwclear" },
@@ -387,26 +414,21 @@ public void bedwarsstart(){
           permissions = { "*" },
           toolTip = "/bwclear")
   public void bwclearCommand(MessageReceiver caller, String[] parameters) {
-    if (caller instanceof Player player) { 
+    if (caller instanceof Player player){ 
       Location loc = player.getLocation();
       World world = loc.getWorld();
 
       for (int x = 300; x <= 555; x++) {
-         for(int y = 212; y <= 254; y++) {
-            for (int z = 300; z <= 525; z++) { 
-
-              Block b = world.getBlockAt(x, y, z);
-
-              if(b.getType() == BlockType.SandstoneBlank){
-
-                b.getLocation().getWorld().setBlockAt(b.getLocation(), BlockType.Air);
-
-              }
-            }
-           }
-         }    
- } 
-                                                                          }
+        for(int y = 212; y <= 254; y++) {
+          for (int z = 300; z <= 525; z++) { 
+            Block b = world.getBlockAt(x, y, z);
+            if(b.getType() == BlockType.SandstoneBlank)
+              b.getLocation().getWorld().setBlockAt(b.getLocation(), BlockType.Air);
+          }
+        }
+      }    
+    } 
+  }
 
 public void bettcheck(World world, Player player){
   int i = 0;
