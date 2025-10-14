@@ -1,5 +1,4 @@
 package bedwars;
-
 import net.canarymod.Canary;
 import net.canarymod.api.world.blocks.Block;
 import net.canarymod.api.world.blocks.BlockType;
@@ -12,47 +11,31 @@ import net.canarymod.chat.ChatFormat;
 import net.canarymod.api.inventory.Item;
 
 public class BwTaskGold extends ServerTask {
+  private World world;
+  private Item customGold;
 
-    private World world;
-
-    public BwTaskGold(World myWorld) {
-
-        super(Canary.getServer(), 25 * 20, true);
-        world = myWorld;
-
-                                  }
+  public BwTaskGold(World myWorld) {
+    super(Canary.getServer(), 25 * 20, true);
+    world = myWorld;
+    ItemFactory factory1 = Canary.factory().getItemFactory();
+    customGold = factory1.newItem(ItemType.GoldIngot);
+    customGold.setDisplayName(ChatFormat.GOLD + "Gold");
+  }
     
-    public void run() {
+  public void run() {
+    int xGold1 = 430;
+    int yGold1 = 229;
+    int zGold1 = 396;
+    world.dropItem(xGold1, yGold1 + 1, zGold1, customGold);
 
-      ItemFactory factory1 = Canary.factory().getItemFactory();
-      Item gold1 = factory1.newItem(ItemType.GoldIngot);
-      gold1.setDisplayName(ChatFormat.GOLD + "Gold");
+    int xGold2 = 431;
+    int yGold2 = 227;
+    int zGold2 = 395;
+    world.dropItem(xGold2, yGold2 + 1, zGold2, customGold);
 
-      ItemFactory factory2 = Canary.factory().getItemFactory();
-      Item gold2 = factory2.newItem(ItemType.GoldIngot);
-      gold2.setDisplayName(ChatFormat.GOLD + "Gold");
-
-      ItemFactory factory3 = Canary.factory().getItemFactory();
-      Item gold3 = factory3.newItem(ItemType.GoldIngot);
-      gold3.setDisplayName(ChatFormat.GOLD + "Gold");
-
-      int xgold1 = 430;
-      int ygold1 = 229;
-      int zgold1 = 396;
-
-      world.dropItem(xgold1, ygold1 + 1, zgold1, gold1);
-
-      int xgold2 = 431;
-      int ygold2 = 227;
-      int zgold2 = 395;
-
-      world.dropItem(xgold2, ygold2 + 1, zgold2, gold2);
-
-      int xgold3 = 428;
-      int ygold3 = 227;
-      int zgold3 = 395;
-
-      world.dropItem(xgold3, ygold3 + 1, zgold3, gold3);
-
-                       }
+    int xGold3 = 428;
+    int yGold3 = 227;
+    int zGold3 = 395;
+    world.dropItem(xGold3, yGold3 + 1, zGold3, customGold);
+  }
 }

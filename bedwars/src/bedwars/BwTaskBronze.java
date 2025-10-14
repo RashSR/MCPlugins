@@ -1,5 +1,4 @@
 package bedwars;
-
 import net.canarymod.Canary;
 import net.canarymod.api.world.blocks.Block;
 import net.canarymod.api.world.blocks.BlockType;
@@ -12,57 +11,36 @@ import net.canarymod.chat.ChatFormat;
 import net.canarymod.api.inventory.Item;
 
 public class BwTaskBronze extends ServerTask {
+  private World world;
+  private Item customBronze;
 
-    private World world;
-
-    public BwTaskBronze(World myWorld) {
-
-        super(Canary.getServer(), 2 * 20, true);
-        world = myWorld;
-
-                                  }
+  public BwTaskBronze(World world) {
+    super(Canary.getServer(), 2 * 20, true);
+    this.world = world;
+    ItemFactory factory = Canary.factory().getItemFactory();
+    customBronze = factory.newItem(ItemType.ClayBrick);
+    customBronze.setDisplayName(ChatFormat.GRAY + "Bronze");
+  }
     
-    public void run() {
+  public void run() {
+    int xBronzeYellow = 427;
+    int yBronzeYellow = 226;
+    int zBronzeYellow = 493;
+    world.dropItem(xBronzeYellow, yBronzeYellow + 1, zBronzeYellow, customBronze);
 
-      ItemFactory factory1 = Canary.factory().getItemFactory();
-      Item bronzegelb = factory1.newItem(ItemType.ClayBrick);
-      bronzegelb.setDisplayName(ChatFormat.GRAY + "Bronze");
+    int xBronzeRed = 430;
+    int yBronzeRed = 226;
+    int zBronzeRed = 298;
+    world.dropItem(xBronzeRed, yBronzeRed + 1, zBronzeRed, customBronze);
 
-      ItemFactory factory2 = Canary.factory().getItemFactory();
-      Item bronzerot = factory2.newItem(ItemType.ClayBrick);
-      bronzerot.setDisplayName(ChatFormat.GRAY + "Bronze");
+    int xBronzePurple = 332;
+    int yBronzePurple = 226;
+    int zBronzePurple = 393;
+    world.dropItem(xBronzePurple, yBronzePurple + 1, zBronzePurple, customBronze);
 
-      ItemFactory factory3 = Canary.factory().getItemFactory();
-      Item bronzelila = factory3.newItem(ItemType.ClayBrick);
-      bronzelila.setDisplayName(ChatFormat.GRAY + "Bronze");
-
-      ItemFactory factory4 = Canary.factory().getItemFactory();
-      Item bronzegruen = factory4.newItem(ItemType.ClayBrick);
-      bronzegruen.setDisplayName(ChatFormat.GRAY + "Bronze");
-
-      int xbronzegelb = 427;
-      int ybronzegelb = 226;
-      int zbronzegelb = 493;
-
-      world.dropItem(xbronzegelb, ybronzegelb + 1, zbronzegelb, bronzegelb);
-
-      int xbronzerot = 430;
-      int ybronzerot = 226;
-      int zbronzerot = 298;
-
-      world.dropItem(xbronzerot, ybronzerot + 1, zbronzerot, bronzerot);
-
-      int xbronzelila = 332;
-      int ybronzelila = 226;
-      int zbronzelila = 393;
-
-      world.dropItem(xbronzelila, ybronzelila + 1, zbronzelila, bronzelila);
-
-      int xbronzegruen = 525;
-      int ybronzegruen = 226;
-      int zbronzegruen = 397;
-
-      world.dropItem(xbronzegruen, ybronzegruen + 1, zbronzegruen, bronzegruen);
-
-                       }
+    int xBronzeGreen = 525;
+    int yBronzeGreen = 226;
+    int zBronzeGreen = 397;
+    world.dropItem(xBronzeGreen, yBronzeGreen + 1, zBronzeGreen, customBronze);
+  }
 }

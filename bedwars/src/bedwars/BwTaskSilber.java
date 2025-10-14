@@ -1,5 +1,4 @@
 package bedwars;
-
 import net.canarymod.Canary;
 import net.canarymod.api.world.blocks.Block;
 import net.canarymod.api.world.blocks.BlockType;
@@ -12,57 +11,36 @@ import net.canarymod.chat.ChatFormat;
 import net.canarymod.api.inventory.Item;
 
 public class BwTaskSilber extends ServerTask {
+  private World world;
+  private Item customIron;
 
-    private World world;
-
-    public BwTaskSilber(World myWorld) {
-
-        super(Canary.getServer(), 17 * 20, true);
-        world = myWorld;
-
-                                  }
+  public BwTaskSilber(World myWorld) {
+    super(Canary.getServer(), 17 * 20, true);
+    world = myWorld;
+    ItemFactory factory = Canary.factory().getItemFactory();
+    Item customIron = factory.newItem(ItemType.IronIngot);
+    customIron.setDisplayName(ChatFormat.DARK_AQUA + "Eisen");
+  }
     
-    public void run() {
+  public void run() {
+    int xIronYellow = 436;
+    int yIronYellow = 227;
+    int zIronYellow = 502;
+    world.dropItem(xIronYellow, yIronYellow + 1, zIronYellow, customIron);
 
-      ItemFactory factory1 = Canary.factory().getItemFactory();
-      Item eisengelb = factory1.newItem(ItemType.IronIngot);
-      eisengelb.setDisplayName(ChatFormat.DARK_AQUA + "Eisen");
+    int xIronRed = 421;
+    int yIronRed = 227;
+    int zIronRed = 289;
+    world.dropItem(xIronRed, yIronRed + 1, zIronRed, customIron);
 
-      ItemFactory factory2 = Canary.factory().getItemFactory();
-      Item eisenrot = factory2.newItem(ItemType.IronIngot);
-      eisenrot.setDisplayName(ChatFormat.DARK_AQUA + "Eisen");
+    int xIronPurple = 323;
+    int yIronPurple = 227;
+    int zIronPurple = 402;
+    world.dropItem(xIronPurple, yIronPurple + 1, zIronPurple, customIron);
 
-      ItemFactory factory3 = Canary.factory().getItemFactory();
-      Item eisenlila = factory3.newItem(ItemType.IronIngot);
-      eisenlila.setDisplayName(ChatFormat.DARK_AQUA + "Eisen");
-
-      ItemFactory factory4 = Canary.factory().getItemFactory();
-      Item eisengruen = factory4.newItem(ItemType.IronIngot);
-      eisengruen.setDisplayName(ChatFormat.DARK_AQUA + "Eisen");
-
-      int xeisengelb = 436;
-      int yeisengelb = 227;
-      int zeisengelb = 502;
-
-      world.dropItem(xeisengelb, yeisengelb + 1, zeisengelb, eisengelb);
-
-      int xrot = 421;
-      int yrot = 227;
-      int zrot = 289;
-
-      world.dropItem(xrot, yrot + 1, zrot, eisenrot);
-
-      int xlila = 323;
-      int ylila = 227;
-      int zlila = 402;
-
-      world.dropItem(xlila, ylila + 1, zlila, eisenlila);
-
-      int xgruen = 534;
-      int ygruen = 227;
-      int zgruen = 388;
-
-      world.dropItem(xgruen, ygruen + 1, zgruen, eisengruen);
-
-                       }
+    int xIronGreen = 534;
+    int yIronGreen = 227;
+    int zIronGreen = 388;
+    world.dropItem(xIronGreen, yIronGreen + 1, zIronGreen, customIron);
+  }
 }

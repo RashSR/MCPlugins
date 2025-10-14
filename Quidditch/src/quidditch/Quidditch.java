@@ -37,11 +37,6 @@ import net.canarymod.hook.player.SlotClickHook;
 import net.canarymod.api.inventory.slot.ButtonPress;
 import utils.DatabaseUtils;
 
-import net.canarymod.api.world.blocks.Sign;
-import net.canarymod.api.world.World;
-import net.canarymod.api.factory.ChatComponentFactory;
-import net.canarymod.api.chat.ChatComponent;
-
 public class Quidditch extends EZPlugin implements PluginListener {
   
   private final String pluginName = "[Quidditch]";
@@ -51,7 +46,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private final int BASE_POINTS_PER_ARROW_HIT = 50;
   private final int POINTS_FOR_MISSED_ARROW = -5;
   private final int POINTS_FOR_FAST_CATCH = 20;
-  private final int TIME_FOR_FAST_CATCH_IN_SECONDS = 10;
+  private final int TIME_FOR_FAST_CATCH_IN_SECONDS = 8;
   private final int FAST_CATCHES_IN_ROW_FOR_BONUS = 3;
   private final int POINTS_FOR_FAST_CATCH_STREAK = 30;
   private final double MAX_HIT_DISTANCE = 3.5;
