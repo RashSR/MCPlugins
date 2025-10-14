@@ -1,5 +1,4 @@
 package bedwars;
-
 import net.canarymod.plugin.Plugin;
 import net.canarymod.logger.Logman;
 import net.canarymod.Canary;
@@ -25,6 +24,7 @@ import net.canarymod.hook.world.RedstoneChangeHook;
 import net.canarymod.hook.player.TeleportHook;
 import java.util.ArrayList;
 import java.util.List;
+import utils.SpawnItemsTask;
 
 public class bedwars extends EZPlugin implements PluginListener{
 
@@ -34,13 +34,13 @@ public class bedwars extends EZPlugin implements PluginListener{
   public static List<String> voteliste = new ArrayList<String>();
   int farmcounter = 0;
   int mapcounter = 0;
-  String msg1 = "[Bedwars] ";
+  private final String pluginName = "[Bedwars] ";
 
-@Override
+  @Override
   public boolean enable() {  
     Canary.hooks().registerListener(this, this);
     return super.enable(); 
-                         }  
+  }  
 
 @HookHandler
  public void pressurefromandbackhub(RedstoneChangeHook event){
@@ -297,26 +297,19 @@ public void bedwarsstart(){
           description = "startet bedwars",
           permissions = "*",
           toolTip = "/bwstart")
-
   public void bwstart(MessageReceiver caller, String[] parameters){
-
-    if(caller instanceof Player){
-
-    Player player = (Player)caller;
-    Location loc = player.getLocation();
-    World world = loc.getWorld();
-    bedwarsstart();
-
-    if(farm){
-
-    Canary.getServer().addSynchronousTask(new BwTaskGold(world));
-    Canary.getServer().addSynchronousTask(new BwTaskBronze(world));
-    Canary.getServer().addSynchronousTask(new BwTaskSilber(world));
-
-    bettcheck(world, player);
-            }
-                                }
-                                                                   }
+    if(caller instanceof Player player){
+      Location loc = player.getLocation();
+      World world = loc.getWorld();
+      bedwarsstart();
+      if(farm){
+        Canary.getServer().addSynchronousTask(new BwTaskGold(world));
+        Canary.getServer().addSynchronousTask(new BwTaskBronze(world));
+        Canary.getServer().addSynchronousTask(new BwTaskSilber(world));
+        bettcheck(world, player);
+      }
+    }
+  }
 
   @Command(aliases = {"bwgold"},
            description = "goldspawner",
@@ -324,64 +317,60 @@ public void bedwarsstart(){
            toolTip = "/bwgold")
 
   public void bwgoldCommand(MessageReceiver caller, String[] parameters){
-
-      if (caller instanceof Player) {
-
+    if (caller instanceof Player) {
       Player player = (Player)caller;
       Location loc = player.getLocation();
       World world = loc.getWorld();
-
       Canary.getServer().addSynchronousTask(new BwTaskGold(world)); 
-
-                                     }
-                                                                          }
+    }
+  }
 
   @Command(aliases = {"bwbronze"},
            description = "bronzespawner",
            permissions = {"*"},
            toolTip = "/bwbronze")
-
   public void bwbronzeCommand(MessageReceiver caller, String[] parameters){
-
-    if(caller instanceof Player){
-
-      Player player = (Player)caller;
+    if(caller instanceof Player player){
       Location loc = player.getLocation();
       World world = loc.getWorld();
 
-      Canary.getServer().addSynchronousTask(new BwTaskBronze(world));
+      ItemFactory factory = Canary.factory().getItemFactory();
+      Item customBronze = factory.newItem(ItemType.ClayBrick);
+      customBronze.setDisplayName(ChatFormat.GRAY + "Bronze");
+
+      Location bronzeYellowSpawner = new Location(427, 227, 493);
+      Location bronzeRedSpawner = new Location(430, 227, 298);
+      Location bronzePurpleSpawner = new Location(332, 227, 393);
+      Location bronzeGreenSpawner = new Location(525, 227, 397);
+      ArrayList<Location> locs = new ArrayList<>();
+      locs.add(bronzeGreenSpawner);
+      locs.add(bronzeYellowSpawner);
+      locs.add(bronzeRedSpawner);
+      locs.add(bronzePurpleSpawner);
+
+      SpawnItemsTask bronzeTask = new SpawnItemsTask(customBronze, locs, 2, true);
+      Canary.getServer().addSynchronousTask(bronzeTask);
     }
   }
 
-@Command(aliases = {"bwsilber"},
+  @Command(aliases = {"bwsilber"},
          description = "silberspawner",
          permissions = {"*"},
          toolTip = "/bwsilber")
-
   public void bwsilberCommand(MessageReceiver caller, String[] parameters){
-
-    if(caller instanceof Player){
-
-    Player player = (Player)caller;
-    Location loc = player.getLocation();
-    World world = loc.getWorld();
-
-    Canary.getServer().addSynchronousTask(new BwTaskSilber(world));
+    if(caller instanceof Player player){
+      Location loc = player.getLocation();
+      World world = loc.getWorld();
+      Canary.getServer().addSynchronousTask(new BwTaskSilber(world));
+    }
   }
 
-  }
-
-
-    @Command(aliases = { "bwclear" },
-            description = "bedwars plugin",
-            permissions = { "*" },
-            toolTip = "/bwclear")
-
+  @Command(aliases = { "bwclear" },
+          description = "bedwars plugin",
+          permissions = { "*" },
+          toolTip = "/bwclear")
   public void bwclearCommand(MessageReceiver caller, String[] parameters) {
-
-    if (caller instanceof Player) { 
-
-      Player player = (Player)caller;
+    if (caller instanceof Player player) { 
       Location loc = player.getLocation();
       World world = loc.getWorld();
 
@@ -403,7 +392,6 @@ public void bedwarsstart(){
                                                                           }
 
 public void bettcheck(World world, Player player){
-
   int i = 0;
   int j = 0;
   int ybett = 228;
@@ -512,7 +500,7 @@ public void bettcheck(World world, Player player){
       }
 
       farmcounter = farmcounter + 1;
-      Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + "Die Map Farm hat " + ChatFormat.GOLD + farmcounter + ChatFormat.DARK_GREEN + " Stimmen.");
+      Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.DARK_GREEN + "Die Map Farm hat " + ChatFormat.GOLD + farmcounter + ChatFormat.DARK_GREEN + " Stimmen.");
       voteliste.add(player.getDisplayName());
     }
   } 
@@ -552,7 +540,7 @@ public void bettcheck(World world, Player player){
 
           teamfarbe.put(player.getDisplayName(), "red");
           player.setPrefix(ChatFormat.RED + "");
-          Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.RED + player.getDisplayName() + ChatFormat.DARK_GREEN + " ist jetzt in Team " + ChatFormat.RED + "rot" + ChatFormat.DARK_GREEN + ".");
+          Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.RED + player.getDisplayName() + ChatFormat.DARK_GREEN + " ist jetzt in Team " + ChatFormat.RED + "rot" + ChatFormat.DARK_GREEN + ".");
 
                                                    }
 
@@ -581,7 +569,7 @@ public void bettcheck(World world, Player player){
 
           teamfarbe.put(player.getDisplayName(), "yellow");
           player.setPrefix(ChatFormat.YELLOW + "");
-          Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.YELLOW + player.getDisplayName() + ChatFormat.DARK_GREEN + " ist jetzt in Team " + ChatFormat.YELLOW + "gelb" + ChatFormat.DARK_GREEN + ".");
+          Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.YELLOW + player.getDisplayName() + ChatFormat.DARK_GREEN + " ist jetzt in Team " + ChatFormat.YELLOW + "gelb" + ChatFormat.DARK_GREEN + ".");
                                                                               }
                                }
                             }
@@ -610,7 +598,7 @@ public void bettcheck(World world, Player player){
 
           teamfarbe.put(player.getDisplayName(), "green");
           player.setPrefix(ChatFormat.DARK_GREEN + "");
-          Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.GREEN + player.getDisplayName() + ChatFormat.DARK_GREEN + " ist jetzt in Team " + ChatFormat.GREEN + "gruen" + ChatFormat.DARK_GREEN + ".");
+          Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.GREEN + player.getDisplayName() + ChatFormat.DARK_GREEN + " ist jetzt in Team " + ChatFormat.GREEN + "gruen" + ChatFormat.DARK_GREEN + ".");
 
                                                                              }
 
@@ -639,7 +627,7 @@ public void bettcheck(World world, Player player){
 
           teamfarbe.put(player.getDisplayName(), "purple");
           player.setPrefix(ChatFormat.DARK_PURPLE + "");
-          Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_PURPLE + player.getDisplayName() + ChatFormat.DARK_GREEN + " ist jetzt in Team " + ChatFormat.DARK_PURPLE + "lila" + ChatFormat.DARK_GREEN + ".");
+          Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.DARK_PURPLE + player.getDisplayName() + ChatFormat.DARK_GREEN + " ist jetzt in Team " + ChatFormat.DARK_PURPLE + "lila" + ChatFormat.DARK_GREEN + ".");
 
                                                                               }
 
@@ -648,105 +636,101 @@ public void bettcheck(World world, Player player){
                                                        }
  }
 
-public void spielerscheidetaus(Player player){
+  public void spielerscheidetaus(Player player){
 
-  Location hub = new Location(251, 71, 262);
-  teamfarbe.remove(player.getDisplayName());
-  player.setSpawnPosition(hub);
-  outofgamemessage(player);
+    Location hub = new Location(251, 71, 262);
+    teamfarbe.remove(player.getDisplayName());
+    player.setSpawnPosition(hub);
+    outofgamemessage(player);
 
-}
+  }
 
-public void tellbwmaps(){
+  public void tellbwmaps(){
 
-  String msg2 = "Zurzeit sind folgende Maps verfuegbar: ";
-  String msg3 = "Farm";
+    String msg2 = "Zurzeit sind folgende Maps verfuegbar: ";
+    String msg3 = "Farm";
 
-  Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + ".");
-                         
-                         }
+    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + ".");
+                          
+                          }
 
-public void bettclearmessage(){
+  public void bettclearmessage(){
 
-  String msg2 = "Betten wurden geladen.";
-  Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + msg2);
+    String msg2 = "Betten wurden geladen.";
+    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.DARK_GREEN + msg2);
 
-                              }
+                                }
 
-public void outofgamemessage(Player player) {
+  public void outofgamemessage(Player player) {
 
-  String msg2 = player.getDisplayName();
-  String msg3 = " ist ";
-  String msg4 = "ausgeschieden";
-  if(teamfarbe.get(msg2).equalsIgnoreCase("red")){
+    String msg2 = player.getDisplayName();
+    String msg3 = " ist ";
+    String msg4 = "ausgeschieden";
+    if(teamfarbe.get(msg2).equalsIgnoreCase("red")){
 
-    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.RED + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".");
+      Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.RED + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".");
 
-                                                 }
+                                                  }
 
-  if(teamfarbe.get(msg2).equalsIgnoreCase("yellow")){
+    if(teamfarbe.get(msg2).equalsIgnoreCase("yellow")){
 
-    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.YELLOW + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".");
+      Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.YELLOW + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".");
+
+                                                      }
+
+    if(teamfarbe.get(msg2).equalsIgnoreCase("green")){
+
+      Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.GREEN + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".");
+
+                                                    }
+
+    if(teamfarbe.get(msg2).equalsIgnoreCase("purple")){
+
+      Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.DARK_PURPLE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".");
+
+                                                  }
+                                              }
+
+  public void deathmessage(Player player) {
+
+    String msg2 = player.getDisplayName();
+    String msg3 = " ist gestorben.";
+
+    if(teamfarbe.get(msg2).equalsIgnoreCase("red")){
+
+      Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.RED + msg2 + ChatFormat.DARK_GREEN + msg3);
+
+                                                  }
+
+    if(teamfarbe.get(msg2).equalsIgnoreCase("yellow")){
+
+      Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.YELLOW + msg2 + ChatFormat.DARK_GREEN + msg3);
+
+                                                        }
+
+    if(teamfarbe.get(msg2).equalsIgnoreCase("green")){
+
+      Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.GREEN + msg2 + ChatFormat.DARK_GREEN + msg3);
 
                                                     }
 
-  if(teamfarbe.get(msg2).equalsIgnoreCase("green")){
+    if(teamfarbe.get(msg2).equalsIgnoreCase("purple")){
 
-    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.GREEN + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".");
+      Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.DARK_PURPLE + msg2 + ChatFormat.DARK_GREEN + msg3);
 
-                                                   }
+                                                      }
+                                          }
 
-  if(teamfarbe.get(msg2).equalsIgnoreCase("purple")){
+  public void bwcommandmessage(){
+    String msg2 = "Zurzeit gibt es folgende Befehle fuer Bedwars: ";
+    String msg3 = "/bwgold";
+    String msg4 = "/bwsilber";
+    String msg5 = "/bwbronze";
+    String msg6 = "/bwstart";
+    String msg8 = "/bwmap";
+  }
 
-    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_PURPLE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".");
-
-                                                 }
-                                            }
-
-public void deathmessage(Player player) {
-
-  String msg2 = player.getDisplayName();
-  String msg3 = " ist gestorben.";
-
-  if(teamfarbe.get(msg2).equalsIgnoreCase("red")){
-
-    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.RED + msg2 + ChatFormat.DARK_GREEN + msg3);
-
-                                                 }
-
-  if(teamfarbe.get(msg2).equalsIgnoreCase("yellow")){
-
-    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.YELLOW + msg2 + ChatFormat.DARK_GREEN + msg3);
-
-                                                       }
-
-  if(teamfarbe.get(msg2).equalsIgnoreCase("green")){
-
-    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.GREEN + msg2 + ChatFormat.DARK_GREEN + msg3);
-
-                                                   }
-
-  if(teamfarbe.get(msg2).equalsIgnoreCase("purple")){
-
-    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_PURPLE + msg2 + ChatFormat.DARK_GREEN + msg3);
-
-                                                    }
-                                        }
-
-public void bwcommandmessage(){
-
-  String msg2 = "Zurzeit gibt es folgende Befehle fuer Bedwars: ";
-  String msg3 = "/bwgold";
-  String msg4 = "/bwsilber";
-  String msg5 = "/bwbronze";
-  String msg6 = "/bwstart";
-  String msg8 = "/bwmap";
-
-                              }
-
-public void teamschonvergebenmessage(){
-
-  Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + msg1 + ChatFormat.DARK_GREEN + "Diese Farbe ist bereits vergeben.");
-
-                                       }
+  public void teamschonvergebenmessage(){
+    Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.DARK_GREEN + "Diese Farbe ist bereits vergeben.");
+  }
 }

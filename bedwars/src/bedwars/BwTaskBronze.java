@@ -13,16 +13,17 @@ import net.canarymod.api.inventory.Item;
 public class BwTaskBronze extends ServerTask {
   private World world;
   private Item customBronze;
+  private ItemFactory factory;
 
   public BwTaskBronze(World world) {
     super(Canary.getServer(), 2 * 20, true);
     this.world = world;
-    ItemFactory factory = Canary.factory().getItemFactory();
-    customBronze = factory.newItem(ItemType.ClayBrick);
-    customBronze.setDisplayName(ChatFormat.GRAY + "Bronze");
+    this.factory = Canary.factory().getItemFactory();
   }
     
   public void run() {
+    customBronze = factory.newItem(ItemType.ClayBrick);
+    customBronze.setDisplayName(ChatFormat.GRAY + "Bronze");
     int xBronzeYellow = 427;
     int yBronzeYellow = 226;
     int zBronzeYellow = 493;
