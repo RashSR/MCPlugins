@@ -113,7 +113,7 @@ public class DatabaseUtils extends EZPlugin{
         }
     }
 
-    public List<String> GetTop3ScoresFromMap(Map map){ //TODO: add to map something like highscore sign.
+    public List<String> GetTop3ScoresFromMap(Map map){
         List<String> topPlayers = new ArrayList<>();
         String sqlCommand = "SELECT player_name, score FROM game_sessions WHERE map_played = ? ORDER BY score DESC LIMIT 3;";
         try{

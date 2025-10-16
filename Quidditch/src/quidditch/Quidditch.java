@@ -354,21 +354,16 @@ public class Quidditch extends EZPlugin implements PluginListener {
     database.insertGameSession(playerName, score, rightClickCatches, bowHits, fastestCatch, slowestCatch, totalFastCatches, totalFastCatchStreaks, missedArrowCount, SELECTED_MAP.toString(), timerTask.getElapsedTimeInSeconds());
   }
 
-  private final Location QuidditchMapHighScoreSignLocation = new Location(244, 55, 270);
-
   private void updateHighscores(){
     String[] signText = new String[4];
     List<String> top3Scores = database.GetTop3ScoresFromMap(SELECTED_MAP);
     if(top3Scores != null){
-      signText[0] = "Quidditch";
+      signText[0] = SELECTED_MAP.toString();
       for(int i = 1; i <= top3Scores.size(); i++){
         signText[i] = i + ". " + top3Scores.get(i-1);
       }
-      //signText[1] = "1. Rash 4354";
-      //signText[2] = "2. Rash 4300";
-      //signText[3] = "3. Rash " + score;
     
-      Utils.UpdateSignText(QuidditchMapHighScoreSignLocation, signText);
+      Utils.UpdateSignText(SELECTED_MAP.GetQuidditchPluginHighScoreSign(), signText);
     }
     else
       logger.info(pluginName + " ERROR while reading TOP3 Highscores");

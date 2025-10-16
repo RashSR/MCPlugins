@@ -8,50 +8,57 @@ public enum Map {
         new Location(190, 154, 328), //end
         Utils.QuidditchFieldLocation, //middle
         new Location(Utils.QuidditchFieldLocation.getWorld(), 139.5, 130.5, 309.5, 0f, -90f), //first spawn position on lapis block
-        new Location(Utils.QuidditchFieldLocation.getWorld(), 187.5, 130.5, 309.5, 0f, 90f) //second Position
+        new Location(Utils.QuidditchFieldLocation.getWorld(), 187.5, 130.5, 309.5, 0f, 90f), //second Position
+        new Location(244, 55, 270) //high score sign
     ), 
     SNOW(
         new Location(12, 105, 221), 
         new Location(45, 121, 285),
         Utils.SnowMapLocation,
         new Location(29, 108, 231),
-        new Location(Utils.SnowMapLocation.getWorld(), 28, 108, 276, 0f, 180f)
+        new Location(Utils.SnowMapLocation.getWorld(), 28, 108, 276, 0f, 180f),
+        new Location(244, 55, 269)
     ), 
     NETHER(
         new Location(136, 129, 329), 
         new Location(190, 159, 401),
         Utils.NetherMapLocation,
         new Location(163, 148, 335),
-        new Location(Utils.NetherMapLocation.getWorld(), 163, 148, 394, 0f, 180f)
+        new Location(Utils.NetherMapLocation.getWorld(), 163, 148, 394, 0f, 180f),
+        new Location(244, 55, 268)
     ), 
     CHRISTMAS(
         new Location(191, 122, 294), 
         new Location(227, 140, 327), 
         Utils.ChristmasMapLocation,
         new Location(Utils.ChristmasMapLocation.getWorld(), 191, 123, 309, 0f, -90f),
-        new Location(Utils.ChristmasMapLocation.getWorld(), 226, 123, 309, 0f, 90f)
+        new Location(Utils.ChristmasMapLocation.getWorld(), 226, 123, 309, 0f, 90f),
+        new Location(244, 55, 266)
     ), 
     SHRIEKING_SHACK(
         new Location(136, 132, 260),
         new Location(221, 160, 290), 
         Utils.ShriekingShackLocation,
         new Location(Utils.ShriekingShackLocation.getWorld(), 149, 148, 266, 0f, -70f),
-        new Location(Utils.ShriekingShackLocation.getWorld(), 210, 141, 283, 0f, 105f)
+        new Location(Utils.ShriekingShackLocation.getWorld(), 210, 141, 283, 0f, 105f),
+        new Location(244, 55, 267)
     );
 
-    private final Location startLocation;
-    private final Location endLocation;
-    private final Location middleLocation;
-    private final Location firstPosition;
-    private final Location secondPosition;
+    private Location startLocation;
+    private Location endLocation;
+    private Location middleLocation;
+    private Location firstPosition;
+    private Location secondPosition;
+    private Location quidditchPluginHighScoreSign;
 
-    Map(Location start, Location end, Location middle, Location firstPosition, Location secondPosition) {
-        //TODO: verify if start and end location is correct
+    Map(Location start, Location end, Location middle, Location firstPosition, Location secondPosition, Location quidditchPluginHighScoreSign) {
+        //TODO: verify if start and end location is correct (first position with lowest x, y and z value)
         this.startLocation = start;
         this.endLocation = end;
         this.middleLocation = middle;
         this.firstPosition = firstPosition;
         this.secondPosition = secondPosition;
+        this.quidditchPluginHighScoreSign = quidditchPluginHighScoreSign;
     }
 
     public static Map GetRandomMap(){
@@ -78,6 +85,10 @@ public enum Map {
 
     public Location GetSecondPosition(){
         return secondPosition;
+    }
+
+    public Location GetQuidditchPluginHighScoreSign(){
+        return quidditchPluginHighScoreSign;
     }
 
     public Location GetRandomSpawnPosition(){
