@@ -28,52 +28,16 @@ public class ScoreboardTimerTask extends ServerTask{
     public void run(){
         passedSeconds++;
         this.scoreboard.removeScore(this.timeScore.getName(), this.objective);
-        this.timeScore = this.scoreboard.getScore("§aTime: §f" + formatPassedTime(), this.objective);
+        this.timeScore = this.scoreboard.getScore("§aTime: §f" + Utils.FormatSecondsPassedIntoString(passedSeconds), this.objective);
         this.timeScore.setScore(this.scoreboardSlot);
         this.timeScore.update();
     }
 
     public String getFormatedElapsedTime(){
-        return formatPassedTime();
+        return Utils.FormatSecondsPassedIntoString(passedSeconds);
     }
 
     public int getElapsedTimeInSeconds(){
         return passedSeconds;
-    }
-
-    private String formatPassedTime(){
-        String result = "";
-
-        int hours = 0; 
-        int mySeconds = passedSeconds;
-        while(mySeconds >= 3600){
-            mySeconds -= 3600;
-            hours++;
-        }
-
-        if(hours > 0){
-            if(hours < 10)
-                result += "0";
-        
-            result += hours + ":";
-        }
-        
-        int minutes = 0;
-        while(mySeconds >= 60){
-            mySeconds -= 60;
-            minutes++;
-        }
-        
-        //Add leading zero for mm:ss
-        if(minutes < 10)
-            result += "0";
-
-        result += minutes + ":";
-
-        if(mySeconds < 10)
-            result += "0";
-
-        result += mySeconds;
-        return result;
     }
 }

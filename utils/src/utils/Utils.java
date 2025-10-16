@@ -238,4 +238,39 @@ public class Utils extends EZPlugin{
     return new Position((int)loc.getX(), (int)loc.getY(), (int)loc.getZ());
   }
 
+  public static String FormatSecondsPassedIntoString(int passedSeconds){
+    String result = "";
+
+    int hours = 0; 
+    int mySeconds = passedSeconds;
+    while(mySeconds >= 3600){
+        mySeconds -= 3600;
+        hours++;
+    }
+
+    if(hours > 0){
+        if(hours < 10)
+            result += "0";
+    
+        result += hours + ":";
+    }
+    
+    int minutes = 0;
+    while(mySeconds >= 60){
+        mySeconds -= 60;
+        minutes++;
+    }
+    
+    //Add leading zero for mm:ss
+    if(minutes < 10)
+        result += "0";
+
+    result += minutes + ":";
+
+    if(mySeconds < 10)
+        result += "0";
+
+    result += mySeconds;
+    return result;
+  }
 }

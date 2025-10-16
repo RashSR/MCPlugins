@@ -91,6 +91,13 @@ public enum Map {
         return quidditchPluginHighScoreSign;
     }
 
+    public Location GetQuidditchPluginHighScoreTimeSign(){
+        Location loc = new Location(quidditchPluginHighScoreSign.getX(), 
+            quidditchPluginHighScoreSign.getY() - 1, 
+            quidditchPluginHighScoreSign.getZ()); 
+        return loc;
+    }
+
     public Location GetRandomSpawnPosition(){
         Random random = new Random();
         int number = random.nextInt(2) + 1;

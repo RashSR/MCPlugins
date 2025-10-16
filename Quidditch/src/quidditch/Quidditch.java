@@ -344,7 +344,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.LEVEL_UP, 3.0f, 1.0f);
     displayWinMessage();
     insertGameSessionIntoDb();
-    updateHighscores();
+    updateHighScoreSigns();
     cleanUpAfterGame();
   }
 
@@ -354,7 +354,12 @@ public class Quidditch extends EZPlugin implements PluginListener {
     database.insertGameSession(playerName, score, rightClickCatches, bowHits, fastestCatch, slowestCatch, totalFastCatches, totalFastCatchStreaks, missedArrowCount, SELECTED_MAP.toString(), timerTask.getElapsedTimeInSeconds());
   }
 
-  private void updateHighscores(){
+  private void updateHighScoreSigns(){
+    updateHighScores();
+    updateHighScoreTimes();
+  }
+
+  private void updateHighScores(){
     String[] signText = new String[4];
     List<String> top3Scores = database.GetTop3ScoresFromMap(SELECTED_MAP);
     if(top3Scores != null){
@@ -367,6 +372,21 @@ public class Quidditch extends EZPlugin implements PluginListener {
     }
     else
       logger.info(pluginName + " ERROR while reading TOP3 Highscores");
+  }
+
+  private void updateHighScoreTimes(){
+    String[] signText = new String[4];
+    List<String> top3Scores = database.GetTop3TimesFromMap(SELECTED_MAP);
+    if(top3Scores != null){
+      signText[0] = SELECTED_MAP.toString();
+      for(int i = 1; i <= top3Scores.size(); i++){
+        signText[i] = i + ". " + top3Scores.get(i-1);
+      }
+    
+      Utils.UpdateSignText(SELECTED_MAP.GetQuidditchPluginHighScoreTimeSign(), signText);
+    }
+    else
+      logger.info(pluginName + " ERROR while reading TOP3 Times");
   }
 
   private Location playerBowStartLocation;
