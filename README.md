@@ -32,7 +32,7 @@ All plugins are written in **Java**, using the **CanaryMod API**, and were desig
 | **MyFireBow** | Arrows cause explosions upon impact. | Complete |
 | **NoFallDmg** | Disables fall damage for players. *(An on/off toggle could be added.)* | Complete |
 | **PaintingSave** | Prevents paintings from being destroyed. *(An on/off toggle could be added.)* | Complete |
-| **Quidditch** | Minigame: Catch a randomly spawned block using a bow or right-click. *(Stats could be stored in a database.)* | Complete |
+| **Quidditch** | Minigame: Catch a randomly spawned block using a bow or right-click. | Complete |
 | **Schneeballschlacht** | A custom snowball fight plugin for testing knockback physics. | Complete |
 | **Secrets** | Allows players to discover hidden “secrets,” viewable in a custom inventory. *(More secrets can be added.)* | Complete |
 | **SnowballArena** | 1v1 minigame where players duel with snowballs. | Complete |
