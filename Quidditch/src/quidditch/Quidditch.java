@@ -291,45 +291,22 @@ public class Quidditch extends EZPlugin implements PluginListener {
     missedArrowCount++;
   }
 
-  private int lastCatchTimeInSeconds;
+  
   private int fastCatchStreak;
-  private int totalFastCatches;
-  private int totalFastCatchStreaks;
-  private int fastestCatch;
-  private int slowestCatch;
 
   private void snitchCatched(int pointsScored, SoundEffect.Type soundType){
     snitchLocation.getWorld().setBlockAt(snitchLocation, BlockType.Air);
     currentSnitchCount++;
-    
-    int catchTimeInSeconds = timerTask.getElapsedTimeInSeconds() - lastCatchTimeInSeconds;
-    if(catchTimeInSeconds < fastestCatch)
-      fastestCatch = catchTimeInSeconds;
-    
-    if(catchTimeInSeconds > slowestCatch)
-      slowestCatch = catchTimeInSeconds;
-    
-    lastCatchTimeInSeconds = timerTask.getElapsedTimeInSeconds();
-    boolean isFastCatch = catchTimeInSeconds < TIME_FOR_FAST_CATCH_IN_SECONDS;
-    if(isFastCatch){
+    boolean isFastCatch = handleFastCatches();
+
+    if(isFastCatch)
       pointsScored += POINTS_FOR_FAST_CATCH;
-      fastCatchStreak++;
-      totalFastCatches++;
-    }
-    else
-      fastCatchStreak = 0;
 
     score += pointsScored;
     displayScoreMessage(pointsScored, isFastCatch);
-
-    if(fastCatchStreak == FAST_CATCHES_IN_ROW_FOR_BONUS){
-      totalFastCatchStreaks++;
-      fastCatchStreak = 0;
-      score += POINTS_FOR_FAST_CATCH_STREAK; 
-      Utils.BroadcastServerMessage(pluginName, ChatFormat.YELLOW + "Blitzfang streak!");
-      Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.WITHER_SHOOT, 1.0f, 1.0f);
-      displayScoreMessage(POINTS_FOR_FAST_CATCH_STREAK, false);
-    }
+    
+    if(fastCatchStreak == FAST_CATCHES_IN_ROW_FOR_BONUS)
+      handleFastCatchStreak();
 
     if(currentSnitchCount <= SNITCHES_PER_GAME){
       Utils.playSoundAtLocation(player.getLocation(), soundType, 1.0f, 3.0f);
@@ -338,6 +315,43 @@ public class Quidditch extends EZPlugin implements PluginListener {
     else{
       initializeWin();
     }
+  }
+
+  private int lastCatchTimeInSeconds;
+  private int totalFastCatches;
+  private int fastestCatch;
+  private int slowestCatch;
+
+  private boolean handleFastCatches(){
+    int gameDuration = timerTask.getElapsedTimeInSeconds();
+    int catchTimeInSeconds = gameDuration - lastCatchTimeInSeconds;
+    if(catchTimeInSeconds < fastestCatch)
+      fastestCatch = catchTimeInSeconds;
+    
+    if(catchTimeInSeconds > slowestCatch)
+      slowestCatch = catchTimeInSeconds;
+    
+    lastCatchTimeInSeconds = gameDuration;
+    boolean isFastCatch = catchTimeInSeconds < TIME_FOR_FAST_CATCH_IN_SECONDS;
+    if(isFastCatch){
+      fastCatchStreak++;
+      totalFastCatches++;
+    }
+    else
+      fastCatchStreak = 0;
+    
+    return isFastCatch;
+  }
+
+  private int totalFastCatchStreaks;
+
+  private void handleFastCatchStreak(){
+    totalFastCatchStreaks++;
+    fastCatchStreak = 0;
+    score += POINTS_FOR_FAST_CATCH_STREAK; 
+    Utils.BroadcastServerMessage(pluginName, ChatFormat.YELLOW + "Blitzfang streak!");
+    Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.WITHER_SHOOT, 1.0f, 1.0f);
+    displayScoreMessage(POINTS_FOR_FAST_CATCH_STREAK, false);
   }
 
   private void initializeWin(){
