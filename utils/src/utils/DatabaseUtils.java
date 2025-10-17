@@ -141,26 +141,6 @@ public class DatabaseUtils extends EZPlugin{
         return topSlowCatches;
     }
 
-    public List<String> GetTop3MapsPlayed(){
-        String sqlCommand = "SELECT map_played, COUNT(*) FROM game_sessions GROUP BY map_played ORDER BY COUNT(*) DESC LIMIT 3;";
-        List<String> topValues = new ArrayList<>();
-
-        try{
-            PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
-            ResultSet rs = pstmt.executeQuery();
-            while(rs.next()){
-                String mapName = rs.getString("map_played");
-                int count = rs.getInt("COUNT(*)");
-                topValues.add(mapName + ":" + count);
-            }
-        }
-        catch(SQLException e){
-            return null;
-        }
-
-        return topValues;
-    }
-
     private List<String> getTopScores(String sqlCommand, String scoreColumn, boolean hasAscendingSorting, int limit, boolean isDuration, Map map){
         List<String> topValues = new ArrayList<>();
 
@@ -198,6 +178,34 @@ public class DatabaseUtils extends EZPlugin{
             return null;
         }
 
+        return topValues;
+    }
+
+    public List<String> GetTop3MapsPlayed(){
+        String sqlCommand = "SELECT map_played, COUNT(*) FROM game_sessions GROUP BY map_played ORDER BY COUNT(*) DESC LIMIT 3;";
+        List<String> topValues = new ArrayList<>();
+
+        try{
+            PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
+            ResultSet rs = pstmt.executeQuery();
+            while(rs.next()){
+                String mapName = rs.getString("map_played");
+                int count = rs.getInt("COUNT(*)");
+                topValues.add(mapName + ":" + count);
+            }
+        }
+        catch(SQLException e){
+            return null;
+        }
+
+        return topValues;
+    }
+
+    public List<String> GetShortestAndLongestBowHit(){
+        String sqlCommand = "";
+        List<String> topValues = new ArrayList<>();
+        topValues.add("Test1");
+        topValues.add("Test2");
         return topValues;
     }
 
