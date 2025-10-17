@@ -155,4 +155,58 @@ public class DatabaseUtils extends EZPlugin{
         return topTimes;
     }
 
+    public List<String> GetTop3FastestCatchTimes(){
+        String sqlCommand = "SELECT player_name, fastest_catch FROM game_sessions";
+        String scoreColumn = "fastest_catch";
+        List<String> topFastCatches = getTopScores(sqlCommand, scoreColumn, true, 3, true, null);
+        return topFastCatches;
+    }
+
+    public List<String> GetTop3SlowestCatchTimes(){
+        String sqlCommand = "SELECT player_name, slowest_catch FROM game_sessions";
+        String scoreColumn = "slowest_catch";
+        List<String> topSlowCatches = getTopScores(sqlCommand, scoreColumn, false, 3, true, null);
+        return topSlowCatches;
+    }
+
+    private List<String> getTopScores(String sqlCommand, String scoreColumn, boolean hasAscendingSorting, int limit, boolean isDuration, Map map){
+        List<String> topValues = new ArrayList<>();
+
+        if(map != null)
+            sqlCommand += " WHERE map_played = ?";
+        
+        sqlCommand += " ORDER BY " + scoreColumn;
+        
+        if(hasAscendingSorting)
+            sqlCommand += " ASC";
+        else
+            sqlCommand += " DESC";
+        
+        sqlCommand += " LIMIT " + limit + ";";
+        
+        logger.info("Constructed command: " + sqlCommand);
+        try{
+            PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
+            if(map != null)
+                pstmt.setString(1, map.toString());
+
+            ResultSet rs = pstmt.executeQuery();
+            while(rs.next()){
+                String playerName = rs.getString("player_name");
+                int score = rs.getInt(scoreColumn);
+                String scoreString = String.valueOf(score);
+
+                if(isDuration)
+                    scoreString = Utils.FormatSecondsPassedIntoString(score);
+                    
+                topValues.add(playerName + " " + Utils.FormatSecondsPassedIntoString(score));
+            }
+        }
+        catch(SQLException e){
+            return null;
+        }
+
+        return topValues;
+    }
+
 }

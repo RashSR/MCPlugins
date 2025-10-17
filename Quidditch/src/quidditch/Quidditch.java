@@ -60,7 +60,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private Map SELECTED_MAP;
   private DatabaseUtils database;
 
-  //TODO: high score signs, give player speed after streak, stats im chat zeigen
+  //TODO: high score signs,(longest/shortest hit each map) give player speed after streak, stats im chat zeigen
   //Ideen:partikel für schnatz nach zeit, schnatz verschwindet nach zeit, schnatz bewegt sich, falls 30 sekunden nicht gefunden -> kompass?
   //vllt anfangs nur 5 pfeile und man muss sich hoch grinden und sachen freischalten in nem Shop.
   //KompassItem 1 mal benutzen, PartikelEffektItem einmal benutzen für Vorteil, Zeitlimit
@@ -371,33 +371,41 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private void updateHighScoreSigns(){
     updateHighScores();
     updateHighScoreTimes();
+    updateFastestCatchTimes();
+    updateSlowestCatchTimes();
   }
 
   private void updateHighScores(){
-    String[] signText = new String[4];
     List<String> top3Scores = database.GetTop3ScoresFromMap(SELECTED_MAP);
-    if(top3Scores != null){
-      signText[0] = SELECTED_MAP.toString();
-      for(int i = 1; i <= top3Scores.size(); i++){
-        signText[i] = i + ". " + top3Scores.get(i-1);
-      }
-    
-      Utils.UpdateSignText(SELECTED_MAP.GetQuidditchPluginHighScoreSign(), signText);
-    }
-    else
-      logger.info(pluginName + " ERROR while reading TOP3 Highscores");
+    writeTextToSign(SELECTED_MAP.toString(), top3Scores, SELECTED_MAP.GetQuidditchPluginHighScoreSign());
   }
 
   private void updateHighScoreTimes(){
-    String[] signText = new String[4];
     List<String> top3Scores = database.GetTop3TimesFromMap(SELECTED_MAP);
+    writeTextToSign(SELECTED_MAP.toString(), top3Scores, SELECTED_MAP.GetQuidditchPluginHighScoreTimeSign());
+  }
+
+  private void updateFastestCatchTimes(){
+    List<String> top3Scores = database.GetTop3FastestCatchTimes();
+    Location fastestCatchHighscoreSign = new Location(248, 55, 272);
+    writeTextToSign("Fastest Catch", top3Scores, fastestCatchHighscoreSign);
+  }
+
+  private void updateSlowestCatchTimes(){
+    List<String> top3Scores = database.GetTop3SlowestCatchTimes();
+    Location slowestCatchHighscoreSign = new Location(248, 54, 272);
+    writeTextToSign("Slowest Catch", top3Scores, slowestCatchHighscoreSign);
+  }
+
+  private void writeTextToSign(String headline, List<String> top3Scores, Location signLocation){
     if(top3Scores != null){
-      signText[0] = SELECTED_MAP.toString();
+      String[] signText = new String[4];
+      signText[0] = headline;
       for(int i = 1; i <= top3Scores.size(); i++){
         signText[i] = i + ". " + top3Scores.get(i-1);
       }
     
-      Utils.UpdateSignText(SELECTED_MAP.GetQuidditchPluginHighScoreTimeSign(), signText);
+      Utils.UpdateSignText(signLocation, signText);
     }
     else
       logger.info(pluginName + " ERROR while reading TOP3 Times");
