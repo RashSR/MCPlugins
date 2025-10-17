@@ -114,44 +114,16 @@ public class DatabaseUtils extends EZPlugin{
     }
 
     public List<String> GetTop3ScoresFromMap(Map map){
-        List<String> topScores = new ArrayList<>();
-        String sqlCommand = "SELECT player_name, score FROM game_sessions WHERE map_played = ? ORDER BY score DESC LIMIT 3;";
-        try{
-            PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
-            pstmt.setString(1, map.toString());
-
-            ResultSet rs = pstmt.executeQuery();
-            while(rs.next()){
-                String playerName = rs.getString("player_name");
-                int score = rs.getInt("score");
-                topScores.add(playerName + " " + score);
-            }
-        }
-        catch(SQLException e){
-            return null;
-        }
-
+        String sqlCommand = "SELECT player_name, score FROM game_sessions";
+        String scoreColumn = "score";
+        List<String> topScores = getTopScores(sqlCommand, scoreColumn, false, 3, false, map);
         return topScores;
     }
 
     public List<String> GetTop3TimesFromMap(Map map){
-        List<String> topTimes = new ArrayList<>();
-        String sqlCommand = "SELECT player_name, game_duration FROM game_sessions WHERE map_played = ? ORDER BY game_duration ASC LIMIT 3;";
-        try{
-            PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
-            pstmt.setString(1, map.toString());
-
-            ResultSet rs = pstmt.executeQuery();
-            while(rs.next()){
-                String playerName = rs.getString("player_name");
-                int gameDurationInSeconds = rs.getInt("game_duration");
-                topTimes.add(playerName + " " + Utils.FormatSecondsPassedIntoString(gameDurationInSeconds));
-            }
-        }
-        catch(SQLException e){
-            return null;
-        }
-
+        String sqlCommand = "SELECT player_name, game_duration FROM game_sessions";
+        String scoreColumn = "game_duration";
+        List<String> topTimes = getTopScores(sqlCommand, scoreColumn, true, 3, true, map);
         return topTimes;
     }
 
@@ -184,9 +156,9 @@ public class DatabaseUtils extends EZPlugin{
         
         sqlCommand += " LIMIT " + limit + ";";
         
-        logger.info("Constructed command: " + sqlCommand);
         try{
             PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
+
             if(map != null)
                 pstmt.setString(1, map.toString());
 
@@ -199,7 +171,7 @@ public class DatabaseUtils extends EZPlugin{
                 if(isDuration)
                     scoreString = Utils.FormatSecondsPassedIntoString(score);
                     
-                topValues.add(playerName + " " + Utils.FormatSecondsPassedIntoString(score));
+                topValues.add(playerName + " " + scoreString);
             }
         }
         catch(SQLException e){
