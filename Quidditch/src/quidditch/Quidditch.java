@@ -373,6 +373,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     updateHighScoreTimes();
     updateFastestCatchTimes();
     updateSlowestCatchTimes();
+    updateMostPlayedMaps();
   }
 
   private void updateHighScores(){
@@ -395,6 +396,12 @@ public class Quidditch extends EZPlugin implements PluginListener {
     List<String> top3Scores = database.GetTop3SlowestCatchTimes();
     Location slowestCatchHighscoreSign = new Location(248, 54, 272);
     writeTextToSign("Slowest Catch", top3Scores, slowestCatchHighscoreSign);
+  }
+
+  private void updateMostPlayedMaps(){
+    List<String> top3MapsPlayed = database.GetTop3MapsPlayed();
+    Location slowestCatchHighscoreSign = new Location(248, 55, 264);
+    writeTextToSign("Most played Maps", top3MapsPlayed, slowestCatchHighscoreSign);
   }
 
   private void writeTextToSign(String headline, List<String> top3Scores, Location signLocation){
