@@ -50,6 +50,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private final int FAST_CATCHES_IN_ROW_FOR_BONUS = 3;
   private final int POINTS_FOR_FAST_CATCH_STREAK = 30;
   private final double MAX_HIT_DISTANCE = 3.5;
+  private final int SCAN_RADIUS = 3;
 
   private boolean isEnabled = false;
   private Location snitchLocation;
@@ -247,37 +248,38 @@ public class Quidditch extends EZPlugin implements PluginListener {
       Entity arrow = event.getProjectile();
       World world = arrow.getWorld();
       Location arrowLocation = arrow.getLocation();
-      arrow.destroy();
 
       int x = (int)arrowLocation.getX();
       int y = (int)arrowLocation.getY();
       int z = (int)arrowLocation.getZ();
 
-      int zaehlx = x + 3;
-      int zahely = y + 3;
-      int zahelz = z + 3;
+      int zaehlx = x + SCAN_RADIUS;
+      int zahely = y + SCAN_RADIUS;
+      int zahelz = z + SCAN_RADIUS;
 
-      for (int scanx = x - 3; scanx <= zaehlx ; scanx++) {
-        for (int scany = y - 3; scany <= zahely ; scany++){
-          for (int scanz = z - 3; scanz <= zahelz ; scanz++){
+      for (int scanx = x - SCAN_RADIUS; scanx <= zaehlx ; scanx++) {
+        for (int scany = y - SCAN_RADIUS; scany <= zahely ; scany++){
+          for (int scanz = z - SCAN_RADIUS; scanz <= zahelz ; scanz++){
             Block hitBlock = world.getBlockAt(scanx, scany, scanz);
 
             if(hitBlock.getType() == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(hitBlock.getLocation(), snitchLocation)){
-              //arrow.getLocation() is very inaccurate!
+              //arrow.getLocation() is very inaccurate! -> try to improve
               double arrowSnitchDistance = Utils.CalculateDistanceBetweenLocations(hitBlock.getLocation(), arrowLocation, true);
               if(arrowSnitchDistance <= MAX_HIT_DISTANCE){
-                snitchCatched(calcualateBowPoints(), SoundEffect.Type.ORB);
+                snitchCatched(calculateBowPoints(), SoundEffect.Type.ORB);
+                arrow.destroy();
                 return;
               }
             }
           }
         }
       }
+      arrow.destroy();
       decreaseScoreForMissedArrow();
     }
   }
 
-  private int calcualateBowPoints(){
+  private int calculateBowPoints(){
     double playerSnitchDistance = Utils.CalculateDistanceBetweenLocations(playerBowStartLocation, snitchLocation, false);
     int roundedPoints = (int)Math.round(playerSnitchDistance / 10);
     int points = BASE_POINTS_PER_ARROW_HIT + (int)playerSnitchDistance;
@@ -374,51 +376,52 @@ public class Quidditch extends EZPlugin implements PluginListener {
     updateFastestCatchTimes();
     updateSlowestCatchTimes();
     updateMostPlayedMaps();
-    //updateShortestAndLongestBowHit();
+    updateShortestAndLongestBowHit();
   }
 
   private void updateHighScores(){
     List<String> top3Scores = database.GetTop3ScoresFromMap(SELECTED_MAP);
-    writeTextToSign(SELECTED_MAP.toString(), top3Scores, SELECTED_MAP.GetQuidditchPluginHighScoreSign());
+    writeTextToSign(SELECTED_MAP.toString(), top3Scores, SELECTED_MAP.GetQuidditchPluginHighScoreSign(), true);
   }
 
   private void updateHighScoreTimes(){
     List<String> top3Scores = database.GetTop3TimesFromMap(SELECTED_MAP);
-    writeTextToSign(SELECTED_MAP.toString(), top3Scores, SELECTED_MAP.GetQuidditchPluginHighScoreTimeSign());
+    writeTextToSign(SELECTED_MAP.toString(), top3Scores, SELECTED_MAP.GetQuidditchPluginHighScoreTimeSign(), true);
   }
 
   private void updateFastestCatchTimes(){
     List<String> top3Scores = database.GetTop3FastestCatchTimes();
     Location fastestCatchHighscoreSign = new Location(248, 55, 272);
-    writeTextToSign("Fastest Catch", top3Scores, fastestCatchHighscoreSign);
+    writeTextToSign("Fastest Catch", top3Scores, fastestCatchHighscoreSign, true);
   }
 
   private void updateSlowestCatchTimes(){
     List<String> top3Scores = database.GetTop3SlowestCatchTimes();
     Location slowestCatchHighscoreSign = new Location(248, 54, 272);
-    writeTextToSign("Slowest Catch", top3Scores, slowestCatchHighscoreSign);
+    writeTextToSign("Slowest Catch", top3Scores, slowestCatchHighscoreSign, true);
   }
 
   private void updateMostPlayedMaps(){
     List<String> top3MapsPlayed = database.GetTop3MapsPlayed();
     Location slowestCatchHighscoreSign = new Location(248, 55, 264);
-    writeTextToSign("Most played Maps", top3MapsPlayed, slowestCatchHighscoreSign);
+    writeTextToSign("Most played Maps", top3MapsPlayed, slowestCatchHighscoreSign, true);
   }
 
   private void updateShortestAndLongestBowHit(){
     List<String> shortestAndLongestBowHit = database.GetShortestAndLongestBowHit();
-    shortestAndLongestBowHit.add(2, shortestAndLongestBowHit.get(1));
     shortestAndLongestBowHit.add(1, "Shortest Bow Hit");
     Location shortestAndLongestHighscoreSign = new Location(248, 54, 264);
-    writeTextToSign("Longest Bow Hit", shortestAndLongestBowHit, shortestAndLongestHighscoreSign);
+    writeTextToSign("Longest Bow Hit", shortestAndLongestBowHit, shortestAndLongestHighscoreSign, false);
   }
 
-  private void writeTextToSign(String headline, List<String> top3Scores, Location signLocation){
+  private void writeTextToSign(String headline, List<String> top3Scores, Location signLocation, boolean hasPosition){
     if(top3Scores != null){
       String[] signText = new String[4];
       signText[0] = headline;
       for(int i = 1; i <= top3Scores.size(); i++){
-        signText[i] = i + ". " + top3Scores.get(i-1);
+        signText[i] = top3Scores.get(i-1);
+        if(hasPosition)
+          signText[i] = i + ". " + signText[i];
       }
     
       Utils.UpdateSignText(signLocation, signText);
