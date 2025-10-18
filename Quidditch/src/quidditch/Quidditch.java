@@ -35,6 +35,7 @@ import net.canarymod.hook.player.ItemUseHook;
 import net.canarymod.hook.player.ItemDropHook;
 import net.canarymod.hook.player.SlotClickHook;
 import net.canarymod.api.inventory.slot.ButtonPress;
+import net.canarymod.api.entity.EntityType;
 import utils.DatabaseUtils;
 
 public class Quidditch extends EZPlugin implements PluginListener {
@@ -246,37 +247,25 @@ public class Quidditch extends EZPlugin implements PluginListener {
   public void ProjectileHitHookEvent(ProjectileHitHook event){
     if(isEnabled){
       Entity arrow = event.getProjectile();
-      World world = arrow.getWorld();
-      Location arrowLocation = arrow.getLocation();
+      if(arrow.getEntityType() == EntityType.ARROW){
+        Location arrowLocation = arrow.getLocation();
 
-      int x = (int)arrowLocation.getX();
-      int y = (int)arrowLocation.getY();
-      int z = (int)arrowLocation.getZ();
+        //arrow.getLocation() is very inaccurate! -> try to improve (idea: change block to redstone and use RedstoneChangeHookEvent)
+        double arrowSnitchDistance = Utils.CalculateDistanceBetweenLocations(snitchLocation, arrowLocation, false);
+        if(arrowSnitchDistance <= MAX_HIT_DISTANCE)
+          snitchCatched(calculateBowPoints(), SoundEffect.Type.ORB);
+        else
+          decreaseScoreForMissedArrow();
 
-      int zaehlx = x + SCAN_RADIUS;
-      int zahely = y + SCAN_RADIUS;
-      int zahelz = z + SCAN_RADIUS;
-
-      for (int scanx = x - SCAN_RADIUS; scanx <= zaehlx ; scanx++) {
-        for (int scany = y - SCAN_RADIUS; scany <= zahely ; scany++){
-          for (int scanz = z - SCAN_RADIUS; scanz <= zahelz ; scanz++){
-            Block hitBlock = world.getBlockAt(scanx, scany, scanz);
-
-            if(hitBlock.getType() == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(hitBlock.getLocation(), snitchLocation)){
-              //arrow.getLocation() is very inaccurate! -> try to improve
-              double arrowSnitchDistance = Utils.CalculateDistanceBetweenLocations(hitBlock.getLocation(), arrowLocation, true);
-              if(arrowSnitchDistance <= MAX_HIT_DISTANCE){
-                snitchCatched(calculateBowPoints(), SoundEffect.Type.ORB);
-                arrow.destroy();
-                return;
-              }
-            }
-          }
-        }
+        arrow.destroy();
       }
-      arrow.destroy();
-      decreaseScoreForMissedArrow();
     }
+  }
+
+  private String printLocOwn(Location loc) {
+    return "" + (int)loc.getX() + ", " +
+    (int)loc.getY() + ", " +
+    (int)loc.getZ();
   }
 
   private int calculateBowPoints(){
