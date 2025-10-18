@@ -62,10 +62,11 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private Map SELECTED_MAP;
   private DatabaseUtils database;
 
-  //TODO: high score signs,(longest/shortest hit each map) give player speed after streak, stats im chat zeigen
+  //TODO: give player speed after streak, stats im chat zeigen, check if highscore has been achieved -> tell player
   //Ideen:partikel für schnatz nach zeit, schnatz verschwindet nach zeit, schnatz bewegt sich, falls 30 sekunden nicht gefunden -> kompass?
   //vllt anfangs nur 5 pfeile und man muss sich hoch grinden und sachen freischalten in nem Shop.
   //KompassItem 1 mal benutzen, PartikelEffektItem einmal benutzen für Vorteil, Zeitlimit
+  //DELETE DB and look what throws an exception e.g. only one line to write on highscore sign
   //Achievements -> block spawned in der nähe, keinen pfeil verschossen, nur hand catches, ...
 
   @Override 
@@ -86,16 +87,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private void startGame(Player player){
-    currentSnitchCount = 1;
-    score = 0;
-    rightClickCatches = 0;
-    missedArrowCount = 0;
-    lastCatchTimeInSeconds = 0;
-    fastCatchStreak = 0;
-    totalFastCatches = 0;
-    totalFastCatchStreaks = 0;
-    fastestCatch = Integer.MAX_VALUE;
-    slowestCatch = 0;
+    setStartVariables();
     this.player = player;
     setUpDatabase();
     hasStartedGame = false;
@@ -106,6 +98,21 @@ public class Quidditch extends EZPlugin implements PluginListener {
     createScoreboard();
     Utils.RefreshInventroyFromPlayer(player);
     isEnabled = true;
+  }
+
+  private void setStartVariables(){
+    currentSnitchCount = 1;
+    score = 0;
+    rightClickCatches = 0;
+    missedArrowCount = 0;
+    lastCatchTimeInSeconds = 0;
+    fastCatchStreak = 0;
+    totalFastCatches = 0;
+    totalFastCatchStreaks = 0;
+    fastestCatch = Integer.MAX_VALUE;
+    slowestCatch = 0;
+    longestBowHit = 0;
+    shortestBowHit = Integer.MAX_VALUE;
   }
 
   private final String DB_FOLDER = "plugins/Quidditch";
@@ -251,7 +258,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
         Location arrowLocation = arrow.getLocation();
 
         //arrow.getLocation() is very inaccurate! -> try to improve (idea: change block to redstone and use RedstoneChangeHookEvent)
-        double arrowSnitchDistance = Utils.CalculateDistanceBetweenLocations(snitchLocation, arrowLocation, false);
+        double arrowSnitchDistance = Utils.CalculateDistanceBetweenLocations(snitchLocation, arrowLocation);
         if(arrowSnitchDistance <= MAX_HIT_DISTANCE)
           snitchCatched(calculateBowPoints(), SoundEffect.Type.ORB);
         else
@@ -262,17 +269,23 @@ public class Quidditch extends EZPlugin implements PluginListener {
     }
   }
 
-  private String printLocOwn(Location loc) {
-    return "" + (int)loc.getX() + ", " +
-    (int)loc.getY() + ", " +
-    (int)loc.getZ();
-  }
+  private int shortestBowHit;
+  private int longestBowHit;
 
   private int calculateBowPoints(){
-    double playerSnitchDistance = Utils.CalculateDistanceBetweenLocations(playerBowStartLocation, snitchLocation, false);
+    double playerSnitchDistance = Utils.CalculateDistanceBetweenLocations(playerBowStartLocation, snitchLocation);
+    setShortestLongestBowHit(playerSnitchDistance);
     int roundedPoints = (int)Math.round(playerSnitchDistance / 10);
     int points = BASE_POINTS_PER_ARROW_HIT + (int)playerSnitchDistance;
     return points;
+  }
+
+  private void setShortestLongestBowHit(double playerSnitchDistance){
+    if(playerSnitchDistance > longestBowHit)
+      longestBowHit = (int)playerSnitchDistance;
+    
+    if(playerSnitchDistance < shortestBowHit)
+      shortestBowHit = (int)playerSnitchDistance;
   }
 
   private int missedArrowCount;
@@ -356,7 +369,10 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private void insertGameSessionIntoDb(){
     String playerName = player.getDisplayName();
     int bowHits = SNITCHES_PER_GAME - rightClickCatches;
-    database.insertGameSession(playerName, score, rightClickCatches, bowHits, fastestCatch, slowestCatch, totalFastCatches, totalFastCatchStreaks, missedArrowCount, SELECTED_MAP.toString(), timerTask.getElapsedTimeInSeconds());
+    database.insertGameSession(playerName, score, rightClickCatches, bowHits, 
+      fastestCatch, slowestCatch, totalFastCatches, totalFastCatchStreaks, 
+      missedArrowCount, SELECTED_MAP.toString(), timerTask.getElapsedTimeInSeconds(), 
+      shortestBowHit, longestBowHit);
   }
 
   private void updateHighScoreSigns(){
@@ -398,9 +414,9 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
   private void updateShortestAndLongestBowHit(){
     List<String> shortestAndLongestBowHit = database.GetShortestAndLongestBowHit();
-    shortestAndLongestBowHit.add(1, "Shortest Bow Hit");
+    shortestAndLongestBowHit.add(1, "Longest Bow Hit");
     Location shortestAndLongestHighscoreSign = new Location(248, 54, 264);
-    writeTextToSign("Longest Bow Hit", shortestAndLongestBowHit, shortestAndLongestHighscoreSign, false);
+    writeTextToSign("Shortest Bow Hit", shortestAndLongestBowHit, shortestAndLongestHighscoreSign, false);
   }
 
   private void writeTextToSign(String headline, List<String> top3Scores, Location signLocation, boolean hasPosition){

@@ -148,16 +148,10 @@ public class Utils extends EZPlugin{
     Canary.getServer().consoleCommand("clear " + player.getDisplayName() + " minecraft:dirt 0 0");
   }
 
-  public static double CalculateDistanceBetweenLocations(Location firstLocation, Location secondLocation, boolean withCenterCalculation) {
+  public static double CalculateDistanceBetweenLocations(Location firstLocation, Location secondLocation) {
     double centerX = firstLocation.getX();
     double centerY = firstLocation.getY();
     double centerZ = firstLocation.getZ();
-
-    if(withCenterCalculation){
-      centerX += 0.5;
-      centerY += 0.5;
-      centerZ += 0.5;
-    }
 
     double dx = centerX - secondLocation.getX();
     double dy = centerY - secondLocation.getY();

@@ -72,6 +72,8 @@ public class DatabaseUtils extends EZPlugin{
             "missed_arrows INTEGER DEFAULT 0," +
             "map_played TEXT," +
             "game_duration INTEGER DEFAULT 0," +
+            "shortest_bow_hit INTEGER," + 
+            "longest_bow_hit INTEGER DEFAULT 0," +
             "session_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
             ");";
 
@@ -85,11 +87,11 @@ public class DatabaseUtils extends EZPlugin{
 
     public void insertGameSession(String playerName, int score, int handCatches, int bowHits,
                               int fastestCatch, int slowestCatch, int fastCatches, int fastCatchStreaks, int missedArrows,
-                              String mapPlayed, int gameDuration) {
+                              String mapPlayed, int gameDuration, int shortestBowHit, int longestBowHit) {
         String sqlCommand = "INSERT INTO game_sessions (" +
                 "player_name, score, hand_catches, bow_hits, fastest_catch, slowest_catch, fast_catches, " +
-                "fast_catch_streaks, missed_arrows, map_played, game_duration, session_timestamp" +
-                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);";
+                "fast_catch_streaks, missed_arrows, map_played, game_duration, shortest_bow_hit, longest_bow_hit, session_timestamp" + 
+                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);";
         try{
             PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
             pstmt.setString(1, playerName);
@@ -103,6 +105,8 @@ public class DatabaseUtils extends EZPlugin{
             pstmt.setInt(9, missedArrows);
             pstmt.setString(10, mapPlayed);
             pstmt.setInt(11, gameDuration);
+            pstmt.setInt(12, shortestBowHit);
+            pstmt.setInt(13, longestBowHit);
 
             pstmt.executeUpdate();
             logger.info("[DatabaseUtils] Successfully inserted game session for player: " + playerName);
@@ -202,10 +206,30 @@ public class DatabaseUtils extends EZPlugin{
     }
 
     public List<String> GetShortestAndLongestBowHit(){
-        String sqlCommand = "";
         List<String> topValues = new ArrayList<>();
-        topValues.add("Test1");
-        topValues.add("Test2");
+        String maxCommand = "SELECT MAX(longest_bow_hit) FROM game_sessions;";
+        String minCommand = "SELECT MIN(shortest_bow_hit) FROM game_sessions;";
+        
+        try{
+            PreparedStatement maxStatment = connection.prepareStatement(maxCommand);
+            PreparedStatement minStatment = connection.prepareStatement(minCommand);
+            
+            ResultSet rs = minStatment.executeQuery();
+            while(rs.next()){
+                String minValue = rs.getString(1);
+                topValues.add(minValue + " Blocks");
+            }
+
+            rs = maxStatment.executeQuery();
+            while(rs.next()){
+                String maxValue = rs.getString(1);
+                topValues.add(maxValue + " Blocks");
+            }
+        }
+        catch(SQLException e){
+            return null;
+        }
+
         return topValues;
     }
 
