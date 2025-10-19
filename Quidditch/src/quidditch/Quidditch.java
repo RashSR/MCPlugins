@@ -37,6 +37,7 @@ import net.canarymod.hook.player.SlotClickHook;
 import net.canarymod.api.inventory.slot.ButtonPress;
 import net.canarymod.api.entity.EntityType;
 import utils.DatabaseUtils;
+import utils.GivePlayerItemTask;
 
 public class Quidditch extends EZPlugin implements PluginListener {
   
@@ -53,6 +54,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private final double MAX_HIT_DISTANCE = 3.5;
   private final int SPEED_FOR_FAST_CATCH_IN_SECONDS = 3;
   private final int SPEED_FOR_FAST_CATCH_STREAK_IN_SECONDS = 5;
+  private final int GIVE_COMPASS_DELAY_IN_SECONDS = 30;
 
   private boolean isEnabled = false;
   private Location snitchLocation;
@@ -63,10 +65,8 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private Map SELECTED_MAP;
   private DatabaseUtils database;
 
-  //TODO: give player speed after streak, stats im chat zeigen, check if highscore has been achieved -> tell player
-  //Ideen:partikel für schnatz nach zeit, schnatz verschwindet nach zeit, schnatz bewegt sich, falls 30 sekunden nicht gefunden -> kompass?
-  //vllt anfangs nur 5 pfeile und man muss sich hoch grinden und sachen freischalten in nem Shop.
-  //KompassItem 1 mal benutzen, PartikelEffektItem einmal benutzen für Vorteil, Zeitlimit
+  //TODO: stats im chat zeigen, check if highscore has been achieved -> tell player
+  //Ideen:partikel für schnatz nach zeit/PartikelEffektItem einmal benutzen für Vorteil, schnatz bewegt sich?
   //DELETE DB and look what throws an exception e.g. only one line to write on highscore sign
   //Achievements -> block spawned in der nähe, keinen pfeil verschossen, nur hand catches, ...
 
@@ -203,8 +203,19 @@ public class Quidditch extends EZPlugin implements PluginListener {
         snitchLocation = randomLocation;
         snitchLocation.getWorld().setBlockAt(snitchLocation, SNITCH_BLOCK_TYPE);
         hasAirBlockBeenSelected = true;
+        givePlayerDelayedCompass();
       }
     }
+  }
+  
+  private GivePlayerItemTask givePlayerItemTask;
+
+  private void givePlayerDelayedCompass(){
+    ItemFactory itemFactory = Canary.factory().getItemFactory();
+    Item compass = itemFactory.newItem(ItemType.Compass);
+    player.setCompassTarget((int)snitchLocation.getX(), (int)snitchLocation.getY(), (int)snitchLocation.getZ());
+    givePlayerItemTask = new GivePlayerItemTask(player, compass, 0, GIVE_COMPASS_DELAY_IN_SECONDS);
+    Canary.getServer().addSynchronousTask(givePlayerItemTask);
   }
 
   private boolean hasStartedGame = false;
@@ -304,6 +315,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
   private void snitchCatched(int pointsScored, SoundEffect.Type soundType){
     snitchLocation.getWorld().setBlockAt(snitchLocation, BlockType.Air);
+    removeCompassFromPlayer();
     currentSnitchCount++;
     boolean isFastCatch = handleFastCatches();
 
@@ -323,6 +335,12 @@ public class Quidditch extends EZPlugin implements PluginListener {
     else{
       initializeWin();
     }
+  }
+
+  private void removeCompassFromPlayer(){
+    Canary.getServer().removeSynchronousTask(givePlayerItemTask);
+    player.getInventory().removeItem(ItemType.Compass);
+    Utils.RefreshInventroyFromPlayer(player);
   }
 
   private int lastCatchTimeInSeconds;
@@ -518,7 +536,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     PlayerInventory playerInventory = player.getInventory();
     playerInventory.removeItem(ItemType.Bow);
     playerInventory.removeItem(ItemType.Arrow);
-    Utils.RefreshInventroyFromPlayer(player);
+    removeCompassFromPlayer();
   }
 
   @HookHandler
