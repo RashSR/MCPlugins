@@ -39,8 +39,9 @@ import net.canarymod.api.inventory.slot.ButtonPress;
 import net.canarymod.api.entity.EntityType;
 import utils.DatabaseUtils;
 import utils.GivePlayerItemTask;
+import utils.IServerTaskCallback;
 
-public class Quidditch extends EZPlugin implements PluginListener {
+public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCallback {
   
   private final String pluginName = "[Quidditch]";
   private final BlockType SNITCH_BLOCK_TYPE = BlockType.GoldBlock;
@@ -119,6 +120,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     longestBowHit = 0;
     shortestBowHit = Integer.MAX_VALUE;
     endTimeInSeconds = Integer.MAX_VALUE;
+    totalCompassCount = 0;
   }
 
   private final String DB_FOLDER = "plugins/Quidditch";
@@ -217,8 +219,18 @@ public class Quidditch extends EZPlugin implements PluginListener {
     ItemFactory itemFactory = Canary.factory().getItemFactory();
     Item compass = itemFactory.newItem(ItemType.Compass);
     player.setCompassTarget((int)snitchLocation.getX(), (int)snitchLocation.getY(), (int)snitchLocation.getZ());
-    givePlayerItemTask = new GivePlayerItemTask(player, compass, 0, GIVE_COMPASS_DELAY_IN_SECONDS);
+    givePlayerItemTask = new GivePlayerItemTask(player, compass, 0, GIVE_COMPASS_DELAY_IN_SECONDS, this);
     Canary.getServer().addSynchronousTask(givePlayerItemTask);
+  }
+
+  public void ExecuteTaskCallback(){
+    incrementCompassCount();
+  }
+
+  private int totalCompassCount;
+
+  private void incrementCompassCount(){
+    totalCompassCount++;
   }
 
   private boolean hasStartedGame = false;
@@ -425,6 +437,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
           + ChatFormat.DARK_GREEN + " with a score of " + ChatFormat.GOLD + this.score + ChatFormat.DARK_GREEN + ".";
         Utils.BroadcastServerMessage(pluginName, serverMessage);
         writeTextToSign(SELECTED_MAP.toString(), top3Scores, SELECTED_MAP.GetQuidditchPluginHighScoreSign(), true);
+        Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.ENDERDRAGON_GROWL, 1.0f, 1.0f);
         break;
       }
     }
@@ -441,6 +454,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
           + ChatFormat.DARK_GREEN + " with a score of " + ChatFormat.GOLD + Utils.FormatSecondsPassedIntoString(endTimeInSeconds) + ChatFormat.DARK_GREEN + ".";
         Utils.BroadcastServerMessage(pluginName, serverMessage);
         writeTextToSign(SELECTED_MAP.toString(), top3Scores, SELECTED_MAP.GetQuidditchPluginHighScoreTimeSign(), true);
+        Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.ENDERDRAGON_GROWL, 1.0f, 1.0f);
         break;
       }
     }
@@ -490,6 +504,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
       shortestAndLongestBowHit.add(1, "Longest Bow Hit");
       Location shortestAndLongestHighscoreSign = new Location(248, 54, 264);
       writeTextToSign("Shortest Bow Hit", shortestAndLongestBowHit, shortestAndLongestHighscoreSign, false);
+      Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.ENDERDRAGON_GROWL, 1.0f, 1.0f);
     }
   }
 

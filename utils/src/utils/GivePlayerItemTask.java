@@ -14,14 +14,16 @@ public class GivePlayerItemTask extends ServerTask{
     private int itemSlot;
     private int elapsedTimeInSeconds;
     private int itemGiveTimeInSeconds;
+    private IServerTaskCallback callback;
 
-    public GivePlayerItemTask(Player player, Item item, int itemSlot, int itemGiveTimeInSeconds) {
+    public GivePlayerItemTask(Player player, Item item, int itemSlot, int itemGiveTimeInSeconds, IServerTaskCallback callback) {
         super(Canary.getServer(), TaskDelay, isContinousTask);
         this.player = player;
         this.item = item;
         this.itemSlot = itemSlot;
         this.elapsedTimeInSeconds = 0;
         this.itemGiveTimeInSeconds = itemGiveTimeInSeconds;
+        this.callback = callback;
     }
 
     public void run(){
@@ -30,6 +32,8 @@ public class GivePlayerItemTask extends ServerTask{
             player.getInventory().setSlot(itemSlot, item);
             Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.ITEM_PICKUP, 1.5f, 1.0f);
             Canary.getServer().removeSynchronousTask(this);
+            if(callback != null)
+                callback.ExecuteTaskCallback();
         }
     }
 }
