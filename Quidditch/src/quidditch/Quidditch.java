@@ -49,6 +49,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private final int POINTS_PER_RIGHTCLICK = 150;
   private final int BASE_POINTS_PER_ARROW_HIT = 50;
   private final int POINTS_FOR_MISSED_ARROW = -5;
+  private final int POINTS_FOR_ADDED_COMPASS = -10;
   private final int POINTS_FOR_FAST_CATCH = 20;
   private final int TIME_FOR_FAST_CATCH_IN_SECONDS = 8;
   private final int FAST_CATCHES_IN_ROW_FOR_BONUS = 3;
@@ -67,7 +68,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private Map SELECTED_MAP;
   private DatabaseUtils database;
 
-  //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, particles?
+  //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, particles?, Halloween event
   //DELETE DB and look what throws an exception e.g. only one line to write on highscore sign
   //Achievements -> block spawned in der nähe, keinen pfeil verschossen, nur hand catches, bow hit > 50...
 
@@ -237,6 +238,8 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
 
   private void incrementCompassCount(){
     totalCompassCount++;
+    score += POINTS_FOR_ADDED_COMPASS;
+    displayScoreMessage(POINTS_FOR_ADDED_COMPASS, false);
   }
 
   private boolean hasStartedGame = false;
