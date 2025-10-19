@@ -25,6 +25,8 @@ import utils.Utils;
 import utils.Map;
 import utils.ScoreboardTimerTask;
 import utils.TeleportPlayerTask;
+
+import java.util.HashMap;
 import java.util.List;
 import net.canarymod.api.scoreboard.*;
 import net.canarymod.hook.player.TeleportHook;
@@ -85,7 +87,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
       if(args.length == 1)
         player.teleportTo(Utils.quidditchHubLocation);
       else if(args.length == 2 && args[1].equalsIgnoreCase("stats")){
-        showPlayerStats(player);
+        displayPlayerStats(player);
       }
     }
   }
@@ -615,7 +617,15 @@ public class Quidditch extends EZPlugin implements PluginListener {
     }
   }
 
-  private void showPlayerStats(Player player){
+  private void displayPlayerStats(Player player){
+    if(database == null)
+      setUpDatabase();
+  
+    HashMap<String, String> stats = database.GetPlayerStatsForQuidditch(player.getDisplayName());
+    for(String key : stats.keySet()){
+      player.chat(key + ": " + stats.get(key));
+    }
+
     Utils.BroadcastServerMessage(pluginName, "This will show my player stats in the future.");
   }
 }
