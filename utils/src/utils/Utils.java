@@ -17,9 +17,10 @@ import net.canarymod.api.scoreboard.*;
 import net.canarymod.api.world.effects.SoundEffect;
 import net.canarymod.api.world.blocks.Sign;
 import net.canarymod.api.world.World;
-import net.canarymod.api.factory.ChatComponentFactory;
-import net.canarymod.api.chat.ChatComponent;
 import net.canarymod.api.world.position.Position;
+import net.canarymod.api.potion.PotionEffect;
+import net.canarymod.api.potion.PotionEffectType;
+import net.canarymod.api.factory.PotionFactory;
 
 public class Utils extends EZPlugin{
   
@@ -60,7 +61,7 @@ public class Utils extends EZPlugin{
 
   public static void BroadcastServerMessage(String pluginName, String message){
       String plugin = ChatFormat.DARK_AQUA + pluginName;
-      String serverMessage = plugin + " " + message;
+      String serverMessage = plugin + " " + ChatFormat.DARK_GREEN + message;
       Canary.instance().getServer().broadcastMessage(serverMessage);
   }
 
@@ -220,7 +221,7 @@ public class Utils extends EZPlugin{
   }
 
   private static void updateSignLine(int index, Location loc, String text){ 
-    //for some reason it does not work if in the string is a normal space -> replace with ASCII space character
+    //for some reason it does not work if the string has a normal space -> replace with ASCII space character
     String safeText = text.replace(" ", "\\u0020");
     String jsonText = "{\"text\":\"" + safeText + "\"}";
     String command = "blockdata " + (int) loc.getX() + " "  + (int) loc.getY() + " " + (int) loc.getZ() + " "
@@ -266,5 +267,11 @@ public class Utils extends EZPlugin{
 
     result += mySeconds;
     return result;
+  }
+
+  public static void GivePlayerSpeedEffect(Player player, int durationInSeconds, int effectLevel){
+    PotionFactory factory = Canary.factory().getPotionFactory();
+    PotionEffect speedEffect = factory.newPotionEffect(PotionEffectType.MOVESPEED, durationInSeconds * TICKS_PER_SECOND, effectLevel);
+    player.addPotionEffect(speedEffect);
   }
 }

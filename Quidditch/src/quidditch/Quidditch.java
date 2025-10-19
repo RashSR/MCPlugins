@@ -51,7 +51,8 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private final int FAST_CATCHES_IN_ROW_FOR_BONUS = 3;
   private final int POINTS_FOR_FAST_CATCH_STREAK = 30;
   private final double MAX_HIT_DISTANCE = 3.5;
-  private final int SCAN_RADIUS = 3;
+  private final int SPEED_FOR_FAST_CATCH_IN_SECONDS = 3;
+  private final int SPEED_FOR_FAST_CATCH_STREAK_IN_SECONDS = 5;
 
   private boolean isEnabled = false;
   private Location snitchLocation;
@@ -78,11 +79,14 @@ public class Quidditch extends EZPlugin implements PluginListener {
   @Command(aliases = { "quidditch" },
             description = "quidditch plugin",
             permissions = { "*" },
-            toolTip = "/quidditch schnatz")
+            toolTip = "/quidditch")
   public void quidditchschnatzCommand(MessageReceiver caller, String[] args) {
     if (caller instanceof Player player) {
       if(args.length == 1)
         player.teleportTo(Utils.quidditchHubLocation);
+      else if(args.length == 2 && args[1].equalsIgnoreCase("stats")){
+        showPlayerStats(player);
+      }
     }
   }
 
@@ -340,6 +344,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     if(isFastCatch){
       fastCatchStreak++;
       totalFastCatches++;
+      Utils.GivePlayerSpeedEffect(player, SPEED_FOR_FAST_CATCH_IN_SECONDS, 0);
     }
     else
       fastCatchStreak = 0;
@@ -356,6 +361,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     Utils.BroadcastServerMessage(pluginName, ChatFormat.YELLOW + "Blitzfang streak!");
     Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.WITHER_SHOOT, 1.0f, 1.0f);
     displayScoreMessage(POINTS_FOR_FAST_CATCH_STREAK, false);
+    Utils.GivePlayerSpeedEffect(player, SPEED_FOR_FAST_CATCH_STREAK_IN_SECONDS, 1);
   }
 
   private void initializeWin(){
@@ -452,7 +458,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     String msg2 = "Versuche jeden ";
     String msg3 = "goldenen Schnatz";
     String msg4 = "zu fangen.";
-    String serverMessage = ChatFormat.DARK_GREEN + msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + msg4;
+    String serverMessage = msg2 + ChatFormat.GOLD + msg3 + ChatFormat.DARK_GREEN + msg4;
     Utils.BroadcastServerMessage(pluginName, serverMessage);
   }
 
@@ -487,7 +493,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private void displayWinMessage(){
-    String msg2 = ChatFormat.DARK_GREEN + "Du hast jeden Schnatz ";
+    String msg2 = "Du hast jeden Schnatz ";
     String msg3 = ChatFormat.GOLD + "gefangen";
 
     String msg4 = "\nPunkte: " + ChatFormat.GOLD + score + ChatFormat.DARK_GREEN;
@@ -589,5 +595,9 @@ public class Quidditch extends EZPlugin implements PluginListener {
       else if(buttonPress == ButtonPress.KEY_DROP || buttonPress == ButtonPress.CTRL_DROP)
         event.setCanceled();
     }
+  }
+
+  private void showPlayerStats(Player player){
+    Utils.BroadcastServerMessage(pluginName, "This will show my player stats in the future.");
   }
 }
