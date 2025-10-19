@@ -67,8 +67,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private Map SELECTED_MAP;
   private DatabaseUtils database;
 
-  //TODO stats for each map
-  //Ideen:partikel für schnatz nach zeit/PartikelEffektItem einmal benutzen für Vorteil, schnatz bewegt sich?
+  //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, particles?
   //DELETE DB and look what throws an exception e.g. only one line to write on highscore sign
   //Achievements -> block spawned in der nähe, keinen pfeil verschossen, nur hand catches, bow hit > 50...
 
@@ -86,8 +85,15 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     if (caller instanceof Player player) {
       if(args.length == 1)
         player.teleportTo(Utils.quidditchHubLocation);
-      else if(args.length == 2 && args[1].equalsIgnoreCase("stats")){
-        displayPlayerStats(player);
+      else if(args.length == 2)
+      {
+        if(args[1].equalsIgnoreCase("stats"))
+          displayPlayerStats(player);
+        else if(args[1].equalsIgnoreCase("usage"))
+          displayUsageMessage();
+      }
+      else if(args.length == 3 && args[1].equalsIgnoreCase("stats") && args[2].equalsIgnoreCase("map")){
+        displayPlayerStatsEachMap(player);
       }
     }
   }
@@ -690,5 +696,31 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       
     Utils.BroadcastServerMessage(pluginName, serverMessage);
     statsDb.CloseConnection();
+  }
+
+  private void displayPlayerStatsEachMap(Player player){
+    DatabaseUtils statsDb = setUpDatabase();
+
+    String serverMessage = "Das sind die Stats von " + ChatFormat.BLUE + player.getDisplayName() + ChatFormat.DARK_GREEN + ":\n";
+    List<HashMap<String, String>> lists = statsDb.GetPlayerStatsForQuidditchEachMap(player.getDisplayName());
+    for(HashMap<String, String> stats : lists){
+      for(String key : stats.keySet())
+        serverMessage += ChatFormat.DARK_GREEN + " - " + key + ": " + ChatFormat.GOLD + stats.get(key) + "\n";
+      
+      serverMessage += ChatFormat.DARK_AQUA + "------------------------------------------------\n";
+    }
+
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
+    statsDb.CloseConnection();
+  }
+
+  private void displayUsageMessage(){
+    String serverMessage = "Die folgenden Kommandos stehen zur Verfügung:\n";
+    String command1 = ChatFormat.GOLD + "/quidditch" + ChatFormat.DARK_GREEN + " -> Teleportiert dich zum Quidditch Minigame Hub\n";
+    String command2 = ChatFormat.GOLD + "/quidditch usage" + ChatFormat.DARK_GREEN + "-> Zeigt alle verfügbaren Kommandos\n";
+    String command3 = ChatFormat.GOLD + "/quidditch stats" + ChatFormat.DARK_GREEN + "-> Zeigt die Statistik des Spielers\n";
+    String command4 = ChatFormat.GOLD + "/quidditch stats map" + ChatFormat.DARK_GREEN + "-> Zeigt die Statistik des Spielers für jede Map";
+
+    Utils.BroadcastServerMessage(pluginName, serverMessage + command1 + command2 + command3 + command4);
   }
 }

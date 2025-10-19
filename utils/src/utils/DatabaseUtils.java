@@ -238,8 +238,6 @@ public class DatabaseUtils extends EZPlugin{
     }
     
     public HashMap<String, String> GetPlayerStatsForQuidditch(String playerName){
-        //For map based stats
-        //SELECT player_name, map_played, COUNT(*), AVG(score), AVG(hand_catches), AVG(bow_hits), MIN(fastest_catch), MAX(slowest_catch), AVG(fast_catch_streaks), AVG(missed_arrows), AVG(game_duration), MIN(shortest_bow_hit), MAX(longest_bow_hit) FROM game_sessions GROUP BY player_name, map_played;
         String sqlCommand = "SELECT player_name, COUNT(*) AS played_matches, AVG(score), AVG(hand_catches), AVG(bow_hits),"
             + " MIN(fastest_catch), MAX(slowest_catch), AVG(fast_catch_streaks), AVG(missed_arrows), AVG(game_duration),"
             + " MIN(shortest_bow_hit), MAX(longest_bow_hit), AVG(total_compass_count) FROM game_sessions WHERE player_name = ? GROUP BY player_name;";
@@ -271,6 +269,44 @@ public class DatabaseUtils extends EZPlugin{
 
         return stats;
     }
+
+    public List<HashMap<String, String>> GetPlayerStatsForQuidditchEachMap(String playerName){
+        String sqlCommand = "SELECT player_name, map_played, COUNT(*), AVG(score), AVG(hand_catches), " + 
+            "AVG(bow_hits), MIN(fastest_catch), MAX(slowest_catch), AVG(fast_catch_streaks), AVG(missed_arrows), " + 
+            "AVG(game_duration), MIN(shortest_bow_hit), MAX(longest_bow_hit), AVG(total_compass_count) " + 
+            "FROM game_sessions WHERE player_name = ? GROUP BY player_name, map_played;";
+        List<HashMap<String, String>> lists = new ArrayList<HashMap<String, String>>();
+
+        try{
+            PreparedStatement statsStatement = connection.prepareStatement(sqlCommand);
+            statsStatement.setString(1, playerName);
+            ResultSet results = statsStatement.executeQuery();
+
+            while (results.next()) {
+                HashMap<String, String> stats = new LinkedHashMap<>();
+                stats.put("Map", results.getString(2));
+                stats.put("Gespielte Spiele", results.getString(3));
+                stats.put("⌀ Score", formatDoubleValue(results.getString(4)));
+                stats.put("⌀ Spieldauer", Utils.FormatSecondsPassedIntoString(results.getInt(11)));
+                stats.put("⌀ Handfänge", formatDoubleValue(results.getString(5)));
+                stats.put("⌀ Bogentreffer", formatDoubleValue(results.getString(6)));
+                stats.put("⌀ Fast Catch Streaks", formatDoubleValue(results.getString(9)));
+                stats.put("⌀ Verschossene Pfeile", formatDoubleValue(results.getString(10)));
+                stats.put("⌀ Kompass verwendet", formatDoubleValue(results.getString(14)));
+                stats.put("Kürzester Bogentreffer", results.getString(12));
+                stats.put("Weitester Bogentreffer", results.getString(13));
+                stats.put("Schnellster Fang", Utils.FormatSecondsPassedIntoString(results.getInt(7))); 
+                stats.put("Langsamster Fang", Utils.FormatSecondsPassedIntoString(results.getInt(8)));
+                lists.add(stats);
+            }
+        }
+        catch(SQLException e){
+            return null;
+        }
+
+        return lists;
+    }
+
 
     private String formatDoubleValue(String value){
         double number = Double.parseDouble(value);
