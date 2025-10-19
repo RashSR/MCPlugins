@@ -67,7 +67,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private Map SELECTED_MAP;
   private DatabaseUtils database;
 
-  //TODO: Stats erweitern (compass getted) und stats for each map
+  //TODO stats for each map
   //Ideen:partikel für schnatz nach zeit/PartikelEffektItem einmal benutzen für Vorteil, schnatz bewegt sich?
   //DELETE DB and look what throws an exception e.g. only one line to write on highscore sign
   //Achievements -> block spawned in der nähe, keinen pfeil verschossen, nur hand catches, bow hit > 50...
@@ -414,7 +414,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     database.insertGameSession(playerName, score, rightClickCatches, bowHits, 
       fastestCatch, slowestCatch, totalFastCatches, totalFastCatchStreaks, 
       missedArrowCount, SELECTED_MAP.toString(), endTimeInSeconds, 
-      shortestBowHit, longestBowHit);
+      shortestBowHit, longestBowHit, totalCompassCount);
   }
 
   private void updateHighScoreSigns(){

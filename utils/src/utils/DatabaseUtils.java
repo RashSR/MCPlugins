@@ -76,6 +76,7 @@ public class DatabaseUtils extends EZPlugin{
             "game_duration INTEGER DEFAULT 0," +
             "shortest_bow_hit INTEGER," + 
             "longest_bow_hit INTEGER DEFAULT 0," +
+            "total_compass_count INTEGER DEFAULT 0," +
             "session_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
             ");";
 
@@ -89,11 +90,11 @@ public class DatabaseUtils extends EZPlugin{
 
     public void insertGameSession(String playerName, int score, int handCatches, int bowHits,
                               int fastestCatch, int slowestCatch, int fastCatches, int fastCatchStreaks, int missedArrows,
-                              String mapPlayed, int gameDuration, int shortestBowHit, int longestBowHit) {
+                              String mapPlayed, int gameDuration, int shortestBowHit, int longestBowHit, int totalCompassCount) {
         String sqlCommand = "INSERT INTO game_sessions (" +
                 "player_name, score, hand_catches, bow_hits, fastest_catch, slowest_catch, fast_catches, " +
-                "fast_catch_streaks, missed_arrows, map_played, game_duration, shortest_bow_hit, longest_bow_hit, session_timestamp" + 
-                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);";
+                "fast_catch_streaks, missed_arrows, map_played, game_duration, shortest_bow_hit, longest_bow_hit, total_compass_count, session_timestamp" + 
+                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);";
         try{
             PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
             pstmt.setString(1, playerName);
@@ -109,6 +110,7 @@ public class DatabaseUtils extends EZPlugin{
             pstmt.setInt(11, gameDuration);
             pstmt.setInt(12, shortestBowHit);
             pstmt.setInt(13, longestBowHit);
+            pstmt.setInt(14, totalCompassCount);
 
             pstmt.executeUpdate();
             logger.info("[DatabaseUtils] Successfully inserted game session for player: " + playerName);
@@ -240,7 +242,7 @@ public class DatabaseUtils extends EZPlugin{
         //SELECT player_name, map_played, COUNT(*), AVG(score), AVG(hand_catches), AVG(bow_hits), MIN(fastest_catch), MAX(slowest_catch), AVG(fast_catch_streaks), AVG(missed_arrows), AVG(game_duration), MIN(shortest_bow_hit), MAX(longest_bow_hit) FROM game_sessions GROUP BY player_name, map_played;
         String sqlCommand = "SELECT player_name, COUNT(*) AS played_matches, AVG(score), AVG(hand_catches), AVG(bow_hits),"
             + " MIN(fastest_catch), MAX(slowest_catch), AVG(fast_catch_streaks), AVG(missed_arrows), AVG(game_duration),"
-            + " MIN(shortest_bow_hit), MAX(longest_bow_hit) FROM game_sessions WHERE player_name = ? GROUP BY player_name;";
+            + " MIN(shortest_bow_hit), MAX(longest_bow_hit), AVG(total_compass_count) FROM game_sessions WHERE player_name = ? GROUP BY player_name;";
         HashMap<String, String> stats = new LinkedHashMap<>();
 
         try{
@@ -256,6 +258,7 @@ public class DatabaseUtils extends EZPlugin{
                 stats.put("⌀ Bogentreffer", formatDoubleValue(results.getString(5)));
                 stats.put("⌀ Fast Catch Streaks", formatDoubleValue(results.getString(8)));
                 stats.put("⌀ Verschossene Pfeile", formatDoubleValue(results.getString(9)));
+                stats.put("⌀ Kompass verwendet", formatDoubleValue(results.getString(13)));
                 stats.put("Kürzester Bogentreffer", results.getString(11));
                 stats.put("Weitester Bogentreffer", results.getString(12));
                 stats.put("Schnellster Fang", Utils.FormatSecondsPassedIntoString(results.getInt(6))); 
