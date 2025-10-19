@@ -269,6 +269,16 @@ public class Utils extends EZPlugin{
     return result;
   }
 
+  public static int ReformatSecondsPassedIntoInt(String passedSeconds){
+    //This is in format mm:ss -> TODO: expand to support hh:mm:ss
+    String[] parts = passedSeconds.split(":");
+    String minutes = parts[0];
+    String seconds = parts[1];
+
+    int totalSeconds = Integer.parseInt(minutes) * 60 + Integer.parseInt(seconds);
+    return totalSeconds;
+  }
+
   public static void GivePlayerSpeedEffect(Player player, int durationInSeconds, int effectLevel){
     PotionFactory factory = Canary.factory().getPotionFactory();
     PotionEffect speedEffect = factory.newPotionEffect(PotionEffectType.MOVESPEED, durationInSeconds * TICKS_PER_SECOND, effectLevel);

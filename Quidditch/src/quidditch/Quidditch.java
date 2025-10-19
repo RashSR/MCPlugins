@@ -66,10 +66,10 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private Map SELECTED_MAP;
   private DatabaseUtils database;
 
-  //TODO: Stats erweitern (most played map, compass getted) und stats for each map, check if highscore has been achieved -> tell player
+  //TODO: Stats erweitern (compass getted) und stats for each map
   //Ideen:partikel für schnatz nach zeit/PartikelEffektItem einmal benutzen für Vorteil, schnatz bewegt sich?
   //DELETE DB and look what throws an exception e.g. only one line to write on highscore sign
-  //Achievements -> block spawned in der nähe, keinen pfeil verschossen, nur hand catches, ...
+  //Achievements -> block spawned in der nähe, keinen pfeil verschossen, nur hand catches, bow hit > 50...
 
   @Override 
   public boolean enable() {
@@ -118,6 +118,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
     slowestCatch = 0;
     longestBowHit = 0;
     shortestBowHit = Integer.MAX_VALUE;
+    endTimeInSeconds = Integer.MAX_VALUE;
   }
 
   private final String DB_FOLDER = "plugins/Quidditch";
@@ -292,7 +293,6 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private int calculateBowPoints(){
     double playerSnitchDistance = Utils.CalculateDistanceBetweenLocations(playerBowStartLocation, snitchLocation);
     setShortestLongestBowHit(playerSnitchDistance);
-    int roundedPoints = (int)Math.round(playerSnitchDistance / 10);
     int points = BASE_POINTS_PER_ARROW_HIT + (int)playerSnitchDistance;
     return points;
   }
@@ -392,12 +392,16 @@ public class Quidditch extends EZPlugin implements PluginListener {
     cleanUpAfterGame();
   }
 
+  private int endTimeInSeconds;
+
   private void insertGameSessionIntoDb(){
     String playerName = player.getDisplayName();
     int bowHits = SNITCHES_PER_GAME - rightClickCatches;
+    endTimeInSeconds = timerTask.getElapsedTimeInSeconds();
+
     database.insertGameSession(playerName, score, rightClickCatches, bowHits, 
       fastestCatch, slowestCatch, totalFastCatches, totalFastCatchStreaks, 
-      missedArrowCount, SELECTED_MAP.toString(), timerTask.getElapsedTimeInSeconds(), 
+      missedArrowCount, SELECTED_MAP.toString(), endTimeInSeconds, 
       shortestBowHit, longestBowHit);
   }
 
@@ -412,12 +416,34 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
   private void updateHighScores(){
     List<String> top3Scores = database.GetTop3ScoresFromMap(SELECTED_MAP);
-    writeTextToSign(SELECTED_MAP.toString(), top3Scores, SELECTED_MAP.GetQuidditchPluginHighScoreSign(), true);
+    for(int i = 0; i < top3Scores.size(); i++){
+      String[] parts = top3Scores.get(i).split(" ");
+      String points = parts[1];
+
+      if(this.score == Integer.parseInt(points)){
+        String serverMessage = ChatFormat.YELLOW + "NEW HIGHSCORE! " + ChatFormat.DARK_GREEN + "You are now on number " + ChatFormat.GOLD + (i+1) 
+          + ChatFormat.DARK_GREEN + " with a score of " + ChatFormat.GOLD + this.score + ChatFormat.DARK_GREEN + ".";
+        Utils.BroadcastServerMessage(pluginName, serverMessage);
+        writeTextToSign(SELECTED_MAP.toString(), top3Scores, SELECTED_MAP.GetQuidditchPluginHighScoreSign(), true);
+        break;
+      }
+    }
   }
 
   private void updateHighScoreTimes(){
     List<String> top3Scores = database.GetTop3TimesFromMap(SELECTED_MAP);
-    writeTextToSign(SELECTED_MAP.toString(), top3Scores, SELECTED_MAP.GetQuidditchPluginHighScoreTimeSign(), true);
+    for(int i = 0; i < top3Scores.size(); i++){
+      String[] parts = top3Scores.get(i).split(" ");
+      String gameDuration = parts[1];
+
+      if(endTimeInSeconds == Utils.ReformatSecondsPassedIntoInt(gameDuration)){
+        String serverMessage = ChatFormat.YELLOW + "NEW HIGHSCORE! " + ChatFormat.DARK_GREEN + "You are now on number " + ChatFormat.GOLD + (i+1) 
+          + ChatFormat.DARK_GREEN + " with a score of " + ChatFormat.GOLD + Utils.FormatSecondsPassedIntoString(endTimeInSeconds) + ChatFormat.DARK_GREEN + ".";
+        Utils.BroadcastServerMessage(pluginName, serverMessage);
+        writeTextToSign(SELECTED_MAP.toString(), top3Scores, SELECTED_MAP.GetQuidditchPluginHighScoreTimeSign(), true);
+        break;
+      }
+    }
   }
 
   private void updateFastestCatchTimes(){
@@ -440,9 +466,31 @@ public class Quidditch extends EZPlugin implements PluginListener {
 
   private void updateShortestAndLongestBowHit(){
     List<String> shortestAndLongestBowHit = database.GetShortestAndLongestBowHit();
-    shortestAndLongestBowHit.add(1, "Longest Bow Hit");
-    Location shortestAndLongestHighscoreSign = new Location(248, 54, 264);
-    writeTextToSign("Shortest Bow Hit", shortestAndLongestBowHit, shortestAndLongestHighscoreSign, false);
+    boolean hasNewHighScore = false;
+
+    String[] parts = shortestAndLongestBowHit.get(0).split(" ");
+    int shortestBowHitFromDb = Integer.parseInt(parts[0]);
+    if(shortestBowHitFromDb == shortestBowHit){
+      String serverMessage = ChatFormat.YELLOW + "NEW HIGHSCORE! " + ChatFormat.DARK_GREEN + "You have made the shortest bow hit with " 
+        + ChatFormat.GOLD + shortestBowHit + ChatFormat.DARK_GREEN + " Blocks.";
+      Utils.BroadcastServerMessage(pluginName, serverMessage);
+      hasNewHighScore = true;
+    }
+
+    parts = shortestAndLongestBowHit.get(1).split(" ");
+    int longestBowHitFromDb = Integer.parseInt(parts[0]);
+    if(longestBowHitFromDb == longestBowHit){
+      String serverMessage = ChatFormat.YELLOW + "NEW HIGHSCORE! " + ChatFormat.DARK_GREEN + "You have made the longest bow hit with " 
+        + ChatFormat.GOLD + longestBowHit + ChatFormat.DARK_GREEN + " Blocks.";
+      Utils.BroadcastServerMessage(pluginName, serverMessage);
+      hasNewHighScore = true;
+    }
+
+    if(hasNewHighScore){
+      shortestAndLongestBowHit.add(1, "Longest Bow Hit");
+      Location shortestAndLongestHighscoreSign = new Location(248, 54, 264);
+      writeTextToSign("Shortest Bow Hit", shortestAndLongestBowHit, shortestAndLongestHighscoreSign, false);
+    }
   }
 
   private void writeTextToSign(String headline, List<String> top3Scores, Location signLocation, boolean hasPosition){
