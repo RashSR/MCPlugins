@@ -25,7 +25,6 @@ import utils.Utils;
 import utils.Map;
 import utils.ScoreboardTimerTask;
 import utils.TeleportPlayerTask;
-
 import java.util.HashMap;
 import java.util.List;
 import net.canarymod.api.scoreboard.*;
@@ -67,7 +66,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private Map SELECTED_MAP;
   private DatabaseUtils database;
 
-  //TODO: stats im chat zeigen, check if highscore has been achieved -> tell player
+  //TODO: Stats erweitern (most played map, compass getted) und stats for each map, check if highscore has been achieved -> tell player
   //Ideen:partikel für schnatz nach zeit/PartikelEffektItem einmal benutzen für Vorteil, schnatz bewegt sich?
   //DELETE DB and look what throws an exception e.g. only one line to write on highscore sign
   //Achievements -> block spawned in der nähe, keinen pfeil verschossen, nur hand catches, ...
@@ -95,7 +94,7 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private void startGame(Player player){
     setStartVariables();
     this.player = player;
-    setUpDatabase();
+    this.database = setUpDatabase();
     hasStartedGame = false;
     player.setModeId(Utils.ADVENTURE_MODE);
     displayStartMessage();
@@ -124,9 +123,10 @@ public class Quidditch extends EZPlugin implements PluginListener {
   private final String DB_FOLDER = "plugins/Quidditch";
   private final String DB_FILE = "quidditch.db";
 
-  private void setUpDatabase(){
-    database = new DatabaseUtils(DB_FOLDER, DB_FILE);
-    database.InitDatabase();
+  private DatabaseUtils setUpDatabase(){
+    DatabaseUtils newDb = new DatabaseUtils(DB_FOLDER, DB_FILE);
+    newDb.InitDatabase();
+    return newDb;
   }
 
   private Scoreboard scoreboard;
@@ -618,14 +618,14 @@ public class Quidditch extends EZPlugin implements PluginListener {
   }
 
   private void displayPlayerStats(Player player){
-    if(database == null)
-      setUpDatabase();
-  
-    HashMap<String, String> stats = database.GetPlayerStatsForQuidditch(player.getDisplayName());
-    for(String key : stats.keySet()){
-      player.chat(key + ": " + stats.get(key));
-    }
+    DatabaseUtils statsDb = setUpDatabase();
 
-    Utils.BroadcastServerMessage(pluginName, "This will show my player stats in the future.");
+    String serverMessage = "Das sind die Stats von " + ChatFormat.BLUE + player.getDisplayName() + ChatFormat.DARK_GREEN + ":\n";
+    HashMap<String, String> stats = statsDb.GetPlayerStatsForQuidditch(player.getDisplayName());
+    for(String key : stats.keySet())
+      serverMessage += ChatFormat.DARK_GREEN + " - " + key + ": " + ChatFormat.GOLD + stats.get(key) + "\n";
+      
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
+    statsDb.CloseConnection();
   }
 }
