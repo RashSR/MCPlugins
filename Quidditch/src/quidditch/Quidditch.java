@@ -68,7 +68,8 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private Map SELECTED_MAP;
   private DatabaseUtils database;
 
-  //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, particles?, Halloween event
+  //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, particles?
+  //Halloween event -> each plugin has an own copy of utils -> compile to one shared copy instead of multiple ones
   //DELETE DB and look what throws an exception e.g. only one line to write on highscore sign
   //Achievements -> block spawned in der nähe, keinen pfeil verschossen, nur hand catches, bow hit > 50...
 
