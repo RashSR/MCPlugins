@@ -137,9 +137,10 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       case ServerEventType.HALLOWEEN:
         SNITCH_BLOCK_TYPE = BlockType.JackOLantern;
         break;
-      case ServerEventType.NONE:
-        SNITCH_BLOCK_TYPE = BlockType.GoldBlock;
+      case ServerEventType.CHRISTMAS:
+        SNITCH_BLOCK_TYPE = BlockType.LapisBlock;
         break;
+      case ServerEventType.NONE:
       default:
         SNITCH_BLOCK_TYPE = BlockType.GoldBlock;
         break;
