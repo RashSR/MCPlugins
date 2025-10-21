@@ -34,7 +34,7 @@ public class events extends EZPlugin implements PluginListener {
 	@HookHandler
  	public void LoadWorldHookEvent(LoadWorldHook event){
  		logger.info("Wir haben den " + Utils.getDay() + "." + Utils.getMonth() + "." + Utils.GetYear() + "!");
-		currentEvent = getCurrentEvent(event.getWorld());
+		currentEvent = getCurrentEventFromDate(event.getWorld());
 		if(currentEvent != null)
 			currentEvent.startEvent();
  	}
@@ -46,7 +46,6 @@ public class events extends EZPlugin implements PluginListener {
   	public void eventsCommand(MessageReceiver caller, String[] args) {
 		if(args.length==2 && caller instanceof Player player){
 			String eventParam = args[1];
-
 			switch (eventParam) {
 				case "weihnachten":
 					endEvent();
@@ -69,6 +68,7 @@ public class events extends EZPlugin implements PluginListener {
 				default:
 					break;
 			}
+			Utils.BroadcastServerMessage(pluginName, "Setze event auf: " + ChatFormat.GOLD + Utils.GetCurrentEvent().toString());
 		}
   	}
 
@@ -77,7 +77,7 @@ public class events extends EZPlugin implements PluginListener {
 			currentEvent.endEvent();
   	}
 
-  	private IEvent getCurrentEvent(World world){
+  	private IEvent getCurrentEventFromDate(World world){
 		int day = Utils.getDay();
 		int month = Utils.getMonth();
 

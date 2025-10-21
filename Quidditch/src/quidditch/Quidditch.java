@@ -40,11 +40,11 @@ import net.canarymod.api.entity.EntityType;
 import utils.DatabaseUtils;
 import utils.GivePlayerItemTask;
 import utils.IServerTaskCallback;
+import utils.ServerEventType;
 
 public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCallback {
   
   private final String pluginName = "[Quidditch]";
-  private final BlockType SNITCH_BLOCK_TYPE = BlockType.GoldBlock;
   private final int SNITCHES_PER_GAME = 10;
   private final int POINTS_PER_RIGHTCLICK = 150;
   private final int BASE_POINTS_PER_ARROW_HIT = 50;
@@ -59,6 +59,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private final int SPEED_FOR_FAST_CATCH_STREAK_IN_SECONDS = 5;
   private final int GIVE_COMPASS_DELAY_IN_SECONDS = 30;
 
+  private BlockType SNITCH_BLOCK_TYPE;
   private boolean isEnabled = false;
   private Location snitchLocation;
   private Player player;
@@ -69,7 +70,6 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private DatabaseUtils database;
 
   //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, particles?
-  //Halloween event -> each plugin has an own copy of utils -> compile to one shared copy instead of multiple ones
   //DELETE DB and look what throws an exception e.g. only one line to write on highscore sign
   //Achievements -> block spawned in der nähe, keinen pfeil verschossen, nur hand catches, bow hit > 50...
 
@@ -107,6 +107,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     hasStartedGame = false;
     player.setModeId(Utils.ADVENTURE_MODE);
     displayStartMessage();
+    checkForEvent();
     placeSnitch();
     giveEquipToPlayer();
     createScoreboard();
@@ -129,6 +130,20 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     shortestBowHit = Integer.MAX_VALUE;
     endTimeInSeconds = Integer.MAX_VALUE;
     totalCompassCount = 0;
+  }
+
+  private void checkForEvent(){
+    switch (Utils.GetCurrentEvent()) {
+      case ServerEventType.HALLOWEEN:
+        SNITCH_BLOCK_TYPE = BlockType.JackOLantern;
+        break;
+      case ServerEventType.NONE:
+        SNITCH_BLOCK_TYPE = BlockType.GoldBlock;
+        break;
+      default:
+        SNITCH_BLOCK_TYPE = BlockType.GoldBlock;
+        break;
+    } 
   }
 
   private final String DB_FOLDER = "plugins/Quidditch";

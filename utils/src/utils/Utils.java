@@ -3,6 +3,9 @@ import net.canarymod.api.entity.living.humanoid.Player;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -31,7 +34,7 @@ public class Utils extends EZPlugin{
 
   public static final int TICKS_PER_SECOND = 20;
 
-  public static final String EventFileLocation = "C:/Users/R/Desktop/server/config/events.txt";
+  public static final String EVENT_FILE_PATH = "C:/Users/R/Desktop/server/config/events.txt";
 
   public static Location HubLocation = new Location(251, 71, 262);
   public static Location ZombieLocation = new Location(256, 71, 546);
@@ -126,8 +129,8 @@ public class Utils extends EZPlugin{
     return Integer.parseInt(dateFormat.format(date));
 	}
 
-  public static void WriteToEventFile(String text){
-    File file = new File(EventFileLocation);
+  public static void WriteToEventFile(ServerEventType eventType){
+    File file = new File(EVENT_FILE_PATH);
     try{
       if (file.createNewFile()){
         logger.info("[FileLoader] File wurde erstellt!");
@@ -135,12 +138,22 @@ public class Utils extends EZPlugin{
         logger.info("[FileWriter] File bereits vorhanden!");
       }
 
-      FileWriter fw = new FileWriter(EventFileLocation);
+      FileWriter fw = new FileWriter(EVENT_FILE_PATH);
       BufferedWriter bw = new BufferedWriter(fw);
-      bw.write(text);
+      bw.write(eventType.toString());
       bw.close();
     }catch(Exception e){
       logger.info("[FileWriter] Unhandled IO-Exception.");
+    }
+  }
+
+  public static ServerEventType GetCurrentEvent(){
+    try {
+      String content = Files.readString(Paths.get(EVENT_FILE_PATH));
+      return ServerEventType.valueOf(content);
+    } 
+    catch (IOException | IllegalArgumentException e) {
+      return ServerEventType.NONE;
     }
   }
 

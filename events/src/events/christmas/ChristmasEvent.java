@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import events.IEvent;
 import events.BlockLocationLoader;
-import events.EventType;
+import utils.ServerEventType;
 
 public class ChristmasEvent extends EZPlugin implements IEvent{
     private Map<BlockType, ArrayList<Location>> eventBlocks = new HashMap<>();
@@ -43,18 +43,18 @@ public class ChristmasEvent extends EZPlugin implements IEvent{
         placeEventBlocks();
         isRunning = true;
         dnaMakeSnow();
-        Utils.WriteToEventFile("christmas");
+        Utils.WriteToEventFile(getEventType());
     }
 
     public void endEvent(){
         logger.info("Das Event Christmas wird beendet.");
         removeEventBlocks();
         isRunning = false;
-        Utils.WriteToEventFile("no");
+        Utils.WriteToEventFile(ServerEventType.NONE);
     }
 
-    public EventType getEventType(){
-		return EventType.CHRISTMAS;
+    public ServerEventType getEventType(){
+		return ServerEventType.CHRISTMAS;
 	}
 
     public void dnaMakeSnow(){

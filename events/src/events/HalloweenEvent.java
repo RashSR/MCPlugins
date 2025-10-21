@@ -9,6 +9,7 @@ import com.pragprog.ahmine.ez.EZPlugin;
 import net.canarymod.api.world.blocks.BlockType;
 import net.canarymod.api.world.position.Location;
 import net.canarymod.api.world.World;
+import utils.ServerEventType;
 
 public class HalloweenEvent extends EZPlugin implements IEvent{
 	private World world;
@@ -24,7 +25,8 @@ public class HalloweenEvent extends EZPlugin implements IEvent{
 		world.setThundering(true);
 		world.setThunderStrength((float)Math.random());
 		placeEventBlocks();
-		Utils.WriteToEventFile("halloween");
+		Utils.WriteToEventFile(getEventType());
+		Utils.GetCurrentEvent();
 	}
 
 	public void endEvent(){
@@ -32,11 +34,11 @@ public class HalloweenEvent extends EZPlugin implements IEvent{
 		removeEventBlocks();
 		world.setRaining(false);
 		world.setThundering(false);
-		Utils.WriteToEventFile("no"); 
+		Utils.WriteToEventFile(ServerEventType.NONE);
 	}
 
-	public EventType getEventType(){
-		return EventType.HALLOWEEN;
+	public ServerEventType getEventType(){
+		return ServerEventType.HALLOWEEN;
 	}
 
 	private void placeEventBlocks(){
