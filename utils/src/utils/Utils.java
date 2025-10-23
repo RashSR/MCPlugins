@@ -24,6 +24,8 @@ import net.canarymod.api.world.position.Position;
 import net.canarymod.api.potion.PotionEffect;
 import net.canarymod.api.potion.PotionEffectType;
 import net.canarymod.api.factory.PotionFactory;
+import net.canarymod.api.world.effects.Particle;
+import net.canarymod.api.world.effects.Particle.Type;
 
 public class Utils extends EZPlugin{
   
@@ -297,5 +299,15 @@ public class Utils extends EZPlugin{
     PotionFactory factory = Canary.factory().getPotionFactory();
     PotionEffect speedEffect = factory.newPotionEffect(PotionEffectType.MOVESPEED, durationInSeconds * TICKS_PER_SECOND, effectLevel);
     player.addPotionEffect(speedEffect);
+  }
+
+  public static void SpawnParticleAroundLocation(Location loc, Particle.Type type){
+    //from the center of the block +- 0.8 offset
+    double offsetX = 0.5 + (Math.random() - 0.5) * 1.6;
+    double offsetY = 0.5 + (Math.random() - 0.5) * 1.6;
+    double offsetZ = 0.5 + (Math.random() - 0.5) * 1.6;
+
+    Particle particle = new Particle(loc.getX() + offsetX, loc.getY() + offsetY, loc.getZ() + offsetZ, type);
+    loc.getWorld().spawnParticle(particle);
   }
 }

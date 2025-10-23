@@ -66,8 +66,9 @@ public class events extends EZPlugin implements PluginListener {
 					currentEvent.startEvent();
 					break;
 				default:
-					break;
+					return;
 			}
+			//TODO: is displayed each time -> only after successful change 
 			Utils.BroadcastServerMessage(pluginName, "Setze event auf: " + ChatFormat.GOLD + Utils.GetCurrentEvent().toString());
 		}
   	}

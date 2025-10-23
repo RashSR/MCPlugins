@@ -25,6 +25,7 @@ import utils.Utils;
 import utils.Map;
 import utils.ScoreboardTimerTask;
 import utils.TeleportPlayerTask;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import net.canarymod.api.scoreboard.*;
@@ -41,6 +42,8 @@ import utils.DatabaseUtils;
 import utils.GivePlayerItemTask;
 import utils.IServerTaskCallback;
 import utils.ServerEventType;
+import utils.SpawnParticlesTask;
+import net.canarymod.api.world.effects.Particle;
 
 public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCallback {
   
@@ -58,6 +61,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private final int SPEED_FOR_FAST_CATCH_IN_SECONDS = 3;
   private final int SPEED_FOR_FAST_CATCH_STREAK_IN_SECONDS = 5;
   private final int GIVE_COMPASS_DELAY_IN_SECONDS = 30;
+  private final int SHOW_HELP_PARTICLE_AFTER_DELAY_IN_SECONDS = 45;
 
   private BlockType SNITCH_BLOCK_TYPE;
   private boolean isEnabled = false;
@@ -69,7 +73,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private Map SELECTED_MAP;
   private DatabaseUtils database;
 
-  //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, particles?
+  //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it
   //Achievements -> block spawned in der nähe, keinen pfeil verschossen, nur hand catches, bow hit > 50...
 
   @Override 
@@ -131,16 +135,29 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     totalCompassCount = 0;
   }
 
+  ArrayList<Particle.Type> particleTypes;
+
   private void checkForEvent(){
+    particleTypes = new ArrayList<>();
+
     switch (Utils.GetCurrentEvent()) {
       case ServerEventType.HALLOWEEN:
         SNITCH_BLOCK_TYPE = BlockType.JackOLantern;
+        particleTypes.add(Particle.Type.SMOKE_NORMAL);
+        particleTypes.add(Particle.Type.SMOKE_LARGE);
+        particleTypes.add(Particle.Type.FLAME);
         break;
       case ServerEventType.CHRISTMAS:
         SNITCH_BLOCK_TYPE = BlockType.LapisBlock;
+        particleTypes.add(Particle.Type.SNOW_SHOVEL);
+        particleTypes.add(Particle.Type.SNOWBALL);
+        particleTypes.add(Particle.Type.REDSTONE);
         break;
       case ServerEventType.NONE:
       default:
+        particleTypes.add(Particle.Type.CRIT);
+        particleTypes.add(Particle.Type.PORTAL);
+        particleTypes.add(Particle.Type.VILLAGER_HAPPY);
         SNITCH_BLOCK_TYPE = BlockType.GoldBlock;
         break;
     } 
@@ -232,10 +249,17 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
         snitchLocation.getWorld().setBlockAt(snitchLocation, SNITCH_BLOCK_TYPE);
         hasAirBlockBeenSelected = true;
         givePlayerDelayedCompass();
+        spawnDelayedParticles();
       }
     }
   }
-  
+  private SpawnParticlesTask spawnParticlesTask;
+
+  private void spawnDelayedParticles(){
+    spawnParticlesTask = new SpawnParticlesTask(snitchLocation, particleTypes, SHOW_HELP_PARTICLE_AFTER_DELAY_IN_SECONDS);
+    Canary.getServer().addSynchronousTask(spawnParticlesTask);
+  }
+
   private GivePlayerItemTask givePlayerItemTask;
 
   private void givePlayerDelayedCompass(){
@@ -356,6 +380,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private void snitchCatched(int pointsScored, SoundEffect.Type soundType){
     snitchLocation.getWorld().setBlockAt(snitchLocation, BlockType.Air);
     removeCompassFromPlayer();
+    Canary.getServer().removeSynchronousTask(spawnParticlesTask);
     currentSnitchCount++;
     boolean isFastCatch = handleFastCatches();
 
@@ -616,6 +641,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
 
   private void cleanUpAfterGame(){
     removeItemsFromPlayer();
+    Canary.getServer().removeSynchronousTask(spawnParticlesTask);
     Utils.clearScoreboard(scoreboard, timerTask, objective);
     isEnabled = false;
     isFirstStartPort = true;
