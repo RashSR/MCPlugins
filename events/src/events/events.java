@@ -90,6 +90,4 @@ public class events extends EZPlugin implements PluginListener {
 
     	return null;
   	}
-
-	//TODO: end event after servershutdown
 }
