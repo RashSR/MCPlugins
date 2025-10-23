@@ -296,7 +296,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       else
         return;
       
-      Utils.BroadcastServerMessage(pluginName, "Das Spiel startet auf Map: " + ChatFormat.GOLD + SELECTED_MAP.toString());
+      Utils.BroadcastServerMessage(pluginName, "Das Spiel startet auf der Map: " + ChatFormat.GOLD + SELECTED_MAP.toString());
       hasStartedGame = true;
       this.player = playerClicked;
       Canary.getServer().addSynchronousTask(new TeleportPlayerTask(playerClicked, SELECTED_MAP.GetRandomSpawnPosition(), 3));

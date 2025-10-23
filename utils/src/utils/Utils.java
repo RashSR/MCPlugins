@@ -229,7 +229,8 @@ public class Utils extends EZPlugin{
 
     //Canary signs are very buggy in 1.8 -> use server commands
     for (int i = 1; i <= 4; i++) {
-      updateSignLine(i, loc, text[i-1]);
+      if(text[i-1] != null || !text[i-1].isEmpty())
+        updateSignLine(i, loc, text[i-1]);
     }
   }
 
