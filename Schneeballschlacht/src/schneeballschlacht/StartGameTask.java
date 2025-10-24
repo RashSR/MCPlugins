@@ -13,13 +13,16 @@ import net.canarymod.api.world.blocks.BlockType;
 import utils.Utils;
 
 public class StartGameTask extends ServerTask{
+    private static final long TaskDelay = 1 * Utils.TICKS_PER_SECOND;
+    private static final boolean isContinousTask = true;
+
     private Schneeballschlacht parentPlugin;
     private boolean has2Players;
     private int elapsedTimeInSeconds;
     private int teleportTimeInSeconds;
 
     public StartGameTask(Schneeballschlacht parentPlugin, boolean has2Players, int teleportTimeInSeconds){
-        super(Canary.getServer(), 20, true);
+        super(Canary.getServer(), TaskDelay, isContinousTask);
         this.parentPlugin = parentPlugin;
         this.has2Players = has2Players;
         this.teleportTimeInSeconds = teleportTimeInSeconds;

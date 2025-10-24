@@ -15,7 +15,7 @@ public class Game extends EZPlugin{
 	private Player player2;
 	private boolean hasFallDmg = false;
 	static Server server = Canary.instance().getServer();
-	static String tag = ChatFormat.DARK_AQUA + "[Snowballarena] ";
+	protected static String pluginName = ChatFormat.DARK_AQUA + "[Snowballarena] ";
 	private boolean isPvp = true;
 	private boolean changedFallDmg = false;
 	private boolean changedPvp = false;
@@ -24,7 +24,7 @@ public class Game extends EZPlugin{
 	private Map map; //falls null map = Map.randomMap();
 	private WaitTask waitTask;
 	private World world;
-	private GainItemTask gainTask;
+	private GainSnowballTask gainTask;
 	private int amountStartSnowballs = 3;
 	private boolean canHeal = false;
 	private int MAX_KNOCKBACK = 2;
@@ -39,7 +39,7 @@ public class Game extends EZPlugin{
 	}
 
 	public Game(World world, Snowballarena sa){
-		server.broadcastMessage(tag+ChatFormat.DARK_GREEN + "Ein neues Spiel beginnt!"); 
+		server.broadcastMessage(pluginName+ChatFormat.DARK_GREEN + "Ein neues Spiel beginnt!"); 
 		this.world=world;
 		this.sa = sa;
 		this.map = Map.QUIDDITCH;
@@ -54,7 +54,7 @@ public class Game extends EZPlugin{
 			endung="en";
 		}
 		snowballDmg=dmg;
-		server.broadcastMessage(tag+ChatFormat.DARK_GREEN+"Ein Schneeball macht "+ChatFormat.GOLD+dmg/2+" Herz"+endung+ChatFormat.DARK_GREEN+"Schaden.");
+		server.broadcastMessage(pluginName+ChatFormat.DARK_GREEN+"Ein Schneeball macht "+ChatFormat.GOLD+dmg/2+" Herz"+endung+ChatFormat.DARK_GREEN+"Schaden.");
 	}
 
 	public void setPvp(boolean isPvp){
@@ -68,21 +68,21 @@ public class Game extends EZPlugin{
 		}else{
 			flag="PVE";
 		}
-		server.broadcastMessage(tag+ChatFormat.DARK_GREEN+"Spielmodus wurde auf "+ChatFormat.GOLD+flag+ChatFormat.DARK_GREEN+" gestellt.");
+		server.broadcastMessage(pluginName+ChatFormat.DARK_GREEN+"Spielmodus wurde auf "+ChatFormat.GOLD+flag+ChatFormat.DARK_GREEN+" gestellt.");
 		changedPvp=true;
 	}
 
 	public void setPlayer1(Player player){
 		if(player1!=null){
 			if(!player.getName().equals(player1.getName())){
-				server.broadcastMessage(tag+ChatFormat.GRAY+"Spieler 1"+ChatFormat.DARK_GREEN+"ist schon an "+ChatFormat.GOLD+player1.getName()+ChatFormat.DARK_GREEN+" vergeben.");
+				server.broadcastMessage(pluginName+ChatFormat.GRAY+"Spieler 1"+ChatFormat.DARK_GREEN+"ist schon an "+ChatFormat.GOLD+player1.getName()+ChatFormat.DARK_GREEN+" vergeben.");
 			}
 			return;
 		}
 		if(!isDuplicate(player)){
 			this.player1=player;
 			if(isFirstMatch){
-				server.broadcastMessage(tag+ChatFormat.GRAY+"Spieler 1"+ChatFormat.DARK_GREEN+"ist jetzt: "+ChatFormat.GOLD+player.getName()+ChatFormat.DARK_GREEN+".");
+				server.broadcastMessage(pluginName+ChatFormat.GRAY+"Spieler 1"+ChatFormat.DARK_GREEN+"ist jetzt: "+ChatFormat.GOLD+player.getName()+ChatFormat.DARK_GREEN+".");
 			}
 		}
 	}
@@ -90,14 +90,14 @@ public class Game extends EZPlugin{
 	public void setPlayer2(Player player){
 		if(player2!=null){
 			if(!player.getName().equals(player2.getName())){
-				server.broadcastMessage(tag+ChatFormat.GRAY+"Spieler 2"+ChatFormat.DARK_GREEN+"ist schon an "+ChatFormat.GOLD+player2.getName()+ChatFormat.DARK_GREEN+" vergeben.");
+				server.broadcastMessage(pluginName+ChatFormat.GRAY+"Spieler 2"+ChatFormat.DARK_GREEN+"ist schon an "+ChatFormat.GOLD+player2.getName()+ChatFormat.DARK_GREEN+" vergeben.");
 			}
 			return;
 		}
 		if(!isDuplicate(player)){
 			this.player2=player;
 			if(isFirstMatch){
-				server.broadcastMessage(tag+ChatFormat.GRAY+"Spieler 2"+ChatFormat.DARK_GREEN+" ist jetzt: "+ChatFormat.GOLD+player.getName()+ChatFormat.DARK_GREEN+".");
+				server.broadcastMessage(pluginName+ChatFormat.GRAY+"Spieler 2"+ChatFormat.DARK_GREEN+" ist jetzt: "+ChatFormat.GOLD+player.getName()+ChatFormat.DARK_GREEN+".");
 			}
 		}
 	}
@@ -113,7 +113,7 @@ public class Game extends EZPlugin{
 		}else{
 			flag="aus";
 		}
-		server.broadcastMessage(tag+ChatFormat.DARK_GREEN+"Fallschaden ist jetzt "+ChatFormat.GOLD+flag+ChatFormat.DARK_GREEN+".");
+		server.broadcastMessage(pluginName+ChatFormat.DARK_GREEN+"Fallschaden ist jetzt "+ChatFormat.GOLD+flag+ChatFormat.DARK_GREEN+".");
 		changedFallDmg=true;
 	}
 
@@ -124,13 +124,13 @@ public class Game extends EZPlugin{
 		}
 		if(player1 != null){
 			if(playerName.equals(player1.getName())){
-				server.broadcastMessage(tag+ChatFormat.DARK_GREEN+"Spieler "+ChatFormat.GOLD+playerName+ChatFormat.DARK_GREEN+" ist "+ChatFormat.DARK_RED+"bereits"+ChatFormat.DARK_GREEN+" beigetreten!");
+				server.broadcastMessage(pluginName+ChatFormat.DARK_GREEN+"Spieler "+ChatFormat.GOLD+playerName+ChatFormat.DARK_GREEN+" ist "+ChatFormat.DARK_RED+"bereits"+ChatFormat.DARK_GREEN+" beigetreten!");
 				return true;
 			}
 		}
 		if(player2!=null){
 			if(playerName.equals(player2.getName())){
-				server.broadcastMessage(tag+ChatFormat.DARK_GREEN+"Spieler "+ChatFormat.GOLD+playerName+ChatFormat.DARK_GREEN+" ist "+ChatFormat.DARK_RED+"bereits"+ChatFormat.DARK_GREEN+" beigetreten!");
+				server.broadcastMessage(pluginName+ChatFormat.DARK_GREEN+"Spieler "+ChatFormat.GOLD+playerName+ChatFormat.DARK_GREEN+" ist "+ChatFormat.DARK_RED+"bereits"+ChatFormat.DARK_GREEN+" beigetreten!");
 				return true;
 			}
 		}
@@ -179,7 +179,7 @@ public class Game extends EZPlugin{
 				loc2 = new Location(this.world, 527, 227, 395, 0f, 90f);
 				break;
 			default: 
-				logger.info(tag+"Es wurde keine Map zugewiesen.");
+				logger.info(pluginName+"Es wurde keine Map zugewiesen.");
 				loc1 = new Location(world,0, 0, 0, 0f, 0f);
 				loc2 = new Location(world,0, 0, 0, 0f, 0f);
 		}
@@ -216,7 +216,7 @@ public class Game extends EZPlugin{
             givePlayerKnockback(hitPlayer, throwingPlayer);
             return;
         }else{
-        	Canary.instance().getServer().broadcastMessage(tag + ChatFormat.GOLD + throwingPlayer.getName() + ChatFormat.DARK_GREEN + " hat mit "+ChatFormat.GOLD+throwingPlayer.getHealth()/2+ChatFormat.DARK_GREEN+" verbleibenden Herzen gewonnen.");
+        	Canary.instance().getServer().broadcastMessage(pluginName + ChatFormat.GOLD + throwingPlayer.getName() + ChatFormat.DARK_GREEN + " hat mit "+ChatFormat.GOLD+throwingPlayer.getHealth()/2+ChatFormat.DARK_GREEN+" verbleibenden Herzen gewonnen.");
         	hitPlayer.setHealth(20f);
         	throwingPlayer.setHealth(20f);
         	endGame(throwingPlayer);
@@ -305,7 +305,7 @@ public class Game extends EZPlugin{
 		teleportPlayersHome();
 		world.setDifficulty(World.Difficulty.PEACEFUL);
 		world.setRaining(false);
-		Snowballarena.game=null;
+		sa.game = null;
 		this.waitTask=null;
 		player1.getInventory().clearInventory();
 		player2.getInventory().clearInventory();
@@ -330,7 +330,7 @@ public class Game extends EZPlugin{
 		player1.getInventory().addItem(ItemType.SnowBall, amountStartSnowballs);
 		player2.getInventory().addItem(ItemType.SnowBall, amountStartSnowballs);
 		world.setDifficulty(World.Difficulty.EASY);
-		this.gainTask = new GainItemTask(this);
+		this.gainTask = new GainSnowballTask(this);
 		Canary.getServer().addSynchronousTask(this.gainTask);
 	}
 
