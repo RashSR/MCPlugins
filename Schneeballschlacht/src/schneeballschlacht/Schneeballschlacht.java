@@ -14,7 +14,6 @@ import net.canarymod.api.DamageType;
 import net.canarymod.api.entity.Entity;
 import net.canarymod.api.entity.EntityType;
 import net.canarymod.hook.entity.ProjectileHitHook;
-import net.canarymod.api.entity.living.*;
 import net.canarymod.hook.player.HealthChangeHook;
 import net.canarymod.api.world.blocks.BlockType;
 import net.canarymod.api.world.blocks.Block;
@@ -37,7 +36,7 @@ public class Schneeballschlacht extends EZPlugin implements PluginListener {
 	private List<Player> playerList = new ArrayList<Player>();
 	private Map<String,String> teamColor = new HashMap<String,String>();
 	private boolean hasGameStarted = false;
-	private boolean hasNoFallDamage;
+	private boolean isFallDamageDeactivated;
 	private boolean isFallDamageClicked = false; //ob einstellung schon ausgewählt wurde
 	private boolean isSnowballDamageClicked =false;
 	private boolean isPVPGame;
@@ -45,11 +44,17 @@ public class Schneeballschlacht extends EZPlugin implements PluginListener {
 	private boolean has2Players; //true = 2 Spieler
 	private boolean isPlayer2Clicked = false;
 	private boolean isColorPicked = false;
-	private int DAMAGE_SNOWBALL = 2;
+	private int SNOWBALL_DAMAGE = 2;
 
 	protected static final String pluginName = "[Schneeballschlacht]";
 	private final Location SnowballHubLocation = new Location(35, 67, 259);
+	private final Location redstoneLampFallDamageLocation = new Location(25, 68, 261);
+	private final Location redstoneLampDifficultyLocation = new Location(31, 68, 255);
+	private final Location redstoneLampPlayerCountLocation = new Location(37, 68, 261);
+	private final Location redstoneLampPVPPVELocation = new Location(31, 68, 267);
 	private final int TELEPORT_DELAY_IN_SECONDS = 10;
+	private final BlockType redstoneLampOffBlockType = BlockType.RedstoneBlock;
+	private final BlockType redstoneLampOnBlockType = BlockType.EmeraldBlock;
 
 	@Override
 	public boolean enable() {  
@@ -126,24 +131,21 @@ public class Schneeballschlacht extends EZPlugin implements PluginListener {
   
   	@HookHandler
  	public void TeleportHookEvent(TeleportHook event){
-		Player player = event.getPlayer();
-		Location ausgangloc = event.getCurrentLocation();
-		double xa = ausgangloc.getX();
-		double za = ausgangloc.getZ();
-		World world = ausgangloc.getWorld();
-		Location zielloc = event.getDestination();
-		double xz = zielloc.getX();
-		double zz = zielloc.getZ();
+		Location startingLocation = event.getCurrentLocation();
+		double xa = startingLocation.getX();
+		double za = startingLocation.getZ();
+		World world = startingLocation.getWorld();
+		Location destinationLocation = event.getDestination();
+		double destinationX = destinationLocation.getX();
+		double destinationZ = destinationLocation.getZ();
 
 		if (xa >= 26 && xa <= 36 && za >= 256 && za <= 266){
-			if(xz>12&&xz<45){
-				if(zz>221 && zz<285){
-					return;
-				}
-			}
+			if(destinationX > 12 && destinationX < 45 && destinationZ > 221 && destinationZ < 285)
+				return;
 			else{
-			teamColor.remove(player.getDisplayName());
-			player.setPrefix(ChatFormat.WHITE + "");
+				Player player = event.getPlayer();
+				teamColor.remove(player.getDisplayName());
+				player.setPrefix(ChatFormat.WHITE + "");
 			}
 		}
 	}
@@ -152,25 +154,22 @@ public class Schneeballschlacht extends EZPlugin implements PluginListener {
 	@HookHandler
 	public void ProjectileHitHookEvent(ProjectileHitHook event){
 		if(hasGameStarted){
-			Entity schneeball = event.getProjectile();
-			Entity ent = event.getEntityHit();
+			Entity snowball = event.getProjectile();
+			Entity entity = event.getEntityHit();
 
-			if (schneeball.getEntityType() == EntityType.SNOWBALL) {
-				if(ent instanceof Player player){
-					if(player.getHealth() > DAMAGE_SNOWBALL){
-						player.setHealth(player.getHealth() - DAMAGE_SNOWBALL);
-						return;
-					}
-					if(player.getHealth() <= DAMAGE_SNOWBALL){
-						Utils.BroadcastServerMessage(pluginName, getTeamColorFromPlayer(player) + ChatFormat.DARK_GREEN + " ist gestorben.");
-						player.teleportTo(SnowballHubLocation);
-						resetGame();
-					}
+			if (snowball.getEntityType() == EntityType.SNOWBALL && entity instanceof Player player) {
+				if(player.getHealth() > SNOWBALL_DAMAGE){
+					player.setHealth(player.getHealth() - SNOWBALL_DAMAGE);
+					return;
+				}
+				if(player.getHealth() <= SNOWBALL_DAMAGE){
+					Utils.BroadcastServerMessage(pluginName, getPlayerInTeamColor(player) + ChatFormat.DARK_GREEN + " ist gestorben.");
+					player.teleportTo(SnowballHubLocation);
+					resetGame();
 				}
 			}
 		}
 	}
-
 
   	@HookHandler
   	public void HealthChangeHookEvent(HealthChangeHook event){
@@ -191,253 +190,189 @@ public class Schneeballschlacht extends EZPlugin implements PluginListener {
 			Entity attacker = event.getAttacker();
 
 			if (defender instanceof Player player) {
-				if(event.getDamageDealt()>=player.getHealth()){
+				if(event.getDamageDealt() >= player.getHealth()){
 					event.setDamageDealt(0f);
-					Utils.BroadcastServerMessage(pluginName, getTeamColorFromPlayer(player) + ChatFormat.DARK_GREEN +" ist gestorben.");
+					Utils.BroadcastServerMessage(pluginName, getPlayerInTeamColor(player) + ChatFormat.DARK_GREEN +" ist gestorben.");
 					player.teleportTo(SnowballHubLocation);
 					resetGame();
 				}
-				if(attacker instanceof Player){
+				if(attacker instanceof Player || (event.getDamageSource().getDamagetype() == DamageType.FALL && isFallDamageDeactivated))
 					event.setCanceled();
-				}
-				if (event.getDamageSource().getDamagetype() == DamageType.FALL && hasNoFallDamage) {
-					event.setCanceled();
-				}
 			}
 		}
 	}
 
     @HookHandler
   	public void BlockRightClickHookEvent(BlockRightClickHook event){
+		Block clickedBlock = event.getBlockClicked();
+		World world = clickedBlock.getWorld();
+		int clickedX = clickedBlock.getX();
+		int clickedY = clickedBlock.getY();
+		int clickedZ = clickedBlock.getZ();
+		Player player = event.getPlayer();
 
-    Block geklickterblock = event.getBlockClicked();
-    Location lampfall = new Location(25, 68, 261);
-    Location lampeasyhard = new Location(31, 68, 255);
-    Location lampplayer12 = new Location(37, 68, 261);
-    Location lamppvppve = new Location(31, 68, 267);
-    BlockType lampean = BlockType.EmeraldBlock;
-    BlockType lampeaus = BlockType.RedstoneBlock;
-    int x = geklickterblock.getX();
-    int y = geklickterblock.getY();
-    int z = geklickterblock.getZ();
-    Player player = event.getPlayer();
+		if(teamColor.size() > 1)
+			playerList = Canary.getServer().getPlayerList();
 
-    if(teamColor.size() > 1){
+		if(clickedY == 67){// alle bei x = 37
+			if(clickedZ == 260){
+				if(!teamColor.get(player.getDisplayName()).equalsIgnoreCase("purple")){
+					if(teamColor.size() > 1){
+						for(Player spieler : playerList){
+							double xs = spieler.getX();
+							double zs = spieler.getZ();
 
-      playerList = Canary.getServer().getPlayerList();
-
-                            }
-
-    if(y==67){// alle bei x = 37
-      if(z==260){
-      	if(!teamColor.get(player.getDisplayName()).equalsIgnoreCase("purple")){
-      		          if(teamColor.size() > 1){
-            for(Player spieler : playerList){
-              double xs = spieler.getX();
-              double zs = spieler.getZ();
-              if(xs >= 25 && xs <= 37 && zs >= 255 && zs <= 267){
-                if(teamColor.get(spieler.getDisplayName()).equalsIgnoreCase("purple")){
-
-                  displayTeamAlreadyUsedMessage();
-                  return;
-
-                                                                                   }
-                                                                  }
-                                              }
-                                  } 
-
-      	teamColor.put(player.getDisplayName(), "purple");
-      	isColorPicked = true;
-        player.setPrefix(ChatFormat.DARK_PURPLE + "");
-        Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Schneeballarena] " + ChatFormat.DARK_PURPLE + player.getDisplayName() + ChatFormat.DARK_GREEN + " ist jetzt in Team " + ChatFormat.DARK_PURPLE + "lila" + ChatFormat.DARK_GREEN + ".");
-      	startGame();
-      }}
-
-      if(z==262){
-      	if(!teamColor.get(player.getDisplayName()).equalsIgnoreCase("yellow")){
-
-      	if(teamColor.size() > 1){
-            for(Player spieler : playerList){
-              double xs = spieler.getX();
-              double zs = spieler.getZ();
-              if(xs >= 25 && xs <= 37 && zs >= 255 && zs <= 267){
-                if(teamColor.get(spieler.getDisplayName()).equalsIgnoreCase("yellow")){
-
-                  displayTeamAlreadyUsedMessage();
-                  return;
-
-                                                                                   }
-                                                                  }
-                                              }
-                                  } 
-
-      	teamColor.put(player.getDisplayName(), "yellow");
-      	isColorPicked = true;
-        player.setPrefix(ChatFormat.YELLOW + "");
-        Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Schneeballarena] " + ChatFormat.YELLOW + player.getDisplayName() + ChatFormat.DARK_GREEN + " ist jetzt in Team " + ChatFormat.YELLOW + "gelb" + ChatFormat.DARK_GREEN + ".");
-      	startGame();
-      }}         
-    }
-
-    if(y==69){
-    	if(z==260){
-    		if(!teamColor.get(player.getDisplayName()).equalsIgnoreCase("red")){
-				if(teamColor.size() > 1){
-					for(Player spieler : playerList){
-					double xs = spieler.getX();
-					double zs = spieler.getZ();
-						if(xs >= 25 && xs <= 37 && zs >= 255 && zs <= 267){
-							if(teamColor.get(spieler.getDisplayName()).equalsIgnoreCase("red")){
-								displayTeamAlreadyUsedMessage();
-								return;
+							if(xs >= 25 && xs <= 37 && zs >= 255 && zs <= 267){
+								if(teamColor.get(spieler.getDisplayName()).equalsIgnoreCase("purple")){
+									displayTeamAlreadyUsedMessage();
+									return;
+								}
 							}
 						}
-					}
-				} 
-    	  teamColor.put(player.getDisplayName(), "red");
-    	  isColorPicked = true;
-          player.setPrefix(ChatFormat.RED + "");
-          Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Schneeballarena] " + ChatFormat.RED + player.getDisplayName() + ChatFormat.DARK_GREEN + " ist jetzt in Team " + ChatFormat.RED + "rot" + ChatFormat.DARK_GREEN + ".");
-    	  startGame();
-    	}}
-    	if(z==262){
-    		if(!teamColor.get(player.getDisplayName()).equalsIgnoreCase("green")){
-				if(teamColor.size() > 1){
-					for(Player spieler : playerList){
-						double xs = spieler.getX();
-						double zs = spieler.getZ();
-						if(xs >= 25 && xs <= 37 && zs >= 255 && zs <= 267){
-							if(teamColor.get(spieler.getDisplayName()).equalsIgnoreCase("green")){
-								displayTeamAlreadyUsedMessage();
-								return;
+					} 
+
+					teamColor.put(player.getDisplayName(), "purple");
+					isColorPicked = true;
+					player.setPrefix(ChatFormat.DARK_PURPLE + "");
+					Utils.BroadcastServerMessage(pluginName,  getPlayerInTeamColor(player) + ChatFormat.DARK_GREEN + " ist jetzt in Team " + ChatFormat.DARK_PURPLE + "lila" + ChatFormat.DARK_GREEN + ".");
+					startGame();
+				}
+			}
+
+			if(clickedZ == 262){
+				if(!teamColor.get(player.getDisplayName()).equalsIgnoreCase("yellow")){
+					if(teamColor.size() > 1){
+						for(Player spieler : playerList){
+							double xs = spieler.getX();
+							double zs = spieler.getZ();
+
+							if(xs >= 25 && xs <= 37 && zs >= 255 && zs <= 267){
+								if(teamColor.get(spieler.getDisplayName()).equalsIgnoreCase("yellow")){
+									displayTeamAlreadyUsedMessage();
+									return;
+								}
 							}
 						}
-					}
-				} 
-				teamColor.put(player.getDisplayName(), "green");
-				isColorPicked = true;
-				player.setPrefix(ChatFormat.DARK_GREEN + "");
-				Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Schneeballarena] " + ChatFormat.GREEN + player.getDisplayName() + ChatFormat.DARK_GREEN + " ist jetzt in Team " + ChatFormat.GREEN + "gruen" + ChatFormat.DARK_GREEN + ".");
-				startGame();
-			}		
+					} 
+
+					teamColor.put(player.getDisplayName(), "yellow");
+					isColorPicked = true;
+					player.setPrefix(ChatFormat.YELLOW + "");
+					Utils.BroadcastServerMessage(pluginName,  getPlayerInTeamColor(player) + ChatFormat.DARK_GREEN + " ist jetzt in Team " + ChatFormat.YELLOW + "gelb" + ChatFormat.DARK_GREEN + ".");
+					startGame();
+				}
+			}         
 		}
-    } 
 
-    if(geklickterblock.getType() == BlockType.WallSign){
-    	
-    	if(isFallDamageClicked){
-     if(x == 26 && z == 262 && hasNoFallDamage){
-      hasNoFallDamage = false;
-      Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Schneeballarena] " + ChatFormat.DARK_GREEN + "Fallschaden ist " + ChatFormat.GOLD + "an" + ChatFormat.DARK_GREEN +".");
-      lampfall.getWorld().setBlockAt(lampfall, lampean);
-           }
-      if(x == 26 && z == 260 && !hasNoFallDamage){     
-      hasNoFallDamage = true;
-      Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Schneeballarena] " +ChatFormat.DARK_GREEN + "Fallschaden ist " +ChatFormat.GOLD + "aus" + ChatFormat.DARK_GREEN + ".");
-      lampfall.getWorld().setBlockAt(lampfall, lampean);
-  }}
-  if(!isFallDamageClicked){
-  	     if(x == 26 && z == 262){
-      hasNoFallDamage = false;
-      isFallDamageClicked = true;
-      Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Schneeballarena] " + ChatFormat.DARK_GREEN + "Fallschaden ist " + ChatFormat.GOLD + "an" + ChatFormat.DARK_GREEN +".");
-      lampfall.getWorld().setBlockAt(lampfall, lampean);
-           }
-      if(x == 26 && z == 260){     
-      hasNoFallDamage = true;
-      isFallDamageClicked = true;
-      Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Schneeballarena] " +ChatFormat.DARK_GREEN + "Fallschaden ist " +ChatFormat.GOLD + "aus" + ChatFormat.DARK_GREEN + ".");
-      lampfall.getWorld().setBlockAt(lampfall, lampean);
-  }
-  }
-  	if(isSnowballDamageClicked){
-  	  if(x == 30 && z == 256 && DAMAGE_SNOWBALL !=2){
-  	  	DAMAGE_SNOWBALL = 2;
-  	  	Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Schneeballarena] " + ChatFormat.DARK_GREEN + "Schneeball macht " + ChatFormat.GOLD + "ein" + ChatFormat.DARK_GREEN + " Herz Schaden.");
-  	  	lampeasyhard.getWorld().setBlockAt(lampeasyhard, lampean);
-  	  }
-  	  if(x == 32 && z == 256 && DAMAGE_SNOWBALL !=4){
-  	  	DAMAGE_SNOWBALL = 4;
-  	  	Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Schneeballarena] " + ChatFormat.DARK_GREEN + "Schneeball macht " + ChatFormat.GOLD + "zwei" + ChatFormat.DARK_GREEN + " Herzen Schaden.");
-  	  	lampeasyhard.getWorld().setBlockAt(lampeasyhard, lampean);
-  	  }}
-  	  if(!isSnowballDamageClicked){
-  	  	  	  if(x == 30 && z == 256){
-  	  	DAMAGE_SNOWBALL = 2;
-  	  	isSnowballDamageClicked = true;
-  	  	Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Schneeballarena] " + ChatFormat.DARK_GREEN + "Schneeball macht " + ChatFormat.GOLD + "ein" + ChatFormat.DARK_GREEN + " Herz Schaden.");
-  	  	lampeasyhard.getWorld().setBlockAt(lampeasyhard, lampean);
-  	  }
-  	  if(x == 32 && z == 256){
-  	  	DAMAGE_SNOWBALL = 4;
-  	  	isSnowballDamageClicked = true;
-  	  	Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Schneeballarena] " + ChatFormat.DARK_GREEN + "Schneeball macht " + ChatFormat.GOLD + "zwei" + ChatFormat.DARK_GREEN + " Herzen Schaden.");
-  	  	lampeasyhard.getWorld().setBlockAt(lampeasyhard, lampean);
-  	  }
-  	  }
-  	  if(isPlayer2Clicked){
-  	  if(x == 36 && z == 262 && !has2Players){
-  	  	has2Players=true;
-  	  	Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA+"[Schneeballarena] "+ ChatFormat.DARK_GREEN + "Es spielen " + ChatFormat.GOLD + "zwei" + ChatFormat.DARK_GREEN + " Spieler.");
-  	  	lampplayer12.getWorld().setBlockAt(lampplayer12, lampean);
-  	  }
-  	  if(x == 36 && z == 260 && has2Players){
-  	  	has2Players=false;
-  	  	Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA+"[Schneeballarena] "+ ChatFormat.DARK_GREEN + "Es spielt " + ChatFormat.GOLD + "ein" + ChatFormat.DARK_GREEN + " Spieler.");
-  	  	lampplayer12.getWorld().setBlockAt(lampplayer12, lampean);
-  	  }}
-  	  if(!isPlayer2Clicked){
-  	   	  if(x == 36 && z == 262){
-  	  	has2Players=true;
-  	  	isPlayer2Clicked = true;
-  	  	Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA+"[Schneeballarena] "+ ChatFormat.DARK_GREEN + "Es spielen " + ChatFormat.GOLD + "zwei" + ChatFormat.DARK_GREEN + " Spieler.");
-  	  	lampplayer12.getWorld().setBlockAt(lampplayer12, lampean);
-  	  }
-  	  if(x == 36 && z == 260){
-  	  	has2Players=false;
-  	  	isPlayer2Clicked = true;
-  	  	Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA+"[Schneeballarena] "+ ChatFormat.DARK_GREEN + "Es spielt " + ChatFormat.GOLD + "ein" + ChatFormat.DARK_GREEN + " Spieler.");
-  	  	lampplayer12.getWorld().setBlockAt(lampplayer12, lampean);
-  	  } 	
-  	  }
-  	  if(isPvpClicked){
-  	  if(x == 32 && z == 266 && !isPVPGame){
-  	  	isPVPGame = true;
-  	  	Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA+"[Schneeballarena] "+ ChatFormat.DARK_GREEN + "Der Modus " + ChatFormat.GOLD + "PVP" + ChatFormat.DARK_GREEN+" wird gespielt.");
-  	  	lamppvppve.getWorld().setBlockAt(lamppvppve, lampean);
-  	  }
-  	  if(x == 30 && z == 266 && isPVPGame){
-  	  	isPVPGame = false;
-  	  	Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA+"[Schneeballarena] "+ ChatFormat.DARK_GREEN + "Der Modus " + ChatFormat.GOLD + "PVE" + ChatFormat.DARK_GREEN+" wird gespielt.");
-  	  	lamppvppve.getWorld().setBlockAt(lamppvppve, lampean);
-  	  }}
-  	  if(!isPvpClicked){
+		if(clickedY == 69){
+			if(clickedZ == 260){
+				if(!teamColor.get(player.getDisplayName()).equalsIgnoreCase("red")){
+					if(teamColor.size() > 1){
+						for(Player spieler : playerList){
+							double xs = spieler.getX();
+							double zs = spieler.getZ();
 
-  	  if(x == 32 && z == 266){
-  	  	isPVPGame = true;
-  	  	isPvpClicked = true;
-  	  	Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA+"[Schneeballarena] "+ ChatFormat.DARK_GREEN + "Der Modus " + ChatFormat.GOLD + "PVP" + ChatFormat.DARK_GREEN+" wird gespielt.");
-  	  	lamppvppve.getWorld().setBlockAt(lamppvppve, lampean);
-  	  }
-  	  if(x == 30 && z == 266){
-  	  	isPVPGame = false;
-  	  	isPvpClicked = true;
-  	  	Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA+"[Schneeballarena] "+ ChatFormat.DARK_GREEN + "Der Modus " + ChatFormat.GOLD + "PVE" + ChatFormat.DARK_GREEN+" wird gespielt.");
-  	  	lamppvppve.getWorld().setBlockAt(lamppvppve, lampean);
-  	  }}
-  	  startGame();
-  	  }
+							if(xs >= 25 && xs <= 37 && zs >= 255 && zs <= 267){
+								if(teamColor.get(spieler.getDisplayName()).equalsIgnoreCase("red")){
+									displayTeamAlreadyUsedMessage();
+									return;
+								}
+							}
+						}
+					} 
+
+					teamColor.put(player.getDisplayName(), "red");
+					isColorPicked = true;
+					player.setPrefix(ChatFormat.RED + "");
+					Utils.BroadcastServerMessage(pluginName,  getPlayerInTeamColor(player) + ChatFormat.DARK_GREEN + " ist jetzt in Team " + ChatFormat.RED + "rot" + ChatFormat.DARK_GREEN + ".");
+					startGame();
+				}
+			}
+
+			if(clickedZ==262){
+				if(!teamColor.get(player.getDisplayName()).equalsIgnoreCase("green")){
+					if(teamColor.size() > 1){
+						for(Player spieler : playerList){
+							double xs = spieler.getX();
+							double zs = spieler.getZ();
+
+							if(xs >= 25 && xs <= 37 && zs >= 255 && zs <= 267){
+								if(teamColor.get(spieler.getDisplayName()).equalsIgnoreCase("green")){
+									displayTeamAlreadyUsedMessage();
+									return;
+								}
+							}
+						}
+					} 
+
+					teamColor.put(player.getDisplayName(), "green");
+					isColorPicked = true;
+					player.setPrefix(ChatFormat.DARK_GREEN + "");
+					Utils.BroadcastServerMessage(pluginName,  getPlayerInTeamColor(player) + ChatFormat.DARK_GREEN + " ist jetzt in Team " + ChatFormat.GREEN + "gruen" + ChatFormat.DARK_GREEN + ".");
+					startGame();
+				}		
+			}
+		} 
+
+    	if(clickedBlock.getType() == BlockType.WallSign){
+			if(clickedX == 26 && clickedZ == 262){
+				isFallDamageDeactivated = false;
+				isFallDamageClicked = true;
+				Utils.BroadcastServerMessage(pluginName, "Fallschaden ist " + ChatFormat.GOLD + "an" + ChatFormat.DARK_GREEN +".");
+				world.setBlockAt(redstoneLampFallDamageLocation , redstoneLampOnBlockType);
+			}
+			if(clickedX == 26 && clickedZ == 260){     
+				isFallDamageDeactivated = true;
+				isFallDamageClicked = true;
+				Utils.BroadcastServerMessage(pluginName, "Fallschaden ist " +ChatFormat.GOLD + "aus" + ChatFormat.DARK_GREEN + ".");
+				world.setBlockAt(redstoneLampFallDamageLocation , redstoneLampOnBlockType);
+			}
+
+			if(clickedX == 30 && clickedZ == 256){
+				SNOWBALL_DAMAGE = 2;
+				isSnowballDamageClicked = true;
+				Utils.BroadcastServerMessage(pluginName, "Schneeball macht " + ChatFormat.GOLD + "ein" + ChatFormat.DARK_GREEN + " Herz Schaden.");
+				world.setBlockAt(redstoneLampDifficultyLocation, redstoneLampOnBlockType);
+			}
+			if(clickedX == 32 && clickedZ == 256){
+				SNOWBALL_DAMAGE = 4;
+				isSnowballDamageClicked = true;
+				Utils.BroadcastServerMessage(pluginName, "Schneeball macht " + ChatFormat.GOLD + "zwei" + ChatFormat.DARK_GREEN + " Herzen Schaden.");
+				world.setBlockAt(redstoneLampDifficultyLocation, redstoneLampOnBlockType);
+			}
+
+			if(clickedX == 36 && clickedZ == 262){
+				has2Players=true;
+				isPlayer2Clicked = true;
+				Utils.BroadcastServerMessage(pluginName, "Es spielen " + ChatFormat.GOLD + "zwei" + ChatFormat.DARK_GREEN + " Spieler.");
+				world.setBlockAt(redstoneLampPlayerCountLocation, redstoneLampOnBlockType);
+			}
+			if(clickedX == 36 && clickedZ == 260){
+				has2Players=false;
+				isPlayer2Clicked = true;
+				Utils.BroadcastServerMessage(pluginName, "Es spielt " + ChatFormat.GOLD + "ein" + ChatFormat.DARK_GREEN + " Spieler.");
+				world.setBlockAt(redstoneLampPlayerCountLocation, redstoneLampOnBlockType);
+			} 	
+
+			if(clickedX == 32 && clickedZ == 266){
+				isPVPGame = true;
+				isPvpClicked = true;
+				Utils.BroadcastServerMessage(pluginName, "Der Modus " + ChatFormat.GOLD + "PVP" + ChatFormat.DARK_GREEN+" wird gespielt.");
+				world.setBlockAt(redstoneLampPVPPVELocation , redstoneLampOnBlockType);
+			}
+			if(clickedX == 30 && clickedZ == 266){
+				isPVPGame = false;
+				isPvpClicked = true;
+				Utils.BroadcastServerMessage(pluginName, "Der Modus " + ChatFormat.GOLD + "PVE" + ChatFormat.DARK_GREEN+" wird gespielt.");
+				world.setBlockAt(redstoneLampPVPPVELocation , redstoneLampOnBlockType);
+			}
+
+			startGame();
+		}
 	}
-        
 
 	private void resetRedstoneBlocks(){
-		Location redstoneLampFallDamageLocation = new Location(25, 68, 261);
-		Location redstoneLampDifficultyLocation = new Location(31, 68, 255);
-		Location redstoneLampPlayerCountLocation = new Location(37, 68, 261);
-		Location redstoneLampPVPPVELocation = new Location(31, 68, 267);
-		BlockType redstoneLampOffBlockType = BlockType.RedstoneBlock;
 		World world = redstoneLampFallDamageLocation.getWorld();
-
 		world.setBlockAt(redstoneLampFallDamageLocation, redstoneLampOffBlockType);
 		world.setBlockAt(redstoneLampDifficultyLocation, redstoneLampOffBlockType);
 		world.setBlockAt(redstoneLampPlayerCountLocation, redstoneLampOffBlockType);
@@ -446,8 +381,7 @@ public class Schneeballschlacht extends EZPlugin implements PluginListener {
 	}   
 
 	private void startGame(){
-		gamenostart();
-		if(isFallDamageClicked && isSnowballDamageClicked && isPvpClicked && isPlayer2Clicked && isColorPicked){
+		if(canGameStart() && isFallDamageClicked && isSnowballDamageClicked && isPvpClicked && isPlayer2Clicked && isColorPicked){
 			hasGameStarted = true;
 			StartGameTask task = new StartGameTask(this, has2Players, TELEPORT_DELAY_IN_SECONDS);  
 			Canary.getServer().addSynchronousTask(task);
@@ -468,20 +402,17 @@ public class Schneeballschlacht extends EZPlugin implements PluginListener {
 		Utils.BroadcastServerMessage(pluginName, "Diese Farbe ist bereits vergeben.");
 	}
 
-	private void gamenostart(){
+	private boolean canGameStart(){
 		if(isPVPGame && !has2Players){
 			Utils.BroadcastServerMessage(pluginName, "Spielmodus " + ChatFormat.GOLD + "PVP" + ChatFormat.DARK_GREEN + " braucht mindestens 2 Spieler.");
 			isPvpClicked = false;
 			isPlayer2Clicked = false;
 			isPVPGame = false;
 			has2Players = false;
-			Location player12LampLocation = new Location(37, 68, 261);
-			Location pvpPveLampLocation = new Location(31, 68, 267);
-			World world = pvpPveLampLocation.getWorld();
-			BlockType redStoneLampOffBlockType = BlockType.RedstoneBlock;
-			world.setBlockAt(player12LampLocation, redStoneLampOffBlockType);
-			world.setBlockAt(pvpPveLampLocation, redStoneLampOffBlockType);
-			return;
+			World world = redstoneLampPVPPVELocation .getWorld();
+			world.setBlockAt(redstoneLampPlayerCountLocation, redstoneLampOffBlockType);
+			world.setBlockAt(redstoneLampPVPPVELocation, redstoneLampOffBlockType);
+			return false;
 		}
 
 		int boolCount = 0;
@@ -497,7 +428,6 @@ public class Schneeballschlacht extends EZPlugin implements PluginListener {
 			boolCount++;
 
 		if(boolCount == 4){
-
 			if(!isFallDamageClicked)
 				Utils.BroadcastServerMessage(pluginName, ChatFormat.GOLD + "Fallschaden " + ChatFormat.DARK_GREEN + "muss noch eingestellt werden.");
 			if(!isSnowballDamageClicked)
@@ -512,36 +442,36 @@ public class Schneeballschlacht extends EZPlugin implements PluginListener {
 			for(Player player : playerList){
 				if(teamColor.get(player.getName()).equalsIgnoreCase("")){
 					if(isPVPGame){
-						Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + "[Schneeballarena] " + ChatFormat.DARK_GREEN + "Der Spieler " + player.getName() + " hat seine Farbe noch nicht gewaehlt.");
-						isColorPicked=false;
-						return;
+						Utils.BroadcastServerMessage(pluginName, "Der Spieler " + player.getName() + " hat seine Farbe noch nicht gewaehlt.");
+						isColorPicked = false;
+						return false;
 					}
-				if(!isPVPGame&&has2Players){
-					for(Player playerf : playerList){
-						String cocap = teamColor.get(playerf.getName());
-						if(!cocap.equalsIgnoreCase("")) {
-							teamColor.put(player.getDisplayName(), cocap);
-							if(cocap.equalsIgnoreCase("green")){
-								playerf.setPrefix(ChatFormat.DARK_GREEN + "");
-							}
-							if(cocap.equalsIgnoreCase("purple")){
-								playerf.setPrefix(ChatFormat.DARK_PURPLE + "");
-							}
-							if(cocap.equalsIgnoreCase("red")){
-								playerf.setPrefix(ChatFormat.RED + "");
-							}
-							if(cocap.equalsIgnoreCase("yellow")){
-								playerf.setPrefix(ChatFormat.YELLOW+"");
+					if(!isPVPGame && has2Players){
+						for(Player playerf : playerList){
+							String teamColorCode = teamColor.get(playerf.getName());
+
+							if(!teamColorCode.equalsIgnoreCase("")) {
+								teamColor.put(player.getDisplayName(), teamColorCode);
+
+								if(teamColorCode.equalsIgnoreCase("green"))
+									playerf.setPrefix(ChatFormat.DARK_GREEN + "");
+								if(teamColorCode.equalsIgnoreCase("purple"))
+									playerf.setPrefix(ChatFormat.DARK_PURPLE + "");
+								if(teamColorCode.equalsIgnoreCase("red"))
+									playerf.setPrefix(ChatFormat.RED + "");
+								if(teamColorCode.equalsIgnoreCase("yellow"))
+									playerf.setPrefix(ChatFormat.YELLOW + "");
 							}
 						}
 					}
 				}
-				}
 			}
 		}
+
+		return true;
 	}
 
-	private String getTeamColorFromPlayer(Player player){
+	private String getPlayerInTeamColor(Player player){
 		String name = player.getDisplayName();
 		String colorname = "";
 
