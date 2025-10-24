@@ -101,7 +101,7 @@ public class Snowballarena extends EZPlugin implements PluginListener{
 
     @HookHandler
     public void DamageHookEvent(DamageHook event){
-        if(game.hasStarted()){
+        if(game != null && game.hasStarted()){
             if(event.getAttacker() instanceof Player)
                 event.setCanceled(); //Spieler können sich nicht gegenseitig schlagen
             if(event.getDamageSource().getDamagetype() == DamageType.FALL && !game.hasFallDmg())
@@ -200,7 +200,7 @@ public class Snowballarena extends EZPlugin implements PluginListener{
 
     @HookHandler
     public void ProjectileHitHookEvent(ProjectileHitHook event){
-        if(game.hasStarted()){
+        if(game != null && game.hasStarted()){
             Entity snowball = event.getProjectile();
             Entity ent = event.getEntityHit();
 
