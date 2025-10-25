@@ -82,10 +82,10 @@ public class DatabaseUtils extends EZPlugin{
             stmt.executeUpdate(createGameSessionQuidditch);
 
             String createAchievementTableQuidditch = "CREATE TABLE IF NOT EXISTS player_achievements (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "playername TEXT NOT NULL," +
-                "achievement_name TEXT NOT NULL," + 
-                "achieved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" + 
+                "player_name TEXT NOT NULL," +
+                "achievement_name TEXT NOT NULL," +
+                "achieved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," + 
+                "PRIMARY KEY(player_name, achievement_name)" +
             ");";
             stmt.executeUpdate(createAchievementTableQuidditch);
 
@@ -270,6 +270,15 @@ public class DatabaseUtils extends EZPlugin{
                 stats.put("Schnellster Fang", Utils.FormatSecondsPassedIntoString(results.getInt(6))); 
                 stats.put("Langsamster Fang", Utils.FormatSecondsPassedIntoString(results.getInt(7)));
             }
+
+            statsStatement = connection.prepareStatement("SELECT COUNT(*) FROM player_achievements WHERE player_name = ?;");
+            statsStatement.setString(1, playerName);
+            ResultSet result = statsStatement.executeQuery();
+
+            while(result.next()){
+                stats.put("Achievements", Integer.toString(result.getInt("COUNT(*)")));
+            }
+
         }
         catch(SQLException e){
             stats.put("ERROR", "Could not load stats");
@@ -322,7 +331,7 @@ public class DatabaseUtils extends EZPlugin{
     }
 
     public boolean hasPlayerAchievement(String playerName, String achievementName){
-        String sqlCommand = "SELECT COUNT(*) FROM player_achievements WHERE playername = ? AND achievement_name = ?;";
+        String sqlCommand = "SELECT COUNT(*) FROM player_achievements WHERE player_name = ? AND achievement_name = ?;";
         
 
         try{
@@ -345,6 +354,18 @@ public class DatabaseUtils extends EZPlugin{
         }
 
         return false;
+    }
+    
+    public void InsertAchievementIntoDbForPlayer(String playerName, String achievementName){
+        String sql = "INSERT OR IGNORE INTO player_achievements (player_name, achievement_name) VALUES (?, ?)";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, playerName);
+            ps.setString(2, achievementName);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            logger.info("ERROR during achievement insertion: " + e.getMessage());
+        }
     }
 
 }

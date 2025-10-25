@@ -745,6 +745,9 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       serverMessage += ChatFormat.DARK_GREEN + " - " + key + ": " + ChatFormat.GOLD + stats.get(key) + "\n";
       
     Utils.BroadcastServerMessage(pluginName, serverMessage);
+    if(!statsDb.hasPlayerAchievement(player.getDisplayName(), AchievementType.RAVENCLAW_ZAG.toString()))
+      insertAchievementIntoDb(player, AchievementType.RAVENCLAW_ZAG, statsDb);
+
     statsDb.CloseConnection();
   }
 
@@ -761,6 +764,9 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     }
 
     Utils.BroadcastServerMessage(pluginName, serverMessage);
+    if(!statsDb.hasPlayerAchievement(player.getDisplayName(), AchievementType.RAVENCLAW_UTZ.toString()))
+      insertAchievementIntoDb(player, AchievementType.RAVENCLAW_UTZ, statsDb);
+
     statsDb.CloseConnection();
   }
 
@@ -768,7 +774,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     String serverMessage = "Die folgenden Kommandos stehen zur Verfügung:\n";
     String command1 = ChatFormat.GOLD + "/quidditch" + ChatFormat.DARK_GREEN + " -> Teleportiert dich zum Quidditch Minigame Hub\n";
     String command2 = ChatFormat.GOLD + "/quidditch usage" + ChatFormat.DARK_GREEN + "-> Zeigt alle verfügbaren Kommandos\n";
-    String command3 = ChatFormat.GOLD + "/quidditch achievements" + ChatFormat.DARK_GREEN + "-> Zeigt alle erspielten Herausforderungen\n";
+    String command3 = ChatFormat.GOLD + "/quidditch achievements" + ChatFormat.DARK_GREEN + "-> Zeigt alle erspielten Achievements\n";
     String command4 = ChatFormat.GOLD + "/quidditch stats" + ChatFormat.DARK_GREEN + "-> Zeigt die Statistik des Spielers\n";
     String command5 = ChatFormat.GOLD + "/quidditch stats map" + ChatFormat.DARK_GREEN + "-> Zeigt die Statistik des Spielers für jede Map";
 
@@ -799,9 +805,20 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
         item = itemFactory.newItem(ItemType.GrayDye);
         item.setDisplayName(ChatFormat.RED + "Noch nicht erspielt!");
       }
-      
+
       customInventory.setSlot(i, item);
     }
     database.CloseConnection();
+  }
+  
+  private void insertAchievementIntoDb(Player player, AchievementType achievementType, DatabaseUtils database){
+    database.InsertAchievementIntoDbForPlayer(player.getDisplayName(), achievementType.toString());
+    displayAchievementEarnMessage(player, achievementType);
+  }
+
+  private void displayAchievementEarnMessage(Player player, AchievementType achievementType){
+    String serverMessage = "Du hast das Achievement " + ChatFormat.GOLD + achievementType.toString() + ChatFormat.DARK_GREEN + " erspielt!";
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
+    Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.ORB, 1.0f, 0.9f);
   }
 }
