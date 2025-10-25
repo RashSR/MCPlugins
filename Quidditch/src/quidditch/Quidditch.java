@@ -73,8 +73,8 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private Map SELECTED_MAP;
   private DatabaseUtils database;
 
-  //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, Fix map count (e.g Shrieking Shack is too long), load chunk to prevent wrong lighting
-  //Achievements -> block spawned in der nähe, keinen pfeil verschossen, nur hand catches, bow hit > 50..., swim in lava
+  //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, load chunk to prevent wrong lighting
+  //Achievements -> block spawned in der nähe, keinen pfeil verschossen, nur hand catches, bow hit > 50..., swim in lava, find pumpking up to three seconds after compass
 
   @Override 
   public boolean enable() {
@@ -525,8 +525,8 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
 
   private void updateMostPlayedMaps(){
     List<String> top3MapsPlayed = database.GetTop3MapsPlayed();
-    Location slowestCatchHighscoreSign = new Location(248, 55, 264);
-    writeTextToSign("Most played Maps", top3MapsPlayed, slowestCatchHighscoreSign, true);
+    Location mostPlayedMapsSign = new Location(248, 55, 264);
+    writeTextToSign("Most played Maps", top3MapsPlayed, mostPlayedMapsSign, true);
   }
 
   private void updateShortestAndLongestBowHit(){

@@ -310,4 +310,19 @@ public class Utils extends EZPlugin{
     Particle particle = new Particle(loc.getX() + offsetX, loc.getY() + offsetY, loc.getZ() + offsetZ, type);
     loc.getWorld().spawnParticle(particle);
   }
+
+  public static String ShortenMapName(String mapName, int maxLength) {
+    if(mapName == null)
+        return "";
+
+    if(mapName.length() <= maxLength)
+        return mapName;
+    
+    String[] parts = mapName.split("_");
+    for(int i = 0; i < parts.length; i++)
+      if(parts[i].length() <= maxLength)
+        return parts[i];
+    
+    return mapName.substring(0, maxLength);
+  }
 }

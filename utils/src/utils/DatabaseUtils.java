@@ -199,7 +199,7 @@ public class DatabaseUtils extends EZPlugin{
             while(rs.next()){
                 String mapName = rs.getString("map_played");
                 int count = rs.getInt("COUNT(*)");
-                topValues.add(mapName + ":" + count);
+                topValues.add(Utils.ShortenMapName(mapName, 10) + ":" + count);
             }
         }
         catch(SQLException e){
