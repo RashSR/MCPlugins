@@ -9,13 +9,16 @@ import net.canarymod.tasks.ServerTask;
 import net.canarymod.api.world.World;
 import net.canarymod.api.world.effects.SoundEffect;
 import net.canarymod.api.inventory.ItemType;
+import utils.Utils;
 
 public class Game extends EZPlugin{
+	private final int MAX_KNOCKBACK = 2;
+	protected final static String pluginName = ChatFormat.DARK_AQUA + "[Snowballarena] ";
+
 	private Player player1;
 	private Player player2;
 	private boolean hasFallDmg = false;
 	static Server server = Canary.instance().getServer();
-	protected static String pluginName = ChatFormat.DARK_AQUA + "[Snowballarena] ";
 	private boolean isPvp = true;
 	private boolean changedFallDmg = false;
 	private boolean changedPvp = false;
@@ -27,124 +30,106 @@ public class Game extends EZPlugin{
 	private GainSnowballTask gainTask;
 	private int amountStartSnowballs = 3;
 	private boolean canHeal = false;
-	private int MAX_KNOCKBACK = 2;
 	private Snowballarena sa;
 	private boolean isFirstMatch = true; 
 
 	public Game(World world, Map map, Snowballarena sa){
-		this.world=world;
-		this.map=map;
-		this.sa=sa;
-		isFirstMatch=false;
+		this.world = world;
+		this.map = map;
+		this.sa = sa;
+		isFirstMatch = false;
 	}
 
 	public Game(World world, Snowballarena sa){
-		server.broadcastMessage(pluginName+ChatFormat.DARK_GREEN + "Ein neues Spiel beginnt!"); 
-		this.world=world;
+		Utils.BroadcastServerMessage(pluginName, "Ein neues Spiel beginnt!");
+		this.world = world;
 		this.sa = sa;
 		this.map = Map.QUIDDITCH;
 	}
 
 	public void setSnowballDmg(int dmg){
-		if(dmg==this.snowballDmg){
+		if(dmg == this.snowballDmg)
 			return;
-		}
+
 		String endung = "";
-		if(dmg!=2){
+		if(dmg != 2)
 			endung="en";
-		}
-		snowballDmg=dmg;
-		server.broadcastMessage(pluginName+ChatFormat.DARK_GREEN+"Ein Schneeball macht "+ChatFormat.GOLD+dmg/2+" Herz"+endung+ChatFormat.DARK_GREEN+"Schaden.");
+		
+		snowballDmg = dmg;
+		Utils.BroadcastServerMessage(pluginName, "Ein Schneeball macht " + ChatFormat.GOLD + dmg/2 + " Herz" + endung + ChatFormat.DARK_GREEN + "Schaden.");
 	}
 
 	public void setPvp(boolean isPvp){
-		if(isPvp==this.isPvp&&changedPvp){
+		if(isPvp == this.isPvp && changedPvp)
 			return;
-		}
-		this.isPvp=isPvp;
-		String flag;
-		if(isPvp){
+
+		this.isPvp = isPvp;
+		String flag = "PVE";
+		if(isPvp)
 			flag="PVP";
-		}else{
-			flag="PVE";
-		}
-		server.broadcastMessage(pluginName+ChatFormat.DARK_GREEN+"Spielmodus wurde auf "+ChatFormat.GOLD+flag+ChatFormat.DARK_GREEN+" gestellt.");
+
+		Utils.BroadcastServerMessage(pluginName, "Spielmodus wurde auf " + ChatFormat.GOLD + flag + ChatFormat.DARK_GREEN + " gestellt.");
 		changedPvp=true;
 	}
 
 	public void setPlayer1(Player player){
-		if(player1!=null){
-			if(!player.getName().equals(player1.getName())){
-				server.broadcastMessage(pluginName+ChatFormat.GRAY+"Spieler 1"+ChatFormat.DARK_GREEN+"ist schon an "+ChatFormat.GOLD+player1.getName()+ChatFormat.DARK_GREEN+" vergeben.");
-			}
-			return;
+		if(player1 != null){
+			if(!player.getName().equals(player1.getName()))
+				Utils.BroadcastServerMessage(pluginName, ChatFormat.GRAY + "Spieler 1" + ChatFormat.DARK_GREEN + "ist schon an " + ChatFormat.GOLD + player1.getName() + ChatFormat.DARK_GREEN + " vergeben.");
 		}
-		if(!isDuplicate(player)){
+		else if(!isDuplicate(player)){
 			this.player1=player;
-			if(isFirstMatch){
-				server.broadcastMessage(pluginName+ChatFormat.GRAY+"Spieler 1"+ChatFormat.DARK_GREEN+"ist jetzt: "+ChatFormat.GOLD+player.getName()+ChatFormat.DARK_GREEN+".");
-			}
+			if(isFirstMatch)
+				Utils.BroadcastServerMessage(pluginName, ChatFormat.GRAY + "Spieler 1" + ChatFormat.DARK_GREEN + "ist jetzt: " + ChatFormat.GOLD + player.getName() + ChatFormat.DARK_GREEN + ".");
 		}
 	}
 
 	public void setPlayer2(Player player){
 		if(player2!=null){
-			if(!player.getName().equals(player2.getName())){
-				server.broadcastMessage(pluginName+ChatFormat.GRAY+"Spieler 2"+ChatFormat.DARK_GREEN+"ist schon an "+ChatFormat.GOLD+player2.getName()+ChatFormat.DARK_GREEN+" vergeben.");
-			}
-			return;
+			if(!player.getName().equals(player2.getName()))
+				Utils.BroadcastServerMessage(pluginName, ChatFormat.GRAY + "Spieler 2" + ChatFormat.DARK_GREEN + "ist schon an " + ChatFormat.GOLD + player1.getName() + ChatFormat.DARK_GREEN + " vergeben.");
 		}
-		if(!isDuplicate(player)){
+		else if(!isDuplicate(player)){
 			this.player2=player;
 			if(isFirstMatch){
-				server.broadcastMessage(pluginName+ChatFormat.GRAY+"Spieler 2"+ChatFormat.DARK_GREEN+" ist jetzt: "+ChatFormat.GOLD+player.getName()+ChatFormat.DARK_GREEN+".");
+				Utils.BroadcastServerMessage(pluginName, ChatFormat.GRAY + "Spieler 2" + ChatFormat.DARK_GREEN + "ist jetzt: " + ChatFormat.GOLD + player.getName() + ChatFormat.DARK_GREEN + ".");
 			}
 		}
 	}
 
 	public void setFallDmg(boolean hasFallDmg){
-		if(hasFallDmg==this.hasFallDmg&&changedFallDmg){
+		if(hasFallDmg == this.hasFallDmg && changedFallDmg)
 			return;
-		}
+
 		this.hasFallDmg = hasFallDmg;
-		String flag;
-		if(hasFallDmg){
+		String flag = "aus";
+		if(hasFallDmg)
 			flag="an";
-		}else{
-			flag="aus";
-		}
-		server.broadcastMessage(pluginName+ChatFormat.DARK_GREEN+"Fallschaden ist jetzt "+ChatFormat.GOLD+flag+ChatFormat.DARK_GREEN+".");
+
+		Utils.BroadcastServerMessage(pluginName, "Fallschaden ist jetzt " + ChatFormat.GOLD + flag + ChatFormat.DARK_GREEN + ".");
 		changedFallDmg=true;
 	}
 
 	private boolean isDuplicate(Player player){
-		String playerName = player.getName();
-		if(player1==null&&player2==null){
+		if(player1 == null && player2 == null)
 			return false;
+
+		String playerName = player.getName();
+		if(player1 != null && playerName.equals(player1.getName())){
+			Utils.BroadcastServerMessage(pluginName, "Spieler " + ChatFormat.GOLD + playerName + ChatFormat.DARK_GREEN + " ist " + ChatFormat.DARK_RED + "bereits" + ChatFormat.DARK_GREEN + " beigetreten!");
+			return true;
 		}
-		if(player1 != null){
-			if(playerName.equals(player1.getName())){
-				server.broadcastMessage(pluginName+ChatFormat.DARK_GREEN+"Spieler "+ChatFormat.GOLD+playerName+ChatFormat.DARK_GREEN+" ist "+ChatFormat.DARK_RED+"bereits"+ChatFormat.DARK_GREEN+" beigetreten!");
-				return true;
-			}
+		if(player2 != null && playerName.equals(player2.getName())){
+			Utils.BroadcastServerMessage(pluginName, "Spieler " + ChatFormat.GOLD + playerName + ChatFormat.DARK_GREEN + " ist " + ChatFormat.DARK_RED + "bereits" + ChatFormat.DARK_GREEN + " beigetreten!");
+			return true;
 		}
-		if(player2!=null){
-			if(playerName.equals(player2.getName())){
-				server.broadcastMessage(pluginName+ChatFormat.DARK_GREEN+"Spieler "+ChatFormat.GOLD+playerName+ChatFormat.DARK_GREEN+" ist "+ChatFormat.DARK_RED+"bereits"+ChatFormat.DARK_GREEN+" beigetreten!");
-				return true;
-			}
-		}
+		
 		return false;
 	}
 
 	public void checkForTwoPlayers(){
-		if(player1!=null&&player2!=null){
-			logger.info("Beide Spieler sind nicht null");
-			if(this.waitTask==null){
-				startWaitTask();
-				logger.info("Der Task ist gestartet!");
-			}
-		}
+		if(player1 != null && player2 != null && this.waitTask == null)
+			startWaitTask();
 	}
 
 	public void teleportPlayersGame(){
@@ -183,21 +168,17 @@ public class Game extends EZPlugin{
 				loc1 = new Location(world,0, 0, 0, 0f, 0f);
 				loc2 = new Location(world,0, 0, 0, 0f, 0f);
 		}
-		if(player1!=null){
+		if(player1 != null)
 			player1.teleportTo(loc1);
-		}
-		if(player2!=null){
+		if(player2 != null)
 			player2.teleportTo(loc2);	
-		}
 	}
 
 	public void teleportPlayersHome(){
-		if(player1!=null){
+		if(player1!=null)
 			player1.teleportTo(new Location(player1.getWorld(), 35.5, 67, 261.5, 0f, 90f));
-		}
-		if(player2!=null){
+		if(player2!=null)
 			player2.teleportTo(new Location(player2.getWorld(), 35.5, 67, 261.5, 0f, 90f));
-		}
 	}
 
 	public void hitPlayer(Player hitPlayer){
@@ -209,14 +190,16 @@ public class Game extends EZPlugin{
             hitPlayer=player2;
             throwingPlayer=player1;
         }
+
         Snowballarena.playSoundByPlayer(throwingPlayer, SoundEffect.Type.NOTE_PLING, 1f, 0f);
         Snowballarena.playSoundByPlayer(hitPlayer, SoundEffect.Type.HURT_FLESH, 1f, 0f);
         if(hitPlayer.getHealth() > snowballDmg){
-            hitPlayer.setHealth(hitPlayer.getHealth()-snowballDmg);
+            hitPlayer.setHealth(hitPlayer.getHealth() - snowballDmg);
             givePlayerKnockback(hitPlayer, throwingPlayer);
             return;
-        }else{
-        	Canary.instance().getServer().broadcastMessage(pluginName + ChatFormat.GOLD + throwingPlayer.getName() + ChatFormat.DARK_GREEN + " hat mit "+ChatFormat.GOLD+throwingPlayer.getHealth()/2+ChatFormat.DARK_GREEN+" verbleibenden Herzen gewonnen.");
+        }
+		else{
+			Utils.BroadcastServerMessage(pluginName, ChatFormat.GOLD + throwingPlayer.getName() + ChatFormat.DARK_GREEN + " hat mit "+ChatFormat.GOLD+throwingPlayer.getHealth()/2+ChatFormat.DARK_GREEN+" verbleibenden Herzen gewonnen.");
         	hitPlayer.setHealth(20f);
         	throwingPlayer.setHealth(20f);
         	endGame(throwingPlayer);
@@ -228,48 +211,48 @@ public class Game extends EZPlugin{
 		double y = Math.random();
 		double z = 0;
 		Direction dir = whichDirection(hitPlayer, throwingPlayer);
-		if(dir!=null){
+		if(dir != null){
 			switch(dir){
 				case POS_X:
-					x = Math.random()*MAX_KNOCKBACK;
+					x = Math.random() * MAX_KNOCKBACK;
 					break;
 				case NEG_X:
-					x = Math.random()*(-MAX_KNOCKBACK);
+					x = Math.random() * (-MAX_KNOCKBACK);
 					break;
 				case POS_Z:
-					z = Math.random()*MAX_KNOCKBACK;
+					z = Math.random() * MAX_KNOCKBACK;
 					break;
 				case NEG_Z:
-					z = Math.random()*(-MAX_KNOCKBACK);
+					z = Math.random() * (-MAX_KNOCKBACK);
 					break;
 				case POS_X_POS_Z:
-					x = Math.random()*MAX_KNOCKBACK; 
-					z = Math.random()*MAX_KNOCKBACK;
+					x = Math.random() * MAX_KNOCKBACK; 
+					z = Math.random() * MAX_KNOCKBACK;
 					break;
 				case NEG_X_NEG_Z:
-					x = Math.random()*(-MAX_KNOCKBACK);
-					z = Math.random()*(-MAX_KNOCKBACK);
+					x = Math.random() * (-MAX_KNOCKBACK);
+					z = Math.random() * (-MAX_KNOCKBACK);
 					break;
 				case POS_X_NEG_Z:
-					x = Math.random()*MAX_KNOCKBACK;
-					z = Math.random()*(-MAX_KNOCKBACK);
+					x = Math.random() * MAX_KNOCKBACK;
+					z = Math.random() * (-MAX_KNOCKBACK);
 					break;
 				case NEG_X_POS_Z:
-					x = Math.random()*(-MAX_KNOCKBACK);
-					z = Math.random()*MAX_KNOCKBACK;
+					x = Math.random() * (-MAX_KNOCKBACK);
+					z = Math.random() * MAX_KNOCKBACK;
 					break;
 			}
 		}
-		if(this.map == Map.SNOWARENA){
+		if(this.map == Map.SNOWARENA)
 			y = 0.5;
-		}
+
 		hitPlayer.moveEntity(x, y, z);
 	}
 	
 	//gibt Richtung zurück in die der übergebene Player schaut
 	private Direction whichDirection(Player hitPlayer, Player throwingPlayer){
 		float headRotation = throwingPlayer.getLocation().getRotation();
-		headRotation=cleanRot(headRotation);
+		headRotation = cleanRot(headRotation);
 		Location loc = hitPlayer.getLocation();
 
 		if(headRotation >= 22.5 && headRotation < 67.5){
@@ -292,52 +275,50 @@ public class Game extends EZPlugin{
 	}
 
 	//Erstellt aus einer float-Zahl die bereinigte 360 Grad Zahl
-	private float cleanRot(float rot){
-		if(rot < 0){
-			return rot+360;
-		} else {
-			return rot;
-		}
+	private float cleanRot(float rotation){
+		if(rotation < 0)
+			return rotation + 360;
+		
+		return rotation;
 	}
 
 	public void endGame(Player winner){
-		hasStarted=false;
+		hasStarted = false;
 		teleportPlayersHome();
 		world.setDifficulty(World.Difficulty.PEACEFUL);
 		world.setRaining(false);
 		sa.game = null;
-		this.waitTask=null;
+		this.waitTask = null;
 		player1.getInventory().clearInventory();
 		player2.getInventory().clearInventory();
 		this.gainTask.endItemTask();
-		if(player1.getFireTicks()>0){
+
+		if(player1.getFireTicks()>0)
 			player1.setFireTicks(0);
-		}
-		if(player2.getFireTicks()>0){
+		if(player2.getFireTicks()>0)
 			player2.setFireTicks(0);
-		}
+
 		player1.setHealth(20f);
 		player2.setHealth(20f);
-
 		sa.createNewGame(this, winner);
 	}
 
 	public void startGame(){
 		player1.setHealth(20f);
 		player2.setHealth(20f);
-		hasStarted=true;
+		hasStarted = true;
 		teleportPlayersGame();
 		player1.getInventory().addItem(ItemType.SnowBall, amountStartSnowballs);
 		player2.getInventory().addItem(ItemType.SnowBall, amountStartSnowballs);
 		world.setDifficulty(World.Difficulty.EASY);
-		this.gainTask = new GainSnowballTask(this);
-		Canary.getServer().addSynchronousTask(this.gainTask);
+		gainTask = new GainSnowballTask(this);
+		Canary.getServer().addSynchronousTask(gainTask);
 	}
 
 	public void startWaitTask(){
 		world.setRaining(true);
-		this.waitTask = new WaitTask(this);
-        Canary.getServer().addSynchronousTask(this.waitTask);
+		waitTask = new WaitTask(this);
+        Canary.getServer().addSynchronousTask(waitTask);
 	}
 
 	public boolean hasFallDmg(){

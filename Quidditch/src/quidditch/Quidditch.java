@@ -73,8 +73,8 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private Map SELECTED_MAP;
   private DatabaseUtils database;
 
-  //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it
-  //Achievements -> block spawned in der nähe, keinen pfeil verschossen, nur hand catches, bow hit > 50...
+  //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, Fix map count (e.g Shrieking Shack is too long), load chunk to prevent wrong lighting
+  //Achievements -> block spawned in der nähe, keinen pfeil verschossen, nur hand catches, bow hit > 50..., swim in lava
 
   @Override 
   public boolean enable() {
