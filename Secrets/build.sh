@@ -42,7 +42,11 @@ NAME=`basename "$HERE"`
 
 # 1. Compile
 echo "Compiling with javac..."
-javac -Xlint:deprecation src/*/*.java -d bin -classpath "$MODS$OSPS$EZ" -sourcepath src -g:lines,vars,source || exit 2
+javac -Xlint:deprecation \
+  $(find src ../utils -name "*.java") \
+  -d bin \
+  -classpath "$MODS$OSPS$EZ$OSPS$UTIL_LIBS" \
+  -g:lines,vars,source || exit 2
 
 # 2. Build the jar
 echo "Creating jar file..."

@@ -28,6 +28,7 @@ import utils.TeleportPlayerTask;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import net.canarymod.api.inventory.CustomStorageInventory;
 import net.canarymod.api.scoreboard.*;
 import net.canarymod.hook.player.TeleportHook;
 import net.canarymod.hook.player.DisconnectionHook;
@@ -44,6 +45,7 @@ import utils.IServerTaskCallback;
 import utils.ServerEventType;
 import utils.SpawnParticlesTask;
 import net.canarymod.api.world.effects.Particle;
+import net.canarymod.api.factory.ObjectFactory;
 
 public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCallback {
   
@@ -74,7 +76,6 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private DatabaseUtils database;
 
   //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, load chunk to prevent wrong lighting
-  //Achievements -> block spawned in der nähe, keinen pfeil verschossen, nur hand catches, bow hit > 50..., swim in lava, find pumpking up to three seconds after compass
 
   @Override 
   public boolean enable() {
@@ -92,10 +93,13 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
         player.teleportTo(Utils.quidditchHubLocation);
       else if(args.length == 2)
       {
-        if(args[1].equalsIgnoreCase("stats"))
+        String secondArgument = args[1];
+        if(secondArgument.equalsIgnoreCase("stats"))
           displayPlayerStats(player);
-        else if(args[1].equalsIgnoreCase("usage"))
+        else if(secondArgument.equalsIgnoreCase("usage"))
           displayUsageMessage();
+        else if(secondArgument.equalsIgnoreCase("achievements"))
+          displayAchievementInventory(player);
       }
       else if(args.length == 3 && args[1].equalsIgnoreCase("stats") && args[2].equalsIgnoreCase("map")){
         displayPlayerStatsEachMap(player);
@@ -764,9 +768,30 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     String serverMessage = "Die folgenden Kommandos stehen zur Verfügung:\n";
     String command1 = ChatFormat.GOLD + "/quidditch" + ChatFormat.DARK_GREEN + " -> Teleportiert dich zum Quidditch Minigame Hub\n";
     String command2 = ChatFormat.GOLD + "/quidditch usage" + ChatFormat.DARK_GREEN + "-> Zeigt alle verfügbaren Kommandos\n";
-    String command3 = ChatFormat.GOLD + "/quidditch stats" + ChatFormat.DARK_GREEN + "-> Zeigt die Statistik des Spielers\n";
-    String command4 = ChatFormat.GOLD + "/quidditch stats map" + ChatFormat.DARK_GREEN + "-> Zeigt die Statistik des Spielers für jede Map";
+    String command3 = ChatFormat.GOLD + "/quidditch achievements" + ChatFormat.DARK_GREEN + "-> Zeigt alle erspielten Herausforderungen\n";
+    String command4 = ChatFormat.GOLD + "/quidditch stats" + ChatFormat.DARK_GREEN + "-> Zeigt die Statistik des Spielers\n";
+    String command5 = ChatFormat.GOLD + "/quidditch stats map" + ChatFormat.DARK_GREEN + "-> Zeigt die Statistik des Spielers für jede Map";
 
-    Utils.BroadcastServerMessage(pluginName, serverMessage + command1 + command2 + command3 + command4);
+    Utils.BroadcastServerMessage(pluginName, serverMessage + command1 + command2 + command3 + command4 + command5);
   }
+
+  private void displayAchievementInventory(Player player){
+    ObjectFactory objectFactory = Canary.factory().getObjectFactory();
+    int inventoryRows = (AchievementType.values().length + 8) / 9; //This ensures correct size for the custom Inventory
+    CustomStorageInventory customInventory = objectFactory.newCustomStorageInventory(ChatFormat.DARK_AQUA + "Achievements", inventoryRows);
+    fillInventoryWithAchievements(customInventory);
+    player.openInventory(customInventory);
+  }
+
+  private void fillInventoryWithAchievements(CustomStorageInventory customInventory){
+    ItemFactory itemFactory = Canary.factory().getItemFactory();
+    //Item[] foundSecretItem = achieveitems(ItemType.LimeDye, itemFactory);
+    int totalAchievementCount = AchievementType.values().length;
+    for(int i = 0; i < totalAchievementCount; i++){
+      Item item = itemFactory.newItem(ItemType.GrayDye);
+      item.setDisplayName(ChatFormat.RED + "Noch nicht erspielt!");
+      customInventory.setSlot(i, item);
+    }
+  }
+
 }
