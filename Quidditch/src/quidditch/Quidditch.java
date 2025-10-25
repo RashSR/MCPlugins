@@ -799,7 +799,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
 
       if(database.hasPlayerAchievement(player.getDisplayName(), achievement.toString())){
         item = itemFactory.newItem(ItemType.LimeDye);
-        item.setDisplayName(ChatFormat.GREEN + achievement.toString());
+        item.setDisplayName(ChatFormat.GREEN + achievement.toString() + " - " + achievement.getDescription());
       }
       else{
         item = itemFactory.newItem(ItemType.GrayDye);
