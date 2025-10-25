@@ -779,19 +779,29 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     ObjectFactory objectFactory = Canary.factory().getObjectFactory();
     int inventoryRows = (AchievementType.values().length + 8) / 9; //This ensures correct size for the custom Inventory
     CustomStorageInventory customInventory = objectFactory.newCustomStorageInventory(ChatFormat.DARK_AQUA + "Achievements", inventoryRows);
-    fillInventoryWithAchievements(customInventory);
+    fillInventoryWithAchievements(customInventory, player);
     player.openInventory(customInventory);
   }
 
-  private void fillInventoryWithAchievements(CustomStorageInventory customInventory){
+  private void fillInventoryWithAchievements(CustomStorageInventory customInventory, Player player){
+    DatabaseUtils database = setUpDatabase();
     ItemFactory itemFactory = Canary.factory().getItemFactory();
-    //Item[] foundSecretItem = achieveitems(ItemType.LimeDye, itemFactory);
-    int totalAchievementCount = AchievementType.values().length;
-    for(int i = 0; i < totalAchievementCount; i++){
-      Item item = itemFactory.newItem(ItemType.GrayDye);
-      item.setDisplayName(ChatFormat.RED + "Noch nicht erspielt!");
+    
+    for(int i = 0; i < AchievementType.values().length; i++){
+      Item item;
+      AchievementType achievement = AchievementType.values()[i];
+
+      if(database.hasPlayerAchievement(player.getDisplayName(), achievement.toString())){
+        item = itemFactory.newItem(ItemType.LimeDye);
+        item.setDisplayName(ChatFormat.GREEN + achievement.toString());
+      }
+      else{
+        item = itemFactory.newItem(ItemType.GrayDye);
+        item.setDisplayName(ChatFormat.RED + "Noch nicht erspielt!");
+      }
+      
       customInventory.setSlot(i, item);
     }
+    database.CloseConnection();
   }
-
 }

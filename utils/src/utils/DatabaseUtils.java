@@ -61,26 +61,34 @@ public class DatabaseUtils extends EZPlugin{
             connection = DriverManager.getConnection(dbUrl);
             Statement stmt = connection.createStatement();
 
-        String sql = "CREATE TABLE IF NOT EXISTS game_sessions (" +
-            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "player_name TEXT NOT NULL," +
-            "score INTEGER DEFAULT 0," +
-            "hand_catches INTEGER DEFAULT 0," +
-            "bow_hits INTEGER DEFAULT 0," +
-            "fastest_catch INTEGER DEFAULT 0," +
-            "slowest_catch INTEGER," +
-            "fast_catches INTEGER DEFAULT 0," +
-            "fast_catch_streaks INTEGER DEFAULT 0," +
-            "missed_arrows INTEGER DEFAULT 0," +
-            "map_played TEXT," +
-            "game_duration INTEGER DEFAULT 0," +
-            "shortest_bow_hit INTEGER," + 
-            "longest_bow_hit INTEGER DEFAULT 0," +
-            "total_compass_count INTEGER DEFAULT 0," +
-            "session_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+            String createGameSessionQuidditch = "CREATE TABLE IF NOT EXISTS game_sessions (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "player_name TEXT NOT NULL," +
+                "score INTEGER DEFAULT 0," +
+                "hand_catches INTEGER DEFAULT 0," +
+                "bow_hits INTEGER DEFAULT 0," +
+                "fastest_catch INTEGER DEFAULT 0," +
+                "slowest_catch INTEGER," +
+                "fast_catches INTEGER DEFAULT 0," +
+                "fast_catch_streaks INTEGER DEFAULT 0," +
+                "missed_arrows INTEGER DEFAULT 0," +
+                "map_played TEXT," +
+                "game_duration INTEGER DEFAULT 0," +
+                "shortest_bow_hit INTEGER," + 
+                "longest_bow_hit INTEGER DEFAULT 0," +
+                "total_compass_count INTEGER DEFAULT 0," +
+                "session_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
             ");";
+            stmt.executeUpdate(createGameSessionQuidditch);
 
-            stmt.executeUpdate(sql);
+            String createAchievementTableQuidditch = "CREATE TABLE IF NOT EXISTS player_achievements (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "playername TEXT NOT NULL," +
+                "achievement_name TEXT NOT NULL," + 
+                "achieved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" + 
+            ");";
+            stmt.executeUpdate(createAchievementTableQuidditch);
+
             logger.info("[DatabaseUtils] Database initialized successfully: " + dbFilePath);
 
         } catch (SQLException e) {
@@ -307,11 +315,36 @@ public class DatabaseUtils extends EZPlugin{
         return lists;
     }
 
-
     private String formatDoubleValue(String value){
         double number = Double.parseDouble(value);
         String formatted = String.format(Locale.US, "%.2f", number);
         return formatted;
+    }
+
+    public boolean hasPlayerAchievement(String playerName, String achievementName){
+        String sqlCommand = "SELECT COUNT(*) FROM player_achievements WHERE playername = ? AND achievement_name = ?;";
+        
+
+        try{
+            PreparedStatement achievementStatement = connection.prepareStatement(sqlCommand);
+            achievementStatement.setString(1, playerName);
+            achievementStatement.setString(2, achievementName);
+            ResultSet result = achievementStatement.executeQuery();
+
+            while(result.next()) {
+                int count = result.getInt("COUNT(*)");
+                if(count == 0)
+                    return false;
+                
+                return true;
+            }
+        }
+        catch(SQLException e){
+            logger.info("ERROR during achievement loading: " + e.getMessage());
+            return false;
+        }
+
+        return false;
     }
 
 }
