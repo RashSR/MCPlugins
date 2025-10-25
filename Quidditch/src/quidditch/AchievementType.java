@@ -17,7 +17,7 @@ public enum AchievementType {
     LONG_SHOT("Distance: 50 Blocks"), //DONE
     KATNISS_EVERDEEN("Distance: 70 Blocks"), //DONE
     GREAT_START("Catch the first Snitch by hand"),
-    FAST_CATCH("Catch a Snitch in under 8 seconds"), //DONE
+    FAST_CATCH("Catch in under 8 seconds"), //DONE
     FAST_STREAK("Make 3 fast catches"), //DONE
     STREAK_MASTER("Make 2 Fast catch Streaks"), //DONE
     PERFECT_ACCURACY("Miss no shot"), //DONE
@@ -37,12 +37,12 @@ public enum AchievementType {
     LUCKY_SPAWN("Snitch spawns close by"),
     SPARKLE("Let the Snitch sparkle"),
     RANDOM_MAP("Play on a random map"), //DONE
-    UNECCESSARY_COMPASS("Catch the snitch shortly after you got a compass"),
+    UNECCESSARY_COMPASS("Catch the snitch shortly after you got a compass"), //DONE
     NO_COMPASS_REQUIRED("Don't use a compass"), //DONE
 
     // Seasonal/Event
-    PUMPKIN_SEASON("Play a game during Halloween"), //DONE
-    CHRISTMAS_SEASON("Play a game during Christmas"), //DONE
+    PUMPKIN_SEASON("Play during Halloween"), //DONE
+    CHRISTMAS_SEASON("Play during Christmas"), //DONE
 
     // Environment/Hazards
     LAVA_SWIMMER("Die in lava"), //DONE

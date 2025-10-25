@@ -338,6 +338,8 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     else if(isEnabled && this.player == playerClicked && clickedType == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(clickedLocation, snitchLocation)){
       rightClickCatches++;
       snitchCatched(POINTS_PER_RIGHTCLICK, SoundEffect.Type.NOTE_PLING);
+      if(!player.isOnGround())
+        tryEarnAchievement(player, AchievementType.AIR_JORDAN, database);
     }
   }
 
@@ -443,6 +445,9 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     
     if(catchTimeInSeconds > slowestCatch)
       slowestCatch = catchTimeInSeconds;
+
+    if(catchTimeInSeconds > 45 && catchTimeInSeconds <= 48)
+      tryEarnAchievement(player, AchievementType.UNECCESSARY_COMPASS, database);
     
     lastCatchTimeInSeconds = gameDuration;
     boolean isFastCatch = catchTimeInSeconds < TIME_FOR_FAST_CATCH_IN_SECONDS;
