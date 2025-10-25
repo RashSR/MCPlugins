@@ -77,7 +77,6 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private DatabaseUtils database;
 
   //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, load chunk to prevent wrong lighting
-
   @Override 
   public boolean enable() {
     Canary.hooks().registerListener(this, this);
@@ -372,9 +371,16 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   }
 
   private void setShortestLongestBowHit(double playerSnitchDistance){
-    if(playerSnitchDistance > longestBowHit)
+    if(playerSnitchDistance > longestBowHit){
       longestBowHit = (int)playerSnitchDistance;
-    
+      if(longestBowHit >= 25)
+        tryEarnAchievement(player, AchievementType.MID_SHOT, database);
+      if(longestBowHit >= 50)
+        tryEarnAchievement(player, AchievementType.LONG_SHOT, database);
+      if(longestBowHit >= 70)
+        tryEarnAchievement(player, AchievementType.KATNISS_EVERDEEN, database);
+    }
+      
     if(playerSnitchDistance < shortestBowHit)
       shortestBowHit = (int)playerSnitchDistance;
   }
@@ -384,6 +390,8 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     score += POINTS_FOR_MISSED_ARROW;
     displayScoreMessage(POINTS_FOR_MISSED_ARROW, false);
     missedArrowCount++;
+    if(missedArrowCount >= 10)
+      tryEarnAchievement(player, AchievementType.STORMTROOPER, database);
   }
 
   
@@ -396,9 +404,11 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     currentSnitchCount++;
     boolean isFastCatch = handleFastCatches();
 
-    if(isFastCatch)
+    if(isFastCatch){
       pointsScored += POINTS_FOR_FAST_CATCH;
-
+      tryEarnAchievement(player, AchievementType.FAST_CATCH, database);
+    }
+      
     score += pointsScored;
     displayScoreMessage(pointsScored, isFastCatch);
     
@@ -450,7 +460,10 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private int totalFastCatchStreaks;
 
   private void handleFastCatchStreak(){
+    tryEarnAchievement(player, AchievementType.FAST_STREAK, database);
     totalFastCatchStreaks++;
+    if(totalFastCatchStreaks > 1)
+      tryEarnAchievement(player, AchievementType.STREAK_MASTER, database);
     fastCatchStreak = 0;
     score += POINTS_FOR_FAST_CATCH_STREAK; 
     Utils.BroadcastServerMessage(pluginName, ChatFormat.YELLOW + "Blitzfang streak!");
@@ -463,8 +476,37 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.LEVEL_UP, 3.0f, 1.0f);
     displayWinMessage();
     insertGameSessionIntoDb();
+    checkForAchievements();
     updateHighScoreSigns();
     cleanUpAfterGame();
+  }
+
+  private void checkForAchievements(){
+    if(missedArrowCount == 0){
+      tryEarnAchievement(player, AchievementType.PERFECT_ACCURACY, database);
+      if(rightClickCatches <= 5)
+        tryEarnAchievement(player, AchievementType.SHARP_SHOOTER, database);
+    }
+    if(rightClickCatches == 10)
+      tryEarnAchievement(player, AchievementType.HAND_ONLY, database);
+    if(rightClickCatches == 0){
+      tryEarnAchievement(player, AchievementType.ARROW_SUPREMACY, database);
+      if(missedArrowCount == 0)
+        tryEarnAchievement(player, AchievementType.HAWKEYE, database);
+    }
+
+    if(score >= 1000)
+      tryEarnAchievement(player, AchievementType.OVER_1000, database);
+    if(score >= 1500)
+      tryEarnAchievement(player, AchievementType.OVER_1500, database);
+
+    if(endTimeInSeconds < 60)
+      tryEarnAchievement(player, AchievementType.UNDER_60, database);
+    if(endTimeInSeconds < 30)
+      tryEarnAchievement(player, AchievementType.UNDER_30, database);
+
+    if(totalCompassCount == 0)
+      tryEarnAchievement(player, AchievementType.NO_COMPASS_REQUIRED, database);
   }
 
   private int endTimeInSeconds;

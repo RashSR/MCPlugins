@@ -13,32 +13,32 @@ public enum AchievementType {
     DEDICATED("Play 7 days in a row"),
 
     // Snitch Hits/Distance/Skill
-    MID_SHOT("Distance: 25 Blocks"),
-    LONG_SHOT("Distance: 50 Blocks"),
-    KATNISS_EVERDEEN("Distance: 70 Blocks"),
+    MID_SHOT("Distance: 25 Blocks"), //DONE
+    LONG_SHOT("Distance: 50 Blocks"), //DONE
+    KATNISS_EVERDEEN("Distance: 70 Blocks"), //DONE
     GREAT_START("Catch the first Snitch by hand"),
-    FAST_CATCH("Catch a Snitch in under 8 seconds"),
-    FAST_STREAK("Make 3 fast catches"),
-    STREAK_MASTER("Make 2 Fast catch Streaks in one game"),
-    PERFECT_ACCURACY("Miss no shot"),
-    HAND_ONLY("Only hand catches"),
-    ARROW_SUPREMACY("Only bow catches"),
-    SHARP_SHOOTER("5 Bow Catches without missing an arrow"),
-    HAWKEYE("10 Bow Catches without missing an arrow"),
-    STORMTROOPER("Miss 10 arrows"),
+    FAST_CATCH("Catch a Snitch in under 8 seconds"), //DONE
+    FAST_STREAK("Make 3 fast catches"), //DONE
+    STREAK_MASTER("Make 2 Fast catch Streaks"), //DONE
+    PERFECT_ACCURACY("Miss no shot"), //DONE
+    HAND_ONLY("Only hand catches"), //DONE
+    ARROW_SUPREMACY("Only bow catches"), //DONE
+    SHARP_SHOOTER("5 perfect Bow Catches"), //DONE
+    HAWKEYE("10 perfect Bow Catches"), //DONE
+    STORMTROOPER("Miss 10 arrows"), //DONE
     HIGH_GROUND("Catch a snitch with height difference"),
     AIR_JORDAN("Hit a snitch in the air"), //player in air
-    OVER_1000("Finish a game with a score over 1000"),
-    OVER_1500("Finish a game with a score over 1500"),
-    UNDER_60("Finish a game in under 60 seconds"),
-    UNDER_30("Finish a game in under 30 seconds"),
+    OVER_1000("Score over 1000"), //DONE
+    OVER_1500("Score over 1500"), //DONE
+    UNDER_60("Time under 60 seconds"), //DONE
+    UNDER_30("Time under 30 seconds"), //DONE
 
     // Special Block/Spawn/Compass
     LUCKY_SPAWN("Snitch spawns close by"),
     SPARKLE("Let the Snitch sparkle"),
     RANDOM_MAP("Play on a random map"), //DONE
     UNECCESSARY_COMPASS("Catch the snitch shortly after you got a compass"),
-    NO_COMPASS_REQUIRED("Don't use a compass"),
+    NO_COMPASS_REQUIRED("Don't use a compass"), //DONE
 
     // Seasonal/Event
     PUMPKIN_SEASON("Play a game during Halloween"), //DONE
