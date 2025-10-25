@@ -36,16 +36,16 @@ public enum AchievementType {
     // Special Block/Spawn/Compass
     LUCKY_SPAWN("Snitch spawns close by"),
     SPARKLE("Let the Snitch sparkle"),
-    RANDOM_MAP("Play on a random map"),
+    RANDOM_MAP("Play on a random map"), //DONE
     UNECCESSARY_COMPASS("Catch the snitch shortly after you got a compass"),
     NO_COMPASS_REQUIRED("Don't use a compass"),
 
     // Seasonal/Event
-    PUMPKIN_SEASON("Play a game during Halloween"),
-    CHRISTMAS_SEASON("Play a game during Christmas"),
+    PUMPKIN_SEASON("Play a game during Halloween"), //DONE
+    CHRISTMAS_SEASON("Play a game during Christmas"), //DONE
 
     // Environment/Hazards
-    LAVA_SWIMMER("Die in lava"),
+    LAVA_SWIMMER("Die in lava"), //DONE
     EARTHBOUND("Dont jump in one game"),
     BOUNCER("Jump 50 times in one game"),
     INVINCIBLE("Dont take damage"),
@@ -60,7 +60,7 @@ public enum AchievementType {
     RAINBOW_HUNTER("Catch snitches on 5 differnt maps in one day"),
 
     // Misc/Fun/Stats Viewing
-    REBEL("Try to drop an item"),
+    REBEL("Try to drop an item"), //DONE
     RAVENCLAW_ZAG("Look at your stats"), //DONE
     RAVENCLAW_UTZ("Look at your map stats"); //DONE
 

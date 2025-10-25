@@ -46,6 +46,7 @@ import utils.ServerEventType;
 import utils.SpawnParticlesTask;
 import net.canarymod.api.world.effects.Particle;
 import net.canarymod.api.factory.ObjectFactory;
+import net.canarymod.api.DamageType;
 
 public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCallback {
   
@@ -150,12 +151,14 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
         particleTypes.add(Particle.Type.SMOKE_NORMAL);
         particleTypes.add(Particle.Type.SMOKE_LARGE);
         particleTypes.add(Particle.Type.FLAME);
+        tryEarnAchievement(player, AchievementType.PUMPKIN_SEASON, database);
         break;
       case ServerEventType.CHRISTMAS:
         SNITCH_BLOCK_TYPE = BlockType.LapisBlock;
         particleTypes.add(Particle.Type.SNOW_SHOVEL);
         particleTypes.add(Particle.Type.SNOWBALL);
         particleTypes.add(Particle.Type.REDSTONE);
+        tryEarnAchievement(player, AchievementType.CHRISTMAS_SEASON, database);
         break;
       case ServerEventType.NONE:
       default:
@@ -318,8 +321,13 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
         SELECTED_MAP = Map.SHRIEKING_SHACK;
       else if(EZPlugin.locEqual(clickedLocation, ChristmasMapSignLocation))
         SELECTED_MAP = Map.CHRISTMAS;
-      else if(EZPlugin.locEqual(clickedLocation, RandomMapSignLocation))
+      else if(EZPlugin.locEqual(clickedLocation, RandomMapSignLocation)){
         SELECTED_MAP = Map.GetRandomMap();
+        DatabaseUtils database = setUpDatabase();
+        tryEarnAchievement(playerClicked, AchievementType.RANDOM_MAP, database);
+        database.CloseConnection();
+      }
+        
       else
         return;
       
@@ -664,6 +672,9 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   public void DamageHookEvent(DamageHook event){
     if(isEnabled && event.getDefender() instanceof Player player){
       if(event.getDamageDealt() >= player.getHealth()){
+        if(event.getDamageSource().getDamagetype() == DamageType.LAVA)
+          tryEarnAchievement(player, AchievementType.LAVA_SWIMMER, database);
+
         player.setFireTicks(0);
         player.setHealth(20f);
         event.setCanceled();
@@ -721,6 +732,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       int hotbarSlotId = playerInventory.getSelectedHotbarSlotId();
       playerInventory.setSlot(hotbarSlotId, event.getItem().getItem());
       Utils.RefreshInventroyFromPlayer(player);
+      tryEarnAchievement(player, AchievementType.REBEL, database);
     }
   }
 
@@ -731,8 +743,10 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       //allows only to rearrange hotbar
       if(event.getSlotId() < 36)
         event.setCanceled();
-      else if(buttonPress == ButtonPress.KEY_DROP || buttonPress == ButtonPress.CTRL_DROP)
+      else if(buttonPress == ButtonPress.KEY_DROP || buttonPress == ButtonPress.CTRL_DROP){
         event.setCanceled();
+        tryEarnAchievement(player, AchievementType.REBEL, database);
+      }
     }
   }
 
@@ -745,8 +759,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       serverMessage += ChatFormat.DARK_GREEN + " - " + key + ": " + ChatFormat.GOLD + stats.get(key) + "\n";
       
     Utils.BroadcastServerMessage(pluginName, serverMessage);
-    if(!statsDb.hasPlayerAchievement(player.getDisplayName(), AchievementType.RAVENCLAW_ZAG.toString()))
-      insertAchievementIntoDb(player, AchievementType.RAVENCLAW_ZAG, statsDb);
+    tryEarnAchievement(player, AchievementType.RAVENCLAW_ZAG, statsDb);
 
     statsDb.CloseConnection();
   }
@@ -764,8 +777,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     }
 
     Utils.BroadcastServerMessage(pluginName, serverMessage);
-    if(!statsDb.hasPlayerAchievement(player.getDisplayName(), AchievementType.RAVENCLAW_UTZ.toString()))
-      insertAchievementIntoDb(player, AchievementType.RAVENCLAW_UTZ, statsDb);
+    tryEarnAchievement(player, AchievementType.RAVENCLAW_UTZ, statsDb);
 
     statsDb.CloseConnection();
   }
@@ -811,6 +823,11 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     database.CloseConnection();
   }
   
+  private void tryEarnAchievement(Player player, AchievementType achievementType, DatabaseUtils database){
+    if(!database.hasPlayerAchievement(player.getDisplayName(), achievementType.toString()))
+      insertAchievementIntoDb(player, achievementType, database);
+  }
+
   private void insertAchievementIntoDb(Player player, AchievementType achievementType, DatabaseUtils database){
     database.InsertAchievementIntoDbForPlayer(player.getDisplayName(), achievementType.toString());
     displayAchievementEarnMessage(player, achievementType);
@@ -820,5 +837,6 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     String serverMessage = "Du hast das Achievement " + ChatFormat.GOLD + achievementType.toString() + ChatFormat.DARK_GREEN + " erspielt!";
     Utils.BroadcastServerMessage(pluginName, serverMessage);
     Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.ORB, 1.0f, 0.9f);
+    Utils.playSoundAtLocation(Utils.quidditchHubLocation, SoundEffect.Type.ORB, 1.0f, 0.9f);
   }
 }
