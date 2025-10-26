@@ -52,13 +52,14 @@ public enum AchievementType {
 
     // Map/Location Specific
     MAP_SPECIALIST("Win on all maps"), //DONE
-    ON_EDGE("Snitch spawned on map border"),
-    UNLUCKY_HAUNT("Snitch spawned in the secret tunnel"),
-    ALL_WATER_UNDER_THE_BRIDGE("Snitch spawned under the bridge"),
-    BEHIND_THE_HOURGLASS("Snitch spawned near the hourglass"),
-    TOWER("Snitch spawned in one Tower"),
-    CRISPY("Snitch spawned above lava"),
-    MIX_UP("Snitch spawned adjacent to gold"),
+    UNLUCKY_HAUNT("Snitch spawned in the secret tunnel"), //DONE
+    ALL_WATER_UNDER_THE_BRIDGE("Snitch spawned under the bridge"), //DONE
+    GOAL("Snitch spawned inside a ring"), //DONE
+    TOWER("Snitch spawned in one Tower"), //DONE
+    CRISPY("Snitch spawned above lava"), //DONE
+    ON_EDGE("Snitch spawned on map border"), //DONE
+    MIX_UP("Snitch spawned adjacent to gold"), //DONE
+    GARDENER("Snitch spawned in a tree"), //DONE
     RAINBOW("Play 5 maps in 1 day"), //DONE
 
     // Misc/Fun/Stats Viewing

@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.pragprog.ahmine.ez.EZPlugin;
@@ -224,6 +225,21 @@ public class Utils extends EZPlugin{
     return randomLocation;
   }
 
+  public static boolean IsInsideVolume(Location corner1, Location corner2, Location point) {
+    double minX = Math.min(corner1.getX(), corner2.getX());
+    double maxX = Math.max(corner1.getX(), corner2.getX());
+    double minY = Math.min(corner1.getY(), corner2.getY());
+    double maxY = Math.max(corner1.getY(), corner2.getY());
+    double minZ = Math.min(corner1.getZ(), corner2.getZ());
+    double maxZ = Math.max(corner1.getZ(), corner2.getZ());
+
+    double px = point.getX();
+    double py = point.getY();
+    double pz = point.getZ();
+    return px >= minX && px <= maxX && py >= minY && py <= maxY && pz >= minZ && pz <= maxZ;
+}
+
+
   public static void UpdateSignText(Location loc, String[] text){
     World world = loc.getWorld();
     Block block = world.getBlockAt(loc);
@@ -331,5 +347,39 @@ public class Utils extends EZPlugin{
     int height2 = (int)loc2.getY();
     int heightDifference = height2 - height1;
     return heightDifference;
+  }
+
+  //There is no method to check 1.8 BlockTypes
+  public static boolean IsWhiteStainedGlass(Block block){
+    if(block.getType().toString().equalsIgnoreCase("net.canarymod.api.world.blocks.BlockType@37d80bb3"))
+      return true;
+
+    return false;
+  }
+
+  public static List<Block> GetSurroundingBlocks(Location location){
+    World world = location.getWorld();
+    Block block = world.getBlockAt((int)location.getX(), (int)location.getY(), (int)location.getZ());
+    return GetSurroundingBlocks(block);
+  }
+
+  public static List<Block> GetSurroundingBlocks(Block block) {
+    World world = block.getWorld();
+    int x = block.getX();
+    int y = block.getY();
+    int z = block.getZ();
+
+    List<Block> list = new ArrayList<>();
+
+    for (int dx = -1; dx <= 1; dx++) {
+        for (int dy = -1; dy <= 1; dy++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                if (dx == 0 && dy == 0 && dz == 0) continue;
+                list.add(world.getBlockAt(x + dx, y + dy, z + dz));
+            }
+        }
+    }
+
+    return list;
   }
 }

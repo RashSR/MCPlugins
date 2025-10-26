@@ -419,6 +419,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     int heightDifference = Utils.CalculateHeightDifference(player.getLocation(), snitchLocation);
     if(heightDifference >= 10)
       tryEarnAchievement(player, AchievementType.HIGH_GROUND, database);
+    checkForSpecialAchievementLocation();
 
     snitchLocation.getWorld().setBlockAt(snitchLocation, BlockType.Air);
     removeCompassFromPlayer();
@@ -443,6 +444,37 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     }
     else{
       initializeWin();
+    }
+  }
+
+  private void checkForSpecialAchievementLocation(){
+    if(Utils.IsInsideVolume(new Location(29, 108, 256), new Location(26, 109, 251), snitchLocation))
+      tryEarnAchievement(player, AchievementType.ALL_WATER_UNDER_THE_BRIDGE, database);
+    else if(Utils.IsInsideVolume(new Location(142, 134, 275), new Location(209, 136, 275), snitchLocation))
+      tryEarnAchievement(player, AchievementType.UNLUCKY_HAUNT, database);
+    else if(Utils.IsInsideVolume(new Location(148, 154, 291), new Location(144, 129, 295), snitchLocation) //Gryffindor
+          || Utils.IsInsideVolume(new Location(148, 154, 327), new Location(144, 129, 323), snitchLocation) //Ravenclaw
+          || Utils.IsInsideVolume(new Location(178, 154, 327), new Location(182, 129, 323), snitchLocation) //Slytherin
+          || Utils.IsInsideVolume(new Location(178, 154, 291), new Location(182, 129, 295), snitchLocation)){ //Hufflepuff
+      tryEarnAchievement(player, AchievementType.TOWER, database);
+    }
+    else if(EZPlugin.locEqual(snitchLocation, new Location(182, 144, 313)) || EZPlugin.locEqual(snitchLocation, new Location(181, 145, 309)) //Goalposts
+      || EZPlugin.locEqual(snitchLocation, new Location(182, 144, 305)) || EZPlugin.locEqual(snitchLocation, new Location(144, 144, 305))
+      || EZPlugin.locEqual(snitchLocation, new Location(145, 145, 309)) || EZPlugin.locEqual(snitchLocation, new Location(144, 144, 313))){
+      tryEarnAchievement(player, AchievementType.GOAL, database);
+    }
+    
+    Block belowSnitch = snitchLocation.getWorld().getBlockAt((int)snitchLocation.getX(), (int)snitchLocation.getY() - 1, (int)snitchLocation.getZ());
+    if(belowSnitch.getType() == BlockType.Lava)
+      tryEarnAchievement(player, AchievementType.CRISPY, database);
+    
+    for(Block surroundingBlock : Utils.GetSurroundingBlocks(snitchLocation)){
+      if(Utils.IsWhiteStainedGlass(surroundingBlock))
+        tryEarnAchievement(player, AchievementType.ON_EDGE, database);
+      else if(surroundingBlock.getType() == BlockType.GoldBlock)
+        tryEarnAchievement(player, AchievementType.MIX_UP, database);
+      else if(surroundingBlock.getType() == BlockType.PineLeaves || surroundingBlock.getType() == BlockType.BirchLeaves)
+        tryEarnAchievement(player, AchievementType.GARDENER, database);
     }
   }
 
