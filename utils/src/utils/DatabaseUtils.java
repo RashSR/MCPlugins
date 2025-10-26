@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -369,6 +370,62 @@ public class DatabaseUtils extends EZPlugin{
 
         return 0;
     }
+
+    public int GetTodayQuidditchMapCountByPlayer(String playerName){
+        String sql = "SELECT COUNT(DISTINCT map_played) AS map_count " + 
+            "FROM game_session WHERE player_name = ? " + 
+            "AND DATE(session_timestamp) = DATE('now');";
+        
+        try{
+            PreparedStatement mapTodayCountStatement = connection.prepareStatement(sql);
+            mapTodayCountStatement.setString(1, playerName);
+            ResultSet result = mapTodayCountStatement.executeQuery();
+
+            while(result.next()){
+                int count = result.getInt("map_count");
+                return count;
+            }
+        }
+        catch(SQLException e){
+            logger.info("ERROR during today map count loading: " + e.getMessage());
+        }
+
+        return 0;
+    }
+
+    public int GetConsecutiveDayCount(String playerName) {
+        String sql = "SELECT DISTINCT DATE(session_timestamp) AS play_date " +
+                    "FROM game_session " +
+                    "WHERE player_name = ? " +
+                    "ORDER BY play_date DESC";
+
+        try{
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setString(1, playerName);
+            ResultSet rs = stmt.executeQuery();
+
+            int streak = 0;
+            LocalDate expected = LocalDate.now();
+
+            while (rs.next()) {
+                LocalDate date = LocalDate.parse(rs.getString("play_date"));
+
+                if (date.equals(expected)) {
+                    streak++;
+                    expected = expected.minusDays(1); // check previous day next loop
+                } else {
+                    break; // streak broken
+                }
+            }
+
+            return streak;
+        } catch (SQLException e) {
+            logger.info("ERROR during consecutive game count loading: " + e.getMessage());
+        }
+
+        return 0;
+    }
+
 
     public boolean hasPlayerQuidditchAchievement(String playerName, String achievementName){
         String sqlCommand = "SELECT COUNT(*) FROM player_achievements WHERE player_name = ? AND achievement_name = ?;";

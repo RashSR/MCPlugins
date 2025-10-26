@@ -10,7 +10,7 @@ public enum AchievementType {
     GAME_500("Play 500 Games"), //DONE
     HALF_MARATHON("Play 21 Matches in a row"), //DONE
     MARATHON("Play 42 Matches in a row"), //DONE
-    DEDICATED("Play 7 days in a row"),
+    DEDICATED("Play 7 days in a row"), //DONE
 
     // Snitch Hits/Distance/Skill
     MID_SHOT("Distance: 25 Blocks"), //DONE
@@ -35,7 +35,7 @@ public enum AchievementType {
 
     // Special Block/Spawn/Compass
     LUCKY_SPAWN("Snitch spawns close by"), //DONE
-    SPARKLE("Let the Snitch sparkle"),
+    SPARKLE("Let the Snitch sparkle"), //DONE
     RANDOM_MAP("Play on a random map"), //DONE
     UNECCESSARY_COMPASS("Catch the snitch shortly after you got a compass"), //DONE
     NO_COMPASS_REQUIRED("Don't use a compass"), //DONE
@@ -56,12 +56,13 @@ public enum AchievementType {
     UNLUCKY_HAUNT("Snitch spawned in the secret tunnel"),
     ALL_WATER_UNDER_THE_BRIDGE("Snitch spawned under the bridge"),
     BEHIND_THE_HOURGLASS("Snitch spawned near the hourglass"),
+    TOWER("Snitch spawned in one Tower"),
     CRISPY("Snitch spawned above lava"),
     MIX_UP("Snitch spawned adjacent to gold"),
-    RAINBOW_HUNTER("Catch snitches on 5 differnt maps in one day"),
+    RAINBOW("Play 5 maps in 1 day"), //DONE
 
     // Misc/Fun/Stats Viewing
-    REBEL("Try to drop an item"), //DONE
+    REBEL("Drop an item"), //DONE
     RAVENCLAW_ZAG("Look at your stats"), //DONE
     RAVENCLAW_UTZ("Look at your map stats"); //DONE
 

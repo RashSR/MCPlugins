@@ -48,6 +48,7 @@ import net.canarymod.api.world.effects.Particle;
 import net.canarymod.api.factory.ObjectFactory;
 import net.canarymod.api.DamageType;
 import net.canarymod.hook.player.HealthChangeHook;
+import net.canarymod.tasks.ServerTask;
 
 public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCallback {
   
@@ -77,7 +78,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private Map SELECTED_MAP;
   private DatabaseUtils database;
 
-  //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, load chunk to prevent wrong lighting
+  //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, load chunk to prevent wrong lighting, improve bow hit e.g. extrapolate direction
   @Override 
   public boolean enable() {
     Canary.hooks().registerListener(this, this);
@@ -268,7 +269,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private SpawnParticlesTask spawnParticlesTask;
 
   private void spawnDelayedParticles(){
-    spawnParticlesTask = new SpawnParticlesTask(snitchLocation, particleTypes, SHOW_HELP_PARTICLE_AFTER_DELAY_IN_SECONDS);
+    spawnParticlesTask = new SpawnParticlesTask(snitchLocation, particleTypes, SHOW_HELP_PARTICLE_AFTER_DELAY_IN_SECONDS, this);
     Canary.getServer().addSynchronousTask(spawnParticlesTask);
   }
 
@@ -282,8 +283,11 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     Canary.getServer().addSynchronousTask(givePlayerItemTask);
   }
 
-  public void ExecuteTaskCallback(){
-    incrementCompassCount();
+  public void ExecuteTaskCallback(ServerTask caller){
+    if(caller instanceof GivePlayerItemTask)
+      incrementCompassCount();
+    else if(caller instanceof SpawnParticlesTask)
+      tryEarnAchievement(player, AchievementType.SPARKLE, database);
   }
 
   private int totalCompassCount;
@@ -526,7 +530,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       tryEarnAchievement(player, AchievementType.MARATHON, database);
 
     int distinctMapsPlayedCount = database.GetQuidditchMapCountByPlayer(player.getDisplayName());
-    if(distinctMapsPlayedCount >= 5)
+    if(distinctMapsPlayedCount == Map.values().length)
       tryEarnAchievement(player, AchievementType.MAP_SPECIALIST, database);
     
     if(!hasLostHealth)
@@ -557,6 +561,14 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
 
     if(totalCompassCount == 0)
       tryEarnAchievement(player, AchievementType.NO_COMPASS_REQUIRED, database);
+    
+    int consecutiveDaysPlayed = database.GetConsecutiveDayCount(player.getDisplayName());
+    if(consecutiveDaysPlayed >= 7)
+      tryEarnAchievement(player, AchievementType.DEDICATED, database);
+    
+    int todayMapCount = database.GetTodayQuidditchMapCountByPlayer(player.getDisplayName());
+    if(todayMapCount >= 5)
+      tryEarnAchievement(player, AchievementType.RAINBOW, database);
   }
 
   private int endTimeInSeconds;

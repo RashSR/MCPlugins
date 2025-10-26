@@ -15,19 +15,27 @@ public class SpawnParticlesTask extends ServerTask{
     private Location location;
     private ArrayList<Particle.Type> particleTypes;
     private int showAfterDelayInSeconds;
+    private IServerTaskCallback callback;
 
-    public SpawnParticlesTask(Location location, ArrayList<Particle.Type> particleTypes, int showAfterDelayInSeconds) {
+    public SpawnParticlesTask(Location location, ArrayList<Particle.Type> particleTypes, int showAfterDelayInSeconds, IServerTaskCallback callback) {
         super(Canary.getServer(), TaskDelay, isContinousTask);
         this.elapsedTimeInSeconds = 0;
         this.location = location;
         this.particleTypes = particleTypes;
         this.showAfterDelayInSeconds = showAfterDelayInSeconds;
+        this.callback = callback;
     }
 
     public void run(){
         elapsedTimeInSeconds++;
+        if(elapsedTimeInSeconds == showAfterDelayInSeconds){
+            if(callback != null)
+                callback.ExecuteTaskCallback(this);
+        }
+        
         if(elapsedTimeInSeconds >= showAfterDelayInSeconds)
             for(Particle.Type particleType : particleTypes)
                 Utils.SpawnParticleAroundLocation(location, particleType);
+
     }
 }

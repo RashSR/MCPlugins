@@ -33,7 +33,7 @@ public class GivePlayerItemTask extends ServerTask{
             Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.ITEM_PICKUP, 1.5f, 1.0f);
             Canary.getServer().removeSynchronousTask(this);
             if(callback != null)
-                callback.ExecuteTaskCallback();
+                callback.ExecuteTaskCallback(this);
         }
     }
 }
