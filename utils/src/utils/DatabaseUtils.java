@@ -61,7 +61,7 @@ public class DatabaseUtils extends EZPlugin{
             connection = DriverManager.getConnection(dbUrl);
             Statement stmt = connection.createStatement();
 
-            String createGameSessionQuidditch = "CREATE TABLE IF NOT EXISTS game_sessions (" +
+            String createGameSessionQuidditch = "CREATE TABLE IF NOT EXISTS game_session (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "player_name TEXT NOT NULL," +
                 "score INTEGER DEFAULT 0," +
@@ -99,7 +99,7 @@ public class DatabaseUtils extends EZPlugin{
     public void insertGameSession(String playerName, int score, int handCatches, int bowHits,
                               int fastestCatch, int slowestCatch, int fastCatches, int fastCatchStreaks, int missedArrows,
                               String mapPlayed, int gameDuration, int shortestBowHit, int longestBowHit, int totalCompassCount) {
-        String sqlCommand = "INSERT INTO game_sessions (" +
+        String sqlCommand = "INSERT INTO game_session (" +
                 "player_name, score, hand_catches, bow_hits, fastest_catch, slowest_catch, fast_catches, " +
                 "fast_catch_streaks, missed_arrows, map_played, game_duration, shortest_bow_hit, longest_bow_hit, total_compass_count, session_timestamp" + 
                 ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);";
@@ -130,28 +130,28 @@ public class DatabaseUtils extends EZPlugin{
     }
 
     public List<String> GetTop3ScoresFromMap(Map map){
-        String sqlCommand = "SELECT player_name, score FROM game_sessions";
+        String sqlCommand = "SELECT player_name, score FROM game_session";
         String scoreColumn = "score";
         List<String> topScores = getTopScores(sqlCommand, scoreColumn, false, 3, false, map);
         return topScores;
     }
 
     public List<String> GetTop3TimesFromMap(Map map){
-        String sqlCommand = "SELECT player_name, game_duration FROM game_sessions";
+        String sqlCommand = "SELECT player_name, game_duration FROM game_session";
         String scoreColumn = "game_duration";
         List<String> topTimes = getTopScores(sqlCommand, scoreColumn, true, 3, true, map);
         return topTimes;
     }
 
     public List<String> GetTop3FastestCatchTimes(){
-        String sqlCommand = "SELECT player_name, fastest_catch FROM game_sessions";
+        String sqlCommand = "SELECT player_name, fastest_catch FROM game_session";
         String scoreColumn = "fastest_catch";
         List<String> topFastCatches = getTopScores(sqlCommand, scoreColumn, true, 3, true, null);
         return topFastCatches;
     }
 
     public List<String> GetTop3SlowestCatchTimes(){
-        String sqlCommand = "SELECT player_name, slowest_catch FROM game_sessions";
+        String sqlCommand = "SELECT player_name, slowest_catch FROM game_session";
         String scoreColumn = "slowest_catch";
         List<String> topSlowCatches = getTopScores(sqlCommand, scoreColumn, false, 3, true, null);
         return topSlowCatches;
@@ -198,7 +198,7 @@ public class DatabaseUtils extends EZPlugin{
     }
 
     public List<String> GetTop3MapsPlayed(){
-        String sqlCommand = "SELECT map_played, COUNT(*) FROM game_sessions GROUP BY map_played ORDER BY COUNT(*) DESC LIMIT 3;";
+        String sqlCommand = "SELECT map_played, COUNT(*) FROM game_session GROUP BY map_played ORDER BY COUNT(*) DESC LIMIT 3;";
         List<String> topValues = new ArrayList<>();
 
         try{
@@ -219,8 +219,8 @@ public class DatabaseUtils extends EZPlugin{
 
     public List<String> GetShortestAndLongestBowHit(){
         List<String> topValues = new ArrayList<>();
-        String maxCommand = "SELECT MAX(longest_bow_hit) FROM game_sessions;";
-        String minCommand = "SELECT MIN(shortest_bow_hit) FROM game_sessions;";
+        String maxCommand = "SELECT MAX(longest_bow_hit) FROM game_session;";
+        String minCommand = "SELECT MIN(shortest_bow_hit) FROM game_session;";
         
         try{
             PreparedStatement maxStatment = connection.prepareStatement(maxCommand);
@@ -248,7 +248,7 @@ public class DatabaseUtils extends EZPlugin{
     public HashMap<String, String> GetPlayerStatsForQuidditch(String playerName){
         String sqlCommand = "SELECT player_name, COUNT(*) AS played_matches, AVG(score), AVG(hand_catches), AVG(bow_hits),"
             + " MIN(fastest_catch), MAX(slowest_catch), AVG(fast_catch_streaks), AVG(missed_arrows), AVG(game_duration),"
-            + " MIN(shortest_bow_hit), MAX(longest_bow_hit), AVG(total_compass_count) FROM game_sessions WHERE player_name = ? GROUP BY player_name;";
+            + " MIN(shortest_bow_hit), MAX(longest_bow_hit), AVG(total_compass_count) FROM game_session WHERE player_name = ? GROUP BY player_name;";
         HashMap<String, String> stats = new LinkedHashMap<>();
 
         try{
@@ -291,7 +291,7 @@ public class DatabaseUtils extends EZPlugin{
         String sqlCommand = "SELECT player_name, map_played, COUNT(*), AVG(score), AVG(hand_catches), " + 
             "AVG(bow_hits), MIN(fastest_catch), MAX(slowest_catch), AVG(fast_catch_streaks), AVG(missed_arrows), " + 
             "AVG(game_duration), MIN(shortest_bow_hit), MAX(longest_bow_hit), AVG(total_compass_count) " + 
-            "FROM game_sessions WHERE player_name = ? GROUP BY player_name, map_played;";
+            "FROM game_session WHERE player_name = ? GROUP BY player_name, map_played;";
         List<HashMap<String, String>> lists = new ArrayList<HashMap<String, String>>();
 
         try{
@@ -330,7 +330,47 @@ public class DatabaseUtils extends EZPlugin{
         return formatted;
     }
 
-    public boolean hasPlayerAchievement(String playerName, String achievementName){
+    public int GetQuidditchGameCountByPlayer(String playerName){
+        String sql = "SELECT COUNT(*) FROM game_session WHERE player_name = ?;";
+
+        try{
+            PreparedStatement gameCountStatement = connection.prepareStatement(sql);
+            gameCountStatement.setString(1, playerName);
+            ResultSet result = gameCountStatement.executeQuery();
+
+            while(result.next()){
+                int count = result.getInt("COUNT(*)");
+                return count;
+            }
+        }
+        catch(SQLException e){
+            logger.info("ERROR during game count loading: " + e.getMessage());
+        }
+
+        return 0;
+    }
+
+    public int GetQuidditchMapCountByPlayer(String playerName){
+        String sql = "SELECT COUNT(DISTINCT map_played) FROM game_session WHERE player_name = ?;";
+
+        try{
+            PreparedStatement mapCountStatement = connection.prepareStatement(sql);
+            mapCountStatement.setString(1, playerName);
+            ResultSet result = mapCountStatement.executeQuery();
+
+            while(result.next()){
+                int count = result.getInt("COUNT(DISTINCT map_played)");
+                return count;
+            }
+        }
+        catch(SQLException e){
+            logger.info("ERROR during game count loading: " + e.getMessage());
+        }
+
+        return 0;
+    }
+
+    public boolean hasPlayerQuidditchAchievement(String playerName, String achievementName){
         String sqlCommand = "SELECT COUNT(*) FROM player_achievements WHERE player_name = ? AND achievement_name = ?;";
         
 
@@ -350,13 +390,12 @@ public class DatabaseUtils extends EZPlugin{
         }
         catch(SQLException e){
             logger.info("ERROR during achievement loading: " + e.getMessage());
-            return false;
         }
 
         return false;
     }
     
-    public void InsertAchievementIntoDbForPlayer(String playerName, String achievementName){
+    public void InsertQuidditchAchievementIntoDbForPlayer(String playerName, String achievementName){
         String sql = "INSERT OR IGNORE INTO player_achievements (player_name, achievement_name) VALUES (?, ?)";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {

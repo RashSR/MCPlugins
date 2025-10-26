@@ -325,4 +325,11 @@ public class Utils extends EZPlugin{
     
     return mapName.substring(0, maxLength);
   }
+
+  public static int CalculateHeightDifference(Location loc1, Location loc2){
+    int height1 = (int)loc1.getY();
+    int height2 = (int)loc2.getY();
+    int heightDifference = height2 - height1;
+    return heightDifference;
+  }
 }

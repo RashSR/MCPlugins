@@ -2,21 +2,21 @@ package quidditch;
 
 public enum AchievementType {
     // Basic/Progression
-    WARM_UP("Complete your first game"),
-    GAME_50("Play 50 Games"),
-    GAME_100("Play 100 Games"),
-    GAME_200("Play 200 Games"),
-    GAME_300("Play 300 Games"),
-    GAME_500("Play 500 Games"),
-    HALF_MARATHON("Play 21 Matches in a row"),
-    MARATHON("Play 42 Matches in a row"),
+    WARM_UP("Complete your first game"), //DONE
+    GAME_50("Play 50 Games"), //DONE
+    GAME_100("Play 100 Games"), //DONE
+    GAME_200("Play 200 Games"), //DONE
+    GAME_350("Play 350 Games"), //DONE
+    GAME_500("Play 500 Games"), //DONE
+    HALF_MARATHON("Play 21 Matches in a row"), //DONE
+    MARATHON("Play 42 Matches in a row"), //DONE
     DEDICATED("Play 7 days in a row"),
 
     // Snitch Hits/Distance/Skill
     MID_SHOT("Distance: 25 Blocks"), //DONE
     LONG_SHOT("Distance: 50 Blocks"), //DONE
     KATNISS_EVERDEEN("Distance: 70 Blocks"), //DONE
-    GREAT_START("Catch the first Snitch by hand"),
+    GREAT_START("Catch the first Snitch by hand"), //DONE
     FAST_CATCH("Catch in under 8 seconds"), //DONE
     FAST_STREAK("Make 3 fast catches"), //DONE
     STREAK_MASTER("Make 2 Fast catch Streaks"), //DONE
@@ -26,15 +26,15 @@ public enum AchievementType {
     SHARP_SHOOTER("5 perfect Bow Catches"), //DONE
     HAWKEYE("10 perfect Bow Catches"), //DONE
     STORMTROOPER("Miss 10 arrows"), //DONE
-    HIGH_GROUND("Catch a snitch with height difference"),
-    AIR_JORDAN("Hit a snitch in the air"), //player in air
+    HIGH_GROUND("Catch a snitch with height difference"), //DONE
+    AIR_JORDAN("Hit a snitch in the air"), //DONE
     OVER_1000("Score over 1000"), //DONE
     OVER_1500("Score over 1500"), //DONE
     UNDER_60("Time under 60 seconds"), //DONE
     UNDER_30("Time under 30 seconds"), //DONE
 
     // Special Block/Spawn/Compass
-    LUCKY_SPAWN("Snitch spawns close by"),
+    LUCKY_SPAWN("Snitch spawns close by"), //DONE
     SPARKLE("Let the Snitch sparkle"),
     RANDOM_MAP("Play on a random map"), //DONE
     UNECCESSARY_COMPASS("Catch the snitch shortly after you got a compass"), //DONE
@@ -48,10 +48,11 @@ public enum AchievementType {
     LAVA_SWIMMER("Die in lava"), //DONE
     EARTHBOUND("Dont jump in one game"),
     BOUNCER("Jump 50 times in one game"),
-    INVINCIBLE("Dont take damage"),
+    INVINCIBLE("Dont take damage"), //DONE
 
     // Map/Location Specific
-    MAP_SPECIALIST("Win on all maps"),
+    MAP_SPECIALIST("Win on all maps"), //DONE
+    ON_EDGE("Snitch spawned on map border"),
     UNLUCKY_HAUNT("Snitch spawned in the secret tunnel"),
     ALL_WATER_UNDER_THE_BRIDGE("Snitch spawned under the bridge"),
     BEHIND_THE_HOURGLASS("Snitch spawned near the hourglass"),
