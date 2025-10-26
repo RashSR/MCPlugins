@@ -28,6 +28,7 @@ public enum AchievementType {
     STORMTROOPER("Miss 10 arrows"), //DONE
     HIGH_GROUND("Catch a snitch with height difference"), //DONE
     AIR_JORDAN("Hit a snitch in the air"), //DONE
+    MERMAID("Hit a snitch in the water"), //DONE
     OVER_1000("Score over 1000"), //DONE
     OVER_1500("Score over 1500"), //DONE
     UNDER_60("Time under 60 seconds"), //DONE
@@ -46,8 +47,8 @@ public enum AchievementType {
 
     // Environment/Hazards
     LAVA_SWIMMER("Die in lava"), //DONE
-    EARTHBOUND("Dont jump in one game"),
-    BOUNCER("Jump 50 times in one game"),
+    EARTHBOUND("Dont jump in one game"), //TODO: is possible with move hook and player.isOnGround
+    BOUNCER("Jump 50 times in one game"), //TODO:
     INVINCIBLE("Dont take damage"), //DONE
 
     // Map/Location Specific

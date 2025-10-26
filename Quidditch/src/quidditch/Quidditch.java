@@ -417,11 +417,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private int fastCatchStreak;
 
   private void snitchCatched(int pointsScored, SoundEffect.Type soundType){
-    int heightDifference = Utils.CalculateHeightDifference(player.getLocation(), snitchLocation);
-    if(heightDifference >= 10)
-      tryEarnAchievement(player, AchievementType.HIGH_GROUND, database);
-    checkForSpecialAchievementLocation();
-
+    checkForSnitchCatchAchievements();
     snitchLocation.getWorld().setBlockAt(snitchLocation, BlockType.Air);
     removeCompassFromPlayer();
     Canary.getServer().removeSynchronousTask(spawnParticlesTask);
@@ -446,6 +442,15 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     else{
       initializeWin();
     }
+  }
+
+  private void checkForSnitchCatchAchievements(){
+    if(player.isInWater())
+      tryEarnAchievement(player, AchievementType.MERMAID, database);
+    int heightDifference = Utils.CalculateHeightDifference(player.getLocation(), snitchLocation);
+    if(heightDifference >= 10)
+      tryEarnAchievement(player, AchievementType.HIGH_GROUND, database);
+    checkForSpecialAchievementLocation();
   }
 
   private void checkForSpecialAchievementLocation(){
