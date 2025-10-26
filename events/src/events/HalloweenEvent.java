@@ -62,6 +62,6 @@ public class HalloweenEvent extends EZPlugin implements IEvent{
 	private void loadEventBlocks(){
 		Map<String, ArrayList<Location>> blocks = BlockLocationLoader.load("config/block_locations_halloween.txt");
 		eventBlocks.put(BlockType.JackOLantern, blocks.get("jack_o_lantern"));
-		eventBlocks.put(BlockType.RedstoneBlock, blocks.get("spider_web"));
+		eventBlocks.put(BlockType.SpiderWeb, blocks.get("spider_web"));
 	}
 }
