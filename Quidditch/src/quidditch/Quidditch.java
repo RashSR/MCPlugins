@@ -49,6 +49,7 @@ import net.canarymod.api.factory.ObjectFactory;
 import net.canarymod.api.DamageType;
 import net.canarymod.hook.player.HealthChangeHook;
 import net.canarymod.tasks.ServerTask;
+import net.canarymod.hook.player.InventoryHook;
 
 public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCallback {
   
@@ -874,7 +875,9 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
 
   @HookHandler
   public void SlotClickHook(SlotClickHook event){
-    if(isEnabled && event.getPlayer() == player){
+    if(isCustomInventoryOpen)
+      event.setCanceled();
+    else if(isEnabled && event.getPlayer() == player){
       ButtonPress buttonPress = event.getButtonPress();
       //allows only to rearrange hotbar
       if(event.getSlotId() < 36)
@@ -937,12 +940,15 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     Utils.BroadcastServerMessage(pluginName, serverMessage + command1 + command2 + command3 + command4 + command5);
   }
 
+  private boolean isCustomInventoryOpen = false;
+
   private void displayAchievementInventory(Player player){
     ObjectFactory objectFactory = Canary.factory().getObjectFactory();
     int inventoryRows = (AchievementType.values().length + 8) / 9; //This ensures correct size for the custom Inventory
     CustomStorageInventory customInventory = objectFactory.newCustomStorageInventory(ChatFormat.DARK_AQUA + "Achievements", inventoryRows);
     fillInventoryWithAchievements(customInventory, player);
     player.openInventory(customInventory);
+    isCustomInventoryOpen = true;
   }
 
   private void fillInventoryWithAchievements(CustomStorageInventory customInventory, Player player){
@@ -965,6 +971,12 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       customInventory.setSlot(i, item);
     }
     database.CloseConnection();
+  }
+
+  @HookHandler
+  public void InventoryHookEvent(InventoryHook event){
+    if(isCustomInventoryOpen && event.isClosing())
+      isCustomInventoryOpen = false;
   }
   
   private void tryEarnAchievement(Player player, AchievementType achievementType, DatabaseUtils database){
