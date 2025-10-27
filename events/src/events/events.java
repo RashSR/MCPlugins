@@ -65,6 +65,11 @@ public class events extends EZPlugin implements PluginListener {
 					currentEvent = new NewYearEvent(player.getWorld());
 					currentEvent.startEvent();
 					break;
+				case "pride":
+					endEvent();
+					currentEvent = new PrideEvent(player.getWorld());
+					currentEvent.startEvent();
+					break;
 				default:
 					return;
 			}
@@ -84,10 +89,12 @@ public class events extends EZPlugin implements PluginListener {
 
   		if(month == 12)
     		return new ChristmasEvent(world);
-    	else if(month==1 && day<10)
+    	else if(month == 1 && day < 10)
     		return new NewYearEvent(world);
-    	else if(month==10&&day>20)
+    	else if(month == 10 && day > 20)
     		return new HalloweenEvent(world);
+		else if(month == 6)
+			return new PrideEvent(world);
 
     	return null;
   	}

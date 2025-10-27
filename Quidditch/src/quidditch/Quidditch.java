@@ -39,6 +39,7 @@ import net.canarymod.hook.player.ItemDropHook;
 import net.canarymod.hook.player.SlotClickHook;
 import net.canarymod.api.inventory.slot.ButtonPress;
 import net.canarymod.api.entity.EntityType;
+import utils.ChangeBlockTypeTask;
 import utils.DatabaseUtils;
 import utils.GivePlayerItemTask;
 import utils.IServerTaskCallback;
@@ -69,6 +70,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private final int SPEED_FOR_FAST_CATCH_STREAK_IN_SECONDS = 5;
   private final int GIVE_COMPASS_DELAY_IN_SECONDS = 30;
   private final int SHOW_HELP_PARTICLE_AFTER_DELAY_IN_SECONDS = 45;
+  private final int CHANGE_BLOCK_COLOR_IN_TICKS = 12;
 
   private BlockType SNITCH_BLOCK_TYPE;
   private boolean isEnabled = false;
@@ -81,7 +83,6 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private DatabaseUtils database;
 
   //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, load chunk to prevent wrong lighting, improve bow hit e.g. extrapolate direction
-  //Rainbow Event? -> block cycles through colors -> Pride?
   @Override 
   public boolean enable() {
     Canary.hooks().registerListener(this, this);
@@ -146,7 +147,9 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     hasPlayerStandOnGround = true;
   }
 
-  ArrayList<Particle.Type> particleTypes;
+  private ArrayList<Particle.Type> particleTypes;
+  private ChangeBlockTypeTask changeBlockTypeTask;
+  private List<BlockType> eventChangingBlocks;
 
   private void checkForEvent(){
     particleTypes = new ArrayList<>();
@@ -154,23 +157,34 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     switch (Utils.GetCurrentEvent()) {
       case ServerEventType.HALLOWEEN:
         SNITCH_BLOCK_TYPE = BlockType.JackOLantern;
+
         particleTypes.add(Particle.Type.SMOKE_NORMAL);
         particleTypes.add(Particle.Type.SMOKE_LARGE);
         particleTypes.add(Particle.Type.FLAME);
+
         tryEarnAchievement(player, AchievementType.PUMPKIN_SEASON, database);
         break;
       case ServerEventType.CHRISTMAS:
         SNITCH_BLOCK_TYPE = BlockType.LapisBlock;
+
         particleTypes.add(Particle.Type.SNOW_SHOVEL);
         particleTypes.add(Particle.Type.SNOWBALL);
         particleTypes.add(Particle.Type.REDSTONE);
+
         tryEarnAchievement(player, AchievementType.CHRISTMAS_SEASON, database);
+        break;
+      case ServerEventType.PRIDE:
+        eventChangingBlocks = Utils.GetPrideBlockTypes();
+        SNITCH_BLOCK_TYPE = BlockType.WoolMagenta;
+        
+        tryEarnAchievement(player, AchievementType.PRIDE_SEASON, database);
         break;
       case ServerEventType.NONE:
       default:
         particleTypes.add(Particle.Type.CRIT);
         particleTypes.add(Particle.Type.PORTAL);
         particleTypes.add(Particle.Type.VILLAGER_HAPPY);
+
         SNITCH_BLOCK_TYPE = BlockType.GoldBlock;
         break;
     } 
@@ -260,6 +274,11 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       if(possibleSnitch.getType() == BlockType.Air){
         snitchLocation = randomLocation;
         snitchLocation.getWorld().setBlockAt(snitchLocation, SNITCH_BLOCK_TYPE);
+        if(eventChangingBlocks != null && eventChangingBlocks.size() > 0){
+          changeBlockTypeTask = new ChangeBlockTypeTask(CHANGE_BLOCK_COLOR_IN_TICKS, true, possibleSnitch, eventChangingBlocks);
+          Canary.getServer().addSynchronousTask(changeBlockTypeTask);
+        }
+
         hasAirBlockBeenSelected = true;
 
         if(Utils.CalculateDistanceBetweenLocations(snitchLocation, player.getLocation()) <= 5)
@@ -349,7 +368,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       this.player = playerClicked;
       Canary.getServer().addSynchronousTask(new TeleportPlayerTask(playerClicked, SELECTED_MAP.GetRandomSpawnPosition(), 3));
     }
-    else if(isEnabled && this.player == playerClicked && clickedType == SNITCH_BLOCK_TYPE && EZPlugin.locEqual(clickedLocation, snitchLocation)){
+    else if(isEnabled && this.player == playerClicked && EZPlugin.locEqual(clickedLocation, snitchLocation)){
       rightClickCatches++;
       tryEarnCatchAchievements();
       snitchCatched(POINTS_PER_RIGHTCLICK, SoundEffect.Type.NOTE_PLING);
@@ -424,6 +443,8 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     snitchLocation.getWorld().setBlockAt(snitchLocation, BlockType.Air);
     removeCompassFromPlayer();
     Canary.getServer().removeSynchronousTask(spawnParticlesTask);
+    if(changeBlockTypeTask != null)
+      Canary.getServer().removeSynchronousTask(changeBlockTypeTask);
     currentSnitchCount++;
     boolean isFastCatch = handleFastCatches();
 
@@ -802,6 +823,9 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private void cleanUpAfterGame(){
     removeItemsFromPlayer();
     Canary.getServer().removeSynchronousTask(spawnParticlesTask);
+    if(changeBlockTypeTask != null)
+      Canary.getServer().removeSynchronousTask(changeBlockTypeTask);
+    eventChangingBlocks = null;
     Utils.clearScoreboard(scoreboard, timerTask, objective);
     isEnabled = false;
     isFirstStartPort = true;

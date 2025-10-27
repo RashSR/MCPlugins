@@ -17,6 +17,7 @@ import net.canarymod.chat.ChatFormat;
 import net.canarymod.api.world.position.Location;
 import net.canarymod.api.inventory.Item;
 import net.canarymod.api.world.blocks.Block;
+import net.canarymod.api.world.blocks.BlockType;
 import net.canarymod.api.scoreboard.*;
 import net.canarymod.api.world.effects.SoundEffect;
 import net.canarymod.api.world.blocks.Sign;
@@ -381,5 +382,20 @@ public class Utils extends EZPlugin{
     }
 
     return list;
+  }
+
+  public static List<BlockType> GetPrideBlockTypes(){
+    List<BlockType> prideBlockTypes = new ArrayList<>();
+
+    prideBlockTypes.add(BlockType.WoolRed);
+    prideBlockTypes.add(BlockType.WoolOrange);
+    prideBlockTypes.add(BlockType.WoolYellow);
+    prideBlockTypes.add(BlockType.WoolLightGreen);
+    prideBlockTypes.add(BlockType.WoolLightBlue);
+    prideBlockTypes.add(BlockType.WoolBlue);
+    prideBlockTypes.add(BlockType.WoolPurple);
+    prideBlockTypes.add(BlockType.WoolMagenta);
+
+    return prideBlockTypes;
   }
 }

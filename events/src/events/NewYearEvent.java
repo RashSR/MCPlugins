@@ -6,7 +6,6 @@ import net.canarymod.chat.ChatFormat;
 import utils.ServerEventType;
 
 public class NewYearEvent extends EZPlugin implements IEvent{
-    
   private World world;
 
   public NewYearEvent(World world){

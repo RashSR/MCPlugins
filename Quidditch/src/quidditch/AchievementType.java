@@ -42,8 +42,10 @@ public enum AchievementType {
     NO_COMPASS_REQUIRED("Don't use a compass"),
 
     // Seasonal/Event
+    PRIDE_SEASON("Play during Pride Month"),
     PUMPKIN_SEASON("Play during Halloween"),
     CHRISTMAS_SEASON("Play during Christmas"),
+    //TODO: GLITCH_EVENT
 
     // Environment/Hazards
     LAVA_SWIMMER("Die in lava"),
