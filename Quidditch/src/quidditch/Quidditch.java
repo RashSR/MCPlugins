@@ -28,6 +28,7 @@ import utils.TeleportPlayerTask;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import net.canarymod.api.inventory.CustomStorageInventory;
 import net.canarymod.api.scoreboard.*;
 import net.canarymod.hook.player.TeleportHook;
@@ -71,6 +72,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private final int GIVE_COMPASS_DELAY_IN_SECONDS = 30;
   private final int SHOW_HELP_PARTICLE_AFTER_DELAY_IN_SECONDS = 45;
   private final int CHANGE_BLOCK_COLOR_IN_TICKS = 12;
+  private final int GLITCH_EVENT_CHANCE_IN_PERCENT = 5;
 
   private BlockType SNITCH_BLOCK_TYPE;
   private boolean isEnabled = false;
@@ -176,7 +178,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       case ServerEventType.PRIDE:
         eventChangingBlocks = Utils.GetPrideBlockTypes();
         SNITCH_BLOCK_TYPE = BlockType.WoolMagenta;
-        
+
         tryEarnAchievement(player, AchievementType.PRIDE_SEASON, database);
         break;
       case ServerEventType.NONE:
@@ -274,10 +276,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       if(possibleSnitch.getType() == BlockType.Air){
         snitchLocation = randomLocation;
         snitchLocation.getWorld().setBlockAt(snitchLocation, SNITCH_BLOCK_TYPE);
-        if(eventChangingBlocks != null && eventChangingBlocks.size() > 0){
-          changeBlockTypeTask = new ChangeBlockTypeTask(CHANGE_BLOCK_COLOR_IN_TICKS, true, possibleSnitch, eventChangingBlocks);
-          Canary.getServer().addSynchronousTask(changeBlockTypeTask);
-        }
+        handleChangingBlocks(possibleSnitch);
 
         hasAirBlockBeenSelected = true;
 
@@ -289,6 +288,29 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       }
     }
   }
+
+  private void handleChangingBlocks(Block snitchBlock){
+    if(eventChangingBlocks != null && eventChangingBlocks.size() > 0){
+      changeBlockTypeTask = new ChangeBlockTypeTask(CHANGE_BLOCK_COLOR_IN_TICKS, true, snitchBlock, eventChangingBlocks);
+      Canary.getServer().addSynchronousTask(changeBlockTypeTask);
+    }else{
+      Random random = new Random();
+      if(random.nextInt(100) < GLITCH_EVENT_CHANCE_IN_PERCENT){
+        int randomDelayTicks = 2 + random.nextInt(6); //between  2..7
+
+        eventChangingBlocks = new ArrayList<>();
+        eventChangingBlocks.add(BlockType.EndStone);
+        eventChangingBlocks.add(BlockType.Obsidian);
+        eventChangingBlocks.add(BlockType.Melon);
+        eventChangingBlocks.add(BlockType.GlowStone);
+
+        changeBlockTypeTask = new ChangeBlockTypeTask(randomDelayTicks, true, snitchBlock, eventChangingBlocks);
+        Canary.getServer().addSynchronousTask(changeBlockTypeTask);
+        tryEarnAchievement(player, AchievementType.GLITCH, database);
+      }
+    }
+  }
+
   private SpawnParticlesTask spawnParticlesTask;
 
   private void spawnDelayedParticles(){

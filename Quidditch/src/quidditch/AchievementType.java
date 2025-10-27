@@ -38,6 +38,7 @@ public enum AchievementType {
     LUCKY_SPAWN("Snitch spawns close by"),
     SPARKLE("Let the Snitch sparkle"),
     RANDOM_MAP("Play on a random map"),
+    GLITCH("What happend to the snitch?"),
     UNECCESSARY_COMPASS("Catch the snitch shortly after you got a compass"),
     NO_COMPASS_REQUIRED("Don't use a compass"),
 
@@ -45,7 +46,6 @@ public enum AchievementType {
     PRIDE_SEASON("Play during Pride Month"),
     PUMPKIN_SEASON("Play during Halloween"),
     CHRISTMAS_SEASON("Play during Christmas"),
-    //TODO: GLITCH_EVENT
 
     // Environment/Hazards
     LAVA_SWIMMER("Die in lava"),
