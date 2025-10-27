@@ -72,7 +72,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private final int GIVE_COMPASS_DELAY_IN_SECONDS = 30;
   private final int SHOW_HELP_PARTICLE_AFTER_DELAY_IN_SECONDS = 45;
   private final int CHANGE_BLOCK_COLOR_IN_TICKS = 12;
-  private final int GLITCH_EVENT_CHANCE_IN_PERCENT = 5;
+  private final int GLITCH_EVENT_CHANCE_IN_PERCENT = 2;
 
   private BlockType SNITCH_BLOCK_TYPE;
   private boolean isEnabled = false;
@@ -147,6 +147,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     totalCompassCount = 0;
     hasPlayerLostHealth = false;
     hasPlayerStandOnGround = true;
+    isGlitchActive = false;
   }
 
   private ArrayList<Particle.Type> particleTypes;
@@ -289,13 +290,21 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     }
   }
 
+  private boolean isGlitchActive;
+
   private void handleChangingBlocks(Block snitchBlock){
+    if(isGlitchActive){
+      eventChangingBlocks = null;
+      isGlitchActive = false;
+    }
+      
     if(eventChangingBlocks != null && eventChangingBlocks.size() > 0){
       changeBlockTypeTask = new ChangeBlockTypeTask(CHANGE_BLOCK_COLOR_IN_TICKS, true, snitchBlock, eventChangingBlocks);
       Canary.getServer().addSynchronousTask(changeBlockTypeTask);
     }else{
       Random random = new Random();
       if(random.nextInt(100) < GLITCH_EVENT_CHANCE_IN_PERCENT){
+        isGlitchActive = true;
         int randomDelayTicks = 2 + random.nextInt(6); //between  2..7
 
         eventChangingBlocks = new ArrayList<>();
@@ -851,6 +860,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     Utils.clearScoreboard(scoreboard, timerTask, objective);
     isEnabled = false;
     isFirstStartPort = true;
+    isGlitchActive = false;
     snitchLocation.getWorld().setBlockAt(snitchLocation, BlockType.Air);
     database.CloseConnection();
   }
