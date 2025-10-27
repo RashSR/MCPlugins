@@ -50,6 +50,7 @@ import net.canarymod.api.DamageType;
 import net.canarymod.hook.player.HealthChangeHook;
 import net.canarymod.tasks.ServerTask;
 import net.canarymod.hook.player.InventoryHook;
+import net.canarymod.hook.player.PlayerMoveHook;
 
 public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCallback {
   
@@ -80,6 +81,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private DatabaseUtils database;
 
   //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, load chunk to prevent wrong lighting, improve bow hit e.g. extrapolate direction
+  //Rainbow Event? -> block cycles through colors -> Pride?
   @Override 
   public boolean enable() {
     Canary.hooks().registerListener(this, this);
@@ -140,7 +142,8 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     shortestBowHit = Integer.MAX_VALUE;
     endTimeInSeconds = Integer.MAX_VALUE;
     totalCompassCount = 0;
-    hasLostHealth = false;
+    hasPlayerLostHealth = false;
+    hasPlayerStandOnGround = true;
   }
 
   ArrayList<Particle.Type> particleTypes;
@@ -571,8 +574,11 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     if(distinctMapsPlayedCount == Map.values().length)
       tryEarnAchievement(player, AchievementType.MAP_SPECIALIST, database);
     
-    if(!hasLostHealth)
+    if(!hasPlayerLostHealth)
       tryEarnAchievement(player, AchievementType.INVINCIBLE, database);
+    
+    if(hasPlayerStandOnGround)
+      tryEarnAchievement(player, AchievementType.EARTHBOUND, database);
     
     if(missedArrowCount == 0){
       tryEarnAchievement(player, AchievementType.PERFECT_ACCURACY, database);
@@ -894,14 +900,24 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     }
   }
 
-  private boolean hasLostHealth;
+  private boolean hasPlayerLostHealth;
 
   @HookHandler
   public void HealthChangeHookEvent(HealthChangeHook event){
     if(isEnabled && event.getPlayer() == player && event.getOldValue() > event.getNewValue())
-      hasLostHealth = true;
+      hasPlayerLostHealth = true;
   }
 
+  private boolean hasPlayerStandOnGround;
+
+  @HookHandler
+  public void PlayerMoveHookEvent(PlayerMoveHook event){
+    if(isEnabled && event.getPlayer() == player){
+      if(!player.isOnGround())
+        hasPlayerStandOnGround = false;
+    }
+  }
+  
   private void displayPlayerStats(Player player){
     DatabaseUtils statsDb = setUpDatabase();
 
