@@ -39,7 +39,7 @@ All plugins are written in **Java**, using the **CanaryMod API**, and were desig
 | **SoupPvP** | Adds soup-based instant healing for PvP combat. | Complete |
 | **Bedwars** | Adds the popular Bedwars minigame. | Beta |
 | **Challenges** | Endermanteleportation, MLG Water, Drop down/up challanges minigame. | Conception |
-| **Challenges** | Log each serverstart + -shutdown and player login + logout. | Conception |
+| **SessionSpy** | Log each serverstart + -shutdown and player login + logout. | Conception |
 
 ---
 
