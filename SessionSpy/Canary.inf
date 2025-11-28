@@ -1,0 +1,5 @@
+main-class = sessionspy.SessionSpy
+name = SessionSpy
+author = yourname
+version = 1.0
+

@@ -17,8 +17,8 @@ public class join extends EZPlugin implements PluginListener{
   }
 
   @HookHandler
-  public void ConnectionHookEvent(ConnectionHook event) {
-    Player player = event.getPlayer(); 
+  public void ConnectionHookEvent(ConnectionHook event){
+    Player player = event.getPlayer();
     Location currentPosition = player.getLocation();
     double x = currentPosition.getX();
     double z = currentPosition.getZ();
