@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-import net.canarymod.api.inventory.CustomStorageInventory;
 import net.canarymod.api.scoreboard.*;
 import net.canarymod.hook.player.TeleportHook;
 import net.canarymod.hook.player.DisconnectionHook;
@@ -40,6 +39,7 @@ import net.canarymod.hook.player.ItemDropHook;
 import net.canarymod.hook.player.SlotClickHook;
 import net.canarymod.api.inventory.slot.ButtonPress;
 import net.canarymod.api.entity.EntityType;
+import utils.AchievementSystem;
 import utils.ChangeBlockTypeTask;
 import utils.DatabaseUtils;
 import utils.GivePlayerItemTask;
@@ -47,7 +47,6 @@ import utils.IServerTaskCallback;
 import utils.ServerEventType;
 import utils.SpawnParticlesTask;
 import net.canarymod.api.world.effects.Particle;
-import net.canarymod.api.factory.ObjectFactory;
 import net.canarymod.api.DamageType;
 import net.canarymod.hook.player.HealthChangeHook;
 import net.canarymod.tasks.ServerTask;
@@ -96,7 +95,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
             permissions = { "*" },
             toolTip = "/quidditch")
   public void quidditchschnatzCommand(MessageReceiver caller, String[] args) {
-    if (caller instanceof Player player) {
+    if(caller instanceof Player player){
       if(args.length == 1)
         player.teleportTo(Utils.quidditchHubLocation);
       else if(args.length == 2)
@@ -214,16 +213,9 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private void createScoreboard(){
     ScoreboardManager manager = Canary.scoreboards();
 
-    // Gets or create the scoreboard
     this.scoreboard = manager.getScoreboard("gameboard");
-
-    // Create or get the objective
     this.objective = scoreboard.addScoreObjective("catchSnitch");
-
-    // Set display name and position
     this.objective.setDisplayName("§6§lGame Info");
-
-    //Set Position and the player it is targetted to
     this.scoreboard.setScoreboardPosition(ScorePosition.SIDEBAR, this.objective, player);
 
     // Initialize score entries
@@ -420,7 +412,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       if(arrow.getEntityType() == EntityType.ARROW){
         Location arrowLocation = arrow.getLocation();
 
-        //arrow.getLocation() is very inaccurate! -> try to improve (idea: change block to redstone and use RedstoneChangeHookEvent)
+        //arrow.getLocation() is very inaccurate! -> try to improve (idea: change block to redstone and use RedstoneChangeHookEvent, or extrapolate trajectory)
         double arrowSnitchDistance = Utils.CalculateDistanceBetweenLocations(snitchLocation, arrowLocation);
         if(arrowSnitchDistance <= MAX_HIT_DISTANCE)
           snitchCatched(calculateBowPoints(), SoundEffect.Type.ORB);
@@ -1020,34 +1012,9 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private boolean isCustomInventoryOpen = false;
 
   private void displayAchievementInventory(Player player){
-    ObjectFactory objectFactory = Canary.factory().getObjectFactory();
-    int inventoryRows = (QuidditchAchievement.values().length + 8) / 9; //This ensures correct size for the custom Inventory
-    CustomStorageInventory customInventory = objectFactory.newCustomStorageInventory(ChatFormat.DARK_AQUA + "Achievements", inventoryRows);
-    fillInventoryWithAchievements(customInventory, player);
-    player.openInventory(customInventory);
+    AchievementSystem achievementSystem = new AchievementSystem<>(player, QuidditchAchievement.class);
+    achievementSystem.displayAchievementInventory(setUpDatabase(), false);
     isCustomInventoryOpen = true;
-  }
-
-  private void fillInventoryWithAchievements(CustomStorageInventory customInventory, Player player){
-    DatabaseUtils database = setUpDatabase();
-    ItemFactory itemFactory = Canary.factory().getItemFactory();
-    
-    for(int i = 0; i < QuidditchAchievement.values().length; i++){
-      Item item;
-      QuidditchAchievement achievement = QuidditchAchievement.values()[i];
-
-      if(database.hasPlayerQuidditchAchievement(player.getDisplayName(), achievement.toString())){
-        item = itemFactory.newItem(ItemType.LimeDye);
-        item.setDisplayName(ChatFormat.GREEN + achievement.toString() + " - " + achievement.getDescription());
-      }
-      else{
-        item = itemFactory.newItem(ItemType.GrayDye);
-        item.setDisplayName(ChatFormat.RED + "Noch nicht erspielt!");
-      }
-
-      customInventory.setSlot(i, item);
-    }
-    database.CloseConnection();
   }
 
   @HookHandler
