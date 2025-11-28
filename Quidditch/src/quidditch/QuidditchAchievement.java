@@ -1,6 +1,7 @@
 package quidditch;
+import utils.IDescriableAchievment;
 
-public enum AchievementType {
+public enum QuidditchAchievement implements IDescriableAchievment{
     // Basic/Progression
     WARM_UP("Complete your first game"),
     GAME_50("Play 50 Games"),
@@ -71,7 +72,7 @@ public enum AchievementType {
 
     private String description;
 
-    AchievementType(String description){
+    QuidditchAchievement(String description){
         this.description = description;
     }
 

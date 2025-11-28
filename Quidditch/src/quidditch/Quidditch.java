@@ -165,7 +165,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
         particleTypes.add(Particle.Type.SMOKE_LARGE);
         particleTypes.add(Particle.Type.FLAME);
 
-        tryEarnAchievement(player, AchievementType.PUMPKIN_SEASON, database);
+        tryEarnAchievement(player, QuidditchAchievement.PUMPKIN_SEASON, database);
         break;
       case ServerEventType.CHRISTMAS:
         SNITCH_BLOCK_TYPE = BlockType.LapisBlock;
@@ -174,13 +174,13 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
         particleTypes.add(Particle.Type.SNOWBALL);
         particleTypes.add(Particle.Type.REDSTONE);
 
-        tryEarnAchievement(player, AchievementType.CHRISTMAS_SEASON, database);
+        tryEarnAchievement(player, QuidditchAchievement.CHRISTMAS_SEASON, database);
         break;
       case ServerEventType.PRIDE:
         eventChangingBlocks = Utils.GetPrideBlockTypes();
         SNITCH_BLOCK_TYPE = BlockType.WoolMagenta;
 
-        tryEarnAchievement(player, AchievementType.PRIDE_SEASON, database);
+        tryEarnAchievement(player, QuidditchAchievement.PRIDE_SEASON, database);
         break;
       case ServerEventType.NONE:
       default:
@@ -282,7 +282,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
         hasAirBlockBeenSelected = true;
 
         if(Utils.CalculateDistanceBetweenLocations(snitchLocation, player.getLocation()) <= 5)
-          tryEarnAchievement(player, AchievementType.LUCKY_SPAWN, database);
+          tryEarnAchievement(player, QuidditchAchievement.LUCKY_SPAWN, database);
 
         givePlayerDelayedCompass();
         spawnDelayedParticles();
@@ -315,7 +315,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
 
         changeBlockTypeTask = new ChangeBlockTypeTask(randomDelayTicks, true, snitchBlock, eventChangingBlocks);
         Canary.getServer().addSynchronousTask(changeBlockTypeTask);
-        tryEarnAchievement(player, AchievementType.GLITCH, database);
+        tryEarnAchievement(player, QuidditchAchievement.GLITCH, database);
       }
     }
   }
@@ -341,7 +341,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     if(caller instanceof GivePlayerItemTask)
       incrementCompassCount();
     else if(caller instanceof SpawnParticlesTask)
-      tryEarnAchievement(player, AchievementType.SPARKLE, database);
+      tryEarnAchievement(player, QuidditchAchievement.SPARKLE, database);
   }
 
   private int totalCompassCount;
@@ -387,7 +387,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       else if(EZPlugin.locEqual(clickedLocation, RandomMapSignLocation)){
         SELECTED_MAP = Map.GetRandomMap();
         DatabaseUtils database = setUpDatabase();
-        tryEarnAchievement(playerClicked, AchievementType.RANDOM_MAP, database);
+        tryEarnAchievement(playerClicked, QuidditchAchievement.RANDOM_MAP, database);
         database.CloseConnection();
       }
         
@@ -408,9 +408,9 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
 
   private void tryEarnCatchAchievements(){
     if(currentSnitchCount == 1 && rightClickCatches == 1)
-        tryEarnAchievement(player, AchievementType.GREAT_START, database);
+        tryEarnAchievement(player, QuidditchAchievement.GREAT_START, database);
     if(!player.isOnGround())
-      tryEarnAchievement(player, AchievementType.AIR_JORDAN, database);
+      tryEarnAchievement(player, QuidditchAchievement.AIR_JORDAN, database);
   }
 
   @HookHandler
@@ -446,11 +446,11 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     if(playerSnitchDistance > longestBowHit){
       longestBowHit = (int)playerSnitchDistance;
       if(longestBowHit >= 25)
-        tryEarnAchievement(player, AchievementType.MID_SHOT, database);
+        tryEarnAchievement(player, QuidditchAchievement.MID_SHOT, database);
       if(longestBowHit >= 50)
-        tryEarnAchievement(player, AchievementType.LONG_SHOT, database);
+        tryEarnAchievement(player, QuidditchAchievement.LONG_SHOT, database);
       if(longestBowHit >= 70)
-        tryEarnAchievement(player, AchievementType.KATNISS_EVERDEEN, database);
+        tryEarnAchievement(player, QuidditchAchievement.KATNISS_EVERDEEN, database);
     }
       
     if(playerSnitchDistance < shortestBowHit)
@@ -463,7 +463,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     displayScoreMessage(POINTS_FOR_MISSED_ARROW, false);
     missedArrowCount++;
     if(missedArrowCount >= 10)
-      tryEarnAchievement(player, AchievementType.STORMTROOPER, database);
+      tryEarnAchievement(player, QuidditchAchievement.STORMTROOPER, database);
   }
 
   
@@ -481,7 +481,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
 
     if(isFastCatch){
       pointsScored += POINTS_FOR_FAST_CATCH;
-      tryEarnAchievement(player, AchievementType.FAST_CATCH, database);
+      tryEarnAchievement(player, QuidditchAchievement.FAST_CATCH, database);
     }
       
     score += pointsScored;
@@ -501,41 +501,41 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
 
   private void checkForSnitchCatchAchievements(){
     if(player.isInWater())
-      tryEarnAchievement(player, AchievementType.MERMAID, database);
+      tryEarnAchievement(player, QuidditchAchievement.MERMAID, database);
     int heightDifference = Utils.CalculateHeightDifference(player.getLocation(), snitchLocation);
     if(heightDifference >= 10)
-      tryEarnAchievement(player, AchievementType.HIGH_GROUND, database);
+      tryEarnAchievement(player, QuidditchAchievement.HIGH_GROUND, database);
     checkForSpecialAchievementLocation();
   }
 
   private void checkForSpecialAchievementLocation(){
     if(Utils.IsInsideVolume(new Location(29, 108, 256), new Location(26, 109, 251), snitchLocation))
-      tryEarnAchievement(player, AchievementType.ALL_WATER_UNDER_THE_BRIDGE, database);
+      tryEarnAchievement(player, QuidditchAchievement.ALL_WATER_UNDER_THE_BRIDGE, database);
     else if(Utils.IsInsideVolume(new Location(142, 134, 275), new Location(209, 136, 275), snitchLocation))
-      tryEarnAchievement(player, AchievementType.UNLUCKY_HAUNT, database);
+      tryEarnAchievement(player, QuidditchAchievement.UNLUCKY_HAUNT, database);
     else if(Utils.IsInsideVolume(new Location(148, 154, 291), new Location(144, 129, 295), snitchLocation) //Gryffindor
           || Utils.IsInsideVolume(new Location(148, 154, 327), new Location(144, 129, 323), snitchLocation) //Ravenclaw
           || Utils.IsInsideVolume(new Location(178, 154, 327), new Location(182, 129, 323), snitchLocation) //Slytherin
           || Utils.IsInsideVolume(new Location(178, 154, 291), new Location(182, 129, 295), snitchLocation)){ //Hufflepuff
-      tryEarnAchievement(player, AchievementType.TOWER, database);
+      tryEarnAchievement(player, QuidditchAchievement.TOWER, database);
     }
     else if(EZPlugin.locEqual(snitchLocation, new Location(182, 144, 313)) || EZPlugin.locEqual(snitchLocation, new Location(181, 145, 309)) //Goalposts
       || EZPlugin.locEqual(snitchLocation, new Location(182, 144, 305)) || EZPlugin.locEqual(snitchLocation, new Location(144, 144, 305))
       || EZPlugin.locEqual(snitchLocation, new Location(145, 145, 309)) || EZPlugin.locEqual(snitchLocation, new Location(144, 144, 313))){
-      tryEarnAchievement(player, AchievementType.GOAL, database);
+      tryEarnAchievement(player, QuidditchAchievement.GOAL, database);
     }
     
     Block belowSnitch = snitchLocation.getWorld().getBlockAt((int)snitchLocation.getX(), (int)snitchLocation.getY() - 1, (int)snitchLocation.getZ());
     if(belowSnitch.getType() == BlockType.Lava)
-      tryEarnAchievement(player, AchievementType.CRISPY, database);
+      tryEarnAchievement(player, QuidditchAchievement.CRISPY, database);
     
     for(Block surroundingBlock : Utils.GetSurroundingBlocks(snitchLocation)){
       if(Utils.IsWhiteStainedGlass(surroundingBlock))
-        tryEarnAchievement(player, AchievementType.ON_EDGE, database);
+        tryEarnAchievement(player, QuidditchAchievement.ON_EDGE, database);
       else if(surroundingBlock.getType() == BlockType.GoldBlock)
-        tryEarnAchievement(player, AchievementType.MIX_UP, database);
+        tryEarnAchievement(player, QuidditchAchievement.MIX_UP, database);
       else if(surroundingBlock.getType() == BlockType.PineLeaves || surroundingBlock.getType() == BlockType.BirchLeaves)
-        tryEarnAchievement(player, AchievementType.GARDENER, database);
+        tryEarnAchievement(player, QuidditchAchievement.GARDENER, database);
     }
   }
 
@@ -560,7 +560,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       slowestCatch = catchTimeInSeconds;
 
     if(catchTimeInSeconds > GIVE_COMPASS_DELAY_IN_SECONDS && catchTimeInSeconds <= GIVE_COMPASS_DELAY_IN_SECONDS + 3)
-      tryEarnAchievement(player, AchievementType.UNECCESSARY_COMPASS, database);
+      tryEarnAchievement(player, QuidditchAchievement.UNECCESSARY_COMPASS, database);
     
     lastCatchTimeInSeconds = gameDuration;
     boolean isFastCatch = catchTimeInSeconds < TIME_FOR_FAST_CATCH_IN_SECONDS;
@@ -578,10 +578,10 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private int totalFastCatchStreaks;
 
   private void handleFastCatchStreak(){
-    tryEarnAchievement(player, AchievementType.FAST_STREAK, database);
+    tryEarnAchievement(player, QuidditchAchievement.FAST_STREAK, database);
     totalFastCatchStreaks++;
     if(totalFastCatchStreaks > 1)
-      tryEarnAchievement(player, AchievementType.STREAK_MASTER, database);
+      tryEarnAchievement(player, QuidditchAchievement.STREAK_MASTER, database);
     fastCatchStreak = 0;
     score += POINTS_FOR_FAST_CATCH_STREAK; 
     Utils.BroadcastServerMessage(pluginName, ChatFormat.YELLOW + "Blitzfang streak!");
@@ -605,66 +605,66 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private void checkForAchievements(){
     int totalGameCount = database.GetQuidditchGameCountByPlayer(player.getDisplayName());
     if(totalGameCount >= 1)
-      tryEarnAchievement(player, AchievementType.WARM_UP, database);
+      tryEarnAchievement(player, QuidditchAchievement.WARM_UP, database);
     if(totalGameCount >= 50)
-      tryEarnAchievement(player, AchievementType.GAME_50, database);
+      tryEarnAchievement(player, QuidditchAchievement.GAME_50, database);
     if(totalGameCount >= 100)
-      tryEarnAchievement(player, AchievementType.GAME_100, database);
+      tryEarnAchievement(player, QuidditchAchievement.GAME_100, database);
     if(totalGameCount >= 200)
-      tryEarnAchievement(player, AchievementType.GAME_200, database);
+      tryEarnAchievement(player, QuidditchAchievement.GAME_200, database);
     if(totalGameCount >= 350)
-      tryEarnAchievement(player, AchievementType.GAME_350, database);
+      tryEarnAchievement(player, QuidditchAchievement.GAME_350, database);
     if(totalGameCount >= 500)
-      tryEarnAchievement(player, AchievementType.GAME_500, database);
+      tryEarnAchievement(player, QuidditchAchievement.GAME_500, database);
     
     if(consecutiveGames >= 21)
-      tryEarnAchievement(player, AchievementType.HALF_MARATHON, database);
+      tryEarnAchievement(player, QuidditchAchievement.HALF_MARATHON, database);
     if(consecutiveGames >= 42)
-      tryEarnAchievement(player, AchievementType.MARATHON, database);
+      tryEarnAchievement(player, QuidditchAchievement.MARATHON, database);
 
     int distinctMapsPlayedCount = database.GetQuidditchMapCountByPlayer(player.getDisplayName());
     if(distinctMapsPlayedCount == Map.values().length)
-      tryEarnAchievement(player, AchievementType.MAP_SPECIALIST, database);
+      tryEarnAchievement(player, QuidditchAchievement.MAP_SPECIALIST, database);
     
     if(!hasPlayerLostHealth)
-      tryEarnAchievement(player, AchievementType.INVINCIBLE, database);
+      tryEarnAchievement(player, QuidditchAchievement.INVINCIBLE, database);
     
     if(hasPlayerStandOnGround)
-      tryEarnAchievement(player, AchievementType.EARTHBOUND, database);
+      tryEarnAchievement(player, QuidditchAchievement.EARTHBOUND, database);
     
     if(missedArrowCount == 0){
-      tryEarnAchievement(player, AchievementType.PERFECT_ACCURACY, database);
+      tryEarnAchievement(player, QuidditchAchievement.PERFECT_ACCURACY, database);
       if(rightClickCatches <= 5)
-        tryEarnAchievement(player, AchievementType.SHARP_SHOOTER, database);
+        tryEarnAchievement(player, QuidditchAchievement.SHARP_SHOOTER, database);
     }
     if(rightClickCatches == 10)
-      tryEarnAchievement(player, AchievementType.HAND_ONLY, database);
+      tryEarnAchievement(player, QuidditchAchievement.HAND_ONLY, database);
     if(rightClickCatches == 0){
-      tryEarnAchievement(player, AchievementType.ARROW_SUPREMACY, database);
+      tryEarnAchievement(player, QuidditchAchievement.ARROW_SUPREMACY, database);
       if(missedArrowCount == 0)
-        tryEarnAchievement(player, AchievementType.HAWKEYE, database);
+        tryEarnAchievement(player, QuidditchAchievement.HAWKEYE, database);
     }
 
     if(score >= 1000)
-      tryEarnAchievement(player, AchievementType.OVER_1000, database);
+      tryEarnAchievement(player, QuidditchAchievement.OVER_1000, database);
     if(score >= 1500)
-      tryEarnAchievement(player, AchievementType.OVER_1500, database);
+      tryEarnAchievement(player, QuidditchAchievement.OVER_1500, database);
 
     if(endTimeInSeconds < 60)
-      tryEarnAchievement(player, AchievementType.UNDER_60, database);
+      tryEarnAchievement(player, QuidditchAchievement.UNDER_60, database);
     if(endTimeInSeconds < 30)
-      tryEarnAchievement(player, AchievementType.UNDER_30, database);
+      tryEarnAchievement(player, QuidditchAchievement.UNDER_30, database);
 
     if(totalCompassCount == 0)
-      tryEarnAchievement(player, AchievementType.NO_COMPASS_REQUIRED, database);
+      tryEarnAchievement(player, QuidditchAchievement.NO_COMPASS_REQUIRED, database);
     
     int consecutiveDaysPlayed = database.GetConsecutiveDayCount(player.getDisplayName());
     if(consecutiveDaysPlayed >= 7)
-      tryEarnAchievement(player, AchievementType.DEDICATED, database);
+      tryEarnAchievement(player, QuidditchAchievement.DEDICATED, database);
     
     int todayMapCount = database.GetTodayQuidditchMapCountByPlayer(player.getDisplayName());
     if(todayMapCount >= 5)
-      tryEarnAchievement(player, AchievementType.RAINBOW, database);
+      tryEarnAchievement(player, QuidditchAchievement.RAINBOW, database);
   }
 
   private int endTimeInSeconds;
@@ -877,7 +877,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     if(isEnabled && event.getDefender() instanceof Player player){
       if(event.getDamageDealt() >= player.getHealth()){
         if(event.getDamageSource().getDamagetype() == DamageType.LAVA)
-          tryEarnAchievement(player, AchievementType.LAVA_SWIMMER, database);
+          tryEarnAchievement(player, QuidditchAchievement.LAVA_SWIMMER, database);
 
         player.setFireTicks(0);
         player.setHealth(20f);
@@ -936,7 +936,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       int hotbarSlotId = playerInventory.getSelectedHotbarSlotId();
       playerInventory.setSlot(hotbarSlotId, event.getItem().getItem());
       Utils.RefreshInventroyFromPlayer(player);
-      tryEarnAchievement(player, AchievementType.REBEL, database);
+      tryEarnAchievement(player, QuidditchAchievement.REBEL, database);
     }
   }
 
@@ -951,7 +951,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
         event.setCanceled();
       else if(buttonPress == ButtonPress.KEY_DROP || buttonPress == ButtonPress.CTRL_DROP){
         event.setCanceled();
-        tryEarnAchievement(player, AchievementType.REBEL, database);
+        tryEarnAchievement(player, QuidditchAchievement.REBEL, database);
       }
     }
   }
@@ -983,7 +983,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       serverMessage += ChatFormat.DARK_GREEN + " - " + key + ": " + ChatFormat.GOLD + stats.get(key) + "\n";
       
     Utils.BroadcastServerMessage(pluginName, serverMessage);
-    tryEarnAchievement(player, AchievementType.RAVENCLAW_ZAG, statsDb);
+    tryEarnAchievement(player, QuidditchAchievement.RAVENCLAW_ZAG, statsDb);
 
     statsDb.CloseConnection();
   }
@@ -1001,7 +1001,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     }
 
     Utils.BroadcastServerMessage(pluginName, serverMessage);
-    tryEarnAchievement(player, AchievementType.RAVENCLAW_UTZ, statsDb);
+    tryEarnAchievement(player, QuidditchAchievement.RAVENCLAW_UTZ, statsDb);
 
     statsDb.CloseConnection();
   }
@@ -1021,7 +1021,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
 
   private void displayAchievementInventory(Player player){
     ObjectFactory objectFactory = Canary.factory().getObjectFactory();
-    int inventoryRows = (AchievementType.values().length + 8) / 9; //This ensures correct size for the custom Inventory
+    int inventoryRows = (QuidditchAchievement.values().length + 8) / 9; //This ensures correct size for the custom Inventory
     CustomStorageInventory customInventory = objectFactory.newCustomStorageInventory(ChatFormat.DARK_AQUA + "Achievements", inventoryRows);
     fillInventoryWithAchievements(customInventory, player);
     player.openInventory(customInventory);
@@ -1032,9 +1032,9 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
     DatabaseUtils database = setUpDatabase();
     ItemFactory itemFactory = Canary.factory().getItemFactory();
     
-    for(int i = 0; i < AchievementType.values().length; i++){
+    for(int i = 0; i < QuidditchAchievement.values().length; i++){
       Item item;
-      AchievementType achievement = AchievementType.values()[i];
+      QuidditchAchievement achievement = QuidditchAchievement.values()[i];
 
       if(database.hasPlayerQuidditchAchievement(player.getDisplayName(), achievement.toString())){
         item = itemFactory.newItem(ItemType.LimeDye);
@@ -1056,17 +1056,17 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
       isCustomInventoryOpen = false;
   }
   
-  private void tryEarnAchievement(Player player, AchievementType achievementType, DatabaseUtils database){
+  private void tryEarnAchievement(Player player, QuidditchAchievement achievementType, DatabaseUtils database){
     if(!database.hasPlayerQuidditchAchievement(player.getDisplayName(), achievementType.toString()))
       insertAchievementIntoDb(player, achievementType, database);
   }
 
-  private void insertAchievementIntoDb(Player player, AchievementType achievementType, DatabaseUtils database){
+  private void insertAchievementIntoDb(Player player, QuidditchAchievement achievementType, DatabaseUtils database){
     database.InsertQuidditchAchievementIntoDbForPlayer(player.getDisplayName(), achievementType.toString());
     displayAchievementEarnMessage(player, achievementType);
   }
 
-  private void displayAchievementEarnMessage(Player player, AchievementType achievementType){
+  private void displayAchievementEarnMessage(Player player, QuidditchAchievement achievementType){
     String serverMessage = "Du hast das Achievement " + ChatFormat.GOLD + achievementType.toString() + ChatFormat.DARK_GREEN + " erspielt!";
     Utils.BroadcastServerMessage(pluginName, serverMessage);
     Utils.playSoundAtLocation(player.getLocation(), SoundEffect.Type.ORB, 1.0f, 0.9f);
