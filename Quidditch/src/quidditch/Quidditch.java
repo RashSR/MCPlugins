@@ -937,7 +937,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
 
   @HookHandler
   public void SlotClickHook(SlotClickHook event){
-    if(achievementSystem.IsAchievementInventoryOpen())
+    if(achievementSystem != null && achievementSystem.IsAchievementInventoryOpen())
       event.setCanceled();
     else if(isEnabled && event.getPlayer() == player){
       ButtonPress buttonPress = event.getButtonPress();
@@ -1014,7 +1014,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
 
   @HookHandler
   public void InventoryHookEvent(InventoryHook event){
-    if(achievementSystem.IsAchievementInventoryOpen() && event.isClosing())
+    if(achievementSystem != null && achievementSystem.IsAchievementInventoryOpen() && event.isClosing())
       achievementSystem.AchievementInventoryIsClosed();
   }
 }
