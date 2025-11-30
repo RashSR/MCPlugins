@@ -26,7 +26,7 @@ public class DatabaseUtils extends EZPlugin{
         this.dbUrl = "jdbc:sqlite:" + dbFolderPath + "/" + dbFilePath;
     }
 
-    public void InitDatabase(DatabaseType type){
+    public void InitDatabase(DatabaseType databaseType){
         try {
             File folder = new File(dbFolderPath);
             if(!folder.exists()){
@@ -39,11 +39,12 @@ public class DatabaseUtils extends EZPlugin{
 
             Class.forName("org.sqlite.JDBC");
             logger.info("[DatabaseUtils] SQLite JDBC driver loaded successfully.");
-            switch (type) {
+            switch(databaseType) {
                 case QUIDDITCH:
                     initQuidditchDatabase();
                     break;
                 case SESSION_SPY:
+                    initSessionSpyDatabase();
                     break;
                 default:
                     break;
@@ -62,6 +63,34 @@ public class DatabaseUtils extends EZPlugin{
             } catch (SQLException e) {
                 logger.info("[DatabaseUtils] Failed to close DB connection: " + e.getMessage());
             }
+        }
+    }
+
+    private void initSessionSpyDatabase(){
+        try {
+            connection = DriverManager.getConnection(dbUrl);
+            Statement stmt = connection.createStatement();
+
+            String createSessionSpyServer = "CREATE TABLE IF NOT EXISTS server_session (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "server_name TEXT NOT NULL, " +
+                "started_at TIMESTAMP NOT NULL, " +
+                "shutdown_at TIMESTAMP" +
+            ");";
+            stmt.executeUpdate(createSessionSpyServer);
+
+            String createSessionSpyPlayer = "CREATE TABLE IF NOT EXISTS player_session (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "player_name TEXT NOT NULL, " +
+                "logged_in_at TIMESTAMP NOT NULL, " +
+                "logged_out_at TIMESTAMP" +
+            ");";
+            stmt.executeUpdate(createSessionSpyPlayer);
+
+            logger.info("[DatabaseUtils] Database initialized successfully: " + dbFilePath);
+        }
+        catch (SQLException e){
+            logger.info("[DatabaseUtils] Failed to initialize database: " + e.getMessage());
         }
     }
 
@@ -100,7 +129,7 @@ public class DatabaseUtils extends EZPlugin{
 
             logger.info("[DatabaseUtils] Database initialized successfully: " + dbFilePath);
 
-        } catch (SQLException e) {
+        } catch (SQLException e){
             logger.info("[DatabaseUtils] Failed to initialize database: " + e.getMessage());
         }
     }

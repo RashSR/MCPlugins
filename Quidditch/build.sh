@@ -26,7 +26,6 @@ if [ ! -r "$EZ" ]; then
     exit 1
 fi
 
-
 #include all JARs from utils/lib (like sqlite-jdbc)
 UTIL_LIBS=$(echo ../utils/lib/*.jar | tr ' ' "$OSPS")
 
