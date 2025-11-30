@@ -18,6 +18,10 @@ public class SessionSpy extends EZPlugin implements PluginListener{
   private final String DB_FOLDER = "plugins/SessionSpy";
   private final String DB_FILE = "sessionspy.db";
 
+  private String insertedServerName;
+  private Instant insertedServerStartTime;
+  private DatabaseUtils database;
+
   @Override 
   public boolean enable() {
     Canary.hooks().registerListener(this, this);
@@ -27,19 +31,27 @@ public class SessionSpy extends EZPlugin implements PluginListener{
   @HookHandler
  	public void LoadWorldHookEvent(LoadWorldHook event){
     Instant currentTime = Instant.now();
-    logger.info("ServerStart at: " + currentTime);
-    DatabaseUtils database = setUpDatabase();
+    database = setUpDatabase();
+    String serverName = Canary.instance().getServer().getHostname();
+    if(database.InsertServerStartSession(serverName, currentTime)){
+      insertedServerName = serverName;
+      insertedServerStartTime = currentTime;
+    }
  	}
 
   @HookHandler
   public void ServerShutdownHook(ServerShutdownHook event){
     Instant currentTime = Instant.now();
     logger.info("ServerShutdown at: " + currentTime);
-    
+    if(database != null)
+      database.UpdateServerShutdownSession(insertedServerName, insertedServerStartTime, currentTime);
+
     //All player need to be logged out after a server shutdown
     List<Player> playerList = Canary.instance().getServer().getPlayerList();
     for(Player player : playerList)
       logoutPlayerEvent(player, currentTime);
+
+    database.CloseConnection();
   }
 
   @HookHandler

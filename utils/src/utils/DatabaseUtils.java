@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -91,6 +92,39 @@ public class DatabaseUtils extends EZPlugin{
         }
         catch (SQLException e){
             logger.info("[DatabaseUtils] Failed to initialize database: " + e.getMessage());
+        }
+    }
+
+    public boolean InsertServerStartSession(String serverName, Instant startTime){
+        try{
+            String sqlCommand = "INSERT INTO server_session (server_name, started_at) VALUES (?, ?);";
+            PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
+            pstmt.setString(1, serverName);
+            pstmt.setString(2, startTime.toString());
+            int updatedRows = pstmt.executeUpdate();
+
+            logger.info("[DatabaseUtils] Successfully inserted server start time");
+            return updatedRows > 0;
+            
+        }catch (SQLException e){
+            logger.info("[DatabaseUtils] Failed to insert server start time");
+        }
+
+        return false;
+    }
+
+    public void UpdateServerShutdownSession(String serverName, Instant startTime, Instant shutdownTime){
+        try{
+            String sqlCommand = "UPDATE server_session SET shutdown_at = ? WHERE server_name = ? AND started_at = ?;";
+            PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
+            pstmt.setString(1, shutdownTime.toString());
+            pstmt.setString(2, serverName);
+            pstmt.setString(3, startTime.toString());
+            int updatedRows = pstmt.executeUpdate();
+
+            logger.info("[DatabaseUtils] Successfully inserted server shutdown time");
+        }catch (SQLException e){
+            logger.info("[DatabaseUtils] Failed to update server shutdown time");
         }
     }
 
