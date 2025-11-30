@@ -1,6 +1,7 @@
 package sessionspy;
 import net.canarymod.Canary;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import com.pragprog.ahmine.ez.EZPlugin;
 import net.canarymod.plugin.PluginListener;
@@ -42,7 +43,6 @@ public class SessionSpy extends EZPlugin implements PluginListener{
   @HookHandler
   public void ServerShutdownHook(ServerShutdownHook event){
     Instant currentTime = Instant.now();
-    logger.info("ServerShutdown at: " + currentTime);
     if(database != null)
       database.UpdateServerShutdownSession(insertedServerName, insertedServerStartTime, currentTime);
 
@@ -54,11 +54,19 @@ public class SessionSpy extends EZPlugin implements PluginListener{
     database.CloseConnection();
   }
 
+  private HashMap<Player, Instant> loggedInPlayers;
+
   @HookHandler
   public void ConnectionHookEvent(ConnectionHook event){
     Instant currentTime = Instant.now();
     Player player = event.getPlayer();
-    logger.info(player.getDisplayName() + " logged in at: " + currentTime);
+
+    if(database != null && database.InsertPlayerLoginSession(player.getDisplayName(), currentTime)){
+      if(loggedInPlayers == null)
+        loggedInPlayers = new HashMap<>();
+
+      loggedInPlayers.put(player, currentTime);
+    }
   }
 
   @HookHandler
@@ -67,8 +75,11 @@ public class SessionSpy extends EZPlugin implements PluginListener{
     logoutPlayerEvent(event.getPlayer(), currentTime);
   }
 
-  private void logoutPlayerEvent(Player player, Instant time){
-    logger.info(player.getDisplayName() + " logged out at: " + time);
+  private void logoutPlayerEvent(Player player, Instant logOutTime){
+    if(database != null)
+      database.UpdatePlayerLogoutSession(player.getDisplayName(), loggedInPlayers.get(player), logOutTime);
+
+    loggedInPlayers.remove(player);
   }
 
   private DatabaseUtils setUpDatabase(){
@@ -76,5 +87,4 @@ public class SessionSpy extends EZPlugin implements PluginListener{
     newDb.InitDatabase(DatabaseType.SESSION_SPY);
     return newDb;
   }
-  
 }

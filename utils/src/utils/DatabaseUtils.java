@@ -128,6 +128,39 @@ public class DatabaseUtils extends EZPlugin{
         }
     }
 
+    public boolean InsertPlayerLoginSession(String playerName, Instant loginTime){
+        try{
+            String sqlCommand = "INSERT INTO player_session (player_name, logged_in_at) VALUES (?, ?);";
+            PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
+            pstmt.setString(1, playerName);
+            pstmt.setString(2, loginTime.toString());
+            int updatedRows = pstmt.executeUpdate();
+
+            logger.info("[DatabaseUtils] Successfully inserted player login time from " + playerName);
+            return updatedRows > 0;
+            
+        }catch (SQLException e){
+            logger.info("[DatabaseUtils] Failed to insert player login time from " + playerName);
+        }
+
+        return false;
+    }
+
+    public void UpdatePlayerLogoutSession(String playerName, Instant loginTime, Instant logoutTime){
+        try{
+            String sqlCommand = "UPDATE player_session SET logged_out_at = ? WHERE player_name = ? AND logged_in_at = ?;";
+            PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
+            pstmt.setString(1, logoutTime.toString());
+            pstmt.setString(2, playerName);
+            pstmt.setString(3, loginTime.toString());
+            int updatedRows = pstmt.executeUpdate();
+
+            logger.info("[DatabaseUtils] Successfully inserted player logout time from " + playerName);
+        }catch (SQLException e){
+            logger.info("[DatabaseUtils] Failed to insert player logout time from " + playerName);
+        }
+    }
+
     private void initQuidditchDatabase() {
         try {
             connection = DriverManager.getConnection(dbUrl);
