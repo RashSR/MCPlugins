@@ -41,6 +41,7 @@ import net.canarymod.api.inventory.slot.ButtonPress;
 import net.canarymod.api.entity.EntityType;
 import utils.AchievementSystem;
 import utils.ChangeBlockTypeTask;
+import utils.DatabaseType;
 import utils.DatabaseUtils;
 import utils.GivePlayerItemTask;
 import utils.IServerTaskCallback;
@@ -200,7 +201,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
 
   private DatabaseUtils setUpDatabase(){
     DatabaseUtils newDb = new DatabaseUtils(DB_FOLDER, DB_FILE);
-    newDb.InitDatabase();
+    newDb.InitDatabase(DatabaseType.QUIDDITCH);
     return newDb;
   }
 

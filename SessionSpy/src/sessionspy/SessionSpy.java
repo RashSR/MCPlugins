@@ -29,9 +29,11 @@ public class SessionSpy extends EZPlugin implements PluginListener{
   public void ServerShutdownHook(ServerShutdownHook event){
     Instant currentTime = Instant.now();
     logger.info("ServerShutdown at: " + currentTime);
+    
+    //All player need to be logged out after a server shutdown
     List<Player> playerList = Canary.instance().getServer().getPlayerList();
     for(Player player : playerList)
-      logoutEvent(player, currentTime);
+      logoutPlayerEvent(player, currentTime);
   }
 
   @HookHandler
@@ -44,10 +46,10 @@ public class SessionSpy extends EZPlugin implements PluginListener{
   @HookHandler
   public void DisconnectionHookHookEvent(DisconnectionHook event){
     Instant currentTime = Instant.now();
-    logoutEvent(event.getPlayer(), currentTime);
+    logoutPlayerEvent(event.getPlayer(), currentTime);
   }
 
-  private void logoutEvent(Player player, Instant time){
+  private void logoutPlayerEvent(Player player, Instant time){
     logger.info(player.getDisplayName() + " logged out at: " + time);
   }
   

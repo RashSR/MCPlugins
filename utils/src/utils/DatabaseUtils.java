@@ -26,7 +26,7 @@ public class DatabaseUtils extends EZPlugin{
         this.dbUrl = "jdbc:sqlite:" + dbFolderPath + "/" + dbFilePath;
     }
 
-    public void InitDatabase(){
+    public void InitDatabase(DatabaseType type){
         try {
             File folder = new File(dbFolderPath);
             if(!folder.exists()){
@@ -39,7 +39,15 @@ public class DatabaseUtils extends EZPlugin{
 
             Class.forName("org.sqlite.JDBC");
             logger.info("[DatabaseUtils] SQLite JDBC driver loaded successfully.");
-            initDatabase();
+            switch (type) {
+                case QUIDDITCH:
+                    initQuidditchDatabase();
+                    break;
+                case SESSION_SPY:
+                    break;
+                default:
+                    break;
+            }
         } catch (Exception e) {
             logger.info("[DatabaseUtils] Database initialization failed:");
             e.printStackTrace();
@@ -57,7 +65,7 @@ public class DatabaseUtils extends EZPlugin{
         }
     }
 
-    private void initDatabase() {
+    private void initQuidditchDatabase() {
         try {
             connection = DriverManager.getConnection(dbUrl);
             Statement stmt = connection.createStatement();
