@@ -39,7 +39,10 @@ All plugins are written in **Java**, using the **CanaryMod API**, and were desig
 | **SoupPvP** | Adds soup-based instant healing for PvP combat. | Complete |
 | **Bedwars** | Adds the popular Bedwars minigame. | Beta |
 | **Challenges** | Endermanteleportation, MLG Water, Drop down/up challanges minigame. | Conception |
-| **SessionSpy** | Log each serverstart + -shutdown and player login + logout. | Beta |
+| **SessionSpy** | Log each serverstart + -shutdown and player login + logout. | Complete |
+| **Woolblock** | Minigame: Stand on the correct woolcolor! | Conception |
+| **MapClone** | Load and Save a selected area in the gameworld. | Conception |
+
 
 ---
 
