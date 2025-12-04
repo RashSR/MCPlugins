@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -96,8 +97,9 @@ public class DatabaseUtils extends EZPlugin{
     }
 
     public boolean InsertServerStartSession(String serverName, Instant startTime){
+        String sqlCommand = "INSERT INTO server_session (server_name, started_at) VALUES (?, ?);";
+
         try{
-            String sqlCommand = "INSERT INTO server_session (server_name, started_at) VALUES (?, ?);";
             PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
             pstmt.setString(1, serverName);
             pstmt.setString(2, startTime.toString());
@@ -114,8 +116,9 @@ public class DatabaseUtils extends EZPlugin{
     }
 
     public void UpdateServerShutdownSession(String serverName, Instant startTime, Instant shutdownTime){
+        String sqlCommand = "UPDATE server_session SET shutdown_at = ? WHERE server_name = ? AND started_at = ?;";
+
         try{
-            String sqlCommand = "UPDATE server_session SET shutdown_at = ? WHERE server_name = ? AND started_at = ?;";
             PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
             pstmt.setString(1, shutdownTime.toString());
             pstmt.setString(2, serverName);
@@ -129,8 +132,9 @@ public class DatabaseUtils extends EZPlugin{
     }
 
     public boolean InsertPlayerLoginSession(String playerName, Instant loginTime){
+        String sqlCommand = "INSERT INTO player_session (player_name, logged_in_at) VALUES (?, ?);";
+
         try{
-            String sqlCommand = "INSERT INTO player_session (player_name, logged_in_at) VALUES (?, ?);";
             PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
             pstmt.setString(1, playerName);
             pstmt.setString(2, loginTime.toString());
@@ -147,8 +151,9 @@ public class DatabaseUtils extends EZPlugin{
     }
 
     public void UpdatePlayerLogoutSession(String playerName, Instant loginTime, Instant logoutTime){
+        String sqlCommand = "UPDATE player_session SET logged_out_at = ? WHERE player_name = ? AND logged_in_at = ?;";
+        
         try{
-            String sqlCommand = "UPDATE player_session SET logged_out_at = ? WHERE player_name = ? AND logged_in_at = ?;";
             PreparedStatement pstmt = connection.prepareStatement(sqlCommand);
             pstmt.setString(1, logoutTime.toString());
             pstmt.setString(2, playerName);
@@ -159,6 +164,59 @@ public class DatabaseUtils extends EZPlugin{
         }catch (SQLException e){
             logger.info("[DatabaseUtils] Failed to insert player logout time from " + playerName);
         }
+    }
+
+    //TODO: this only works with already logged sessions -> the current playtime is not included
+    public int LoadTotalPlayerTimeInSeconds(String playerName){
+        String sqlCommand = "SELECT logged_in_at, logged_out_at FROM player_session WHERE player_name = ? AND logged_out_at IS NOT NULL;";
+        int totalSeconds = 0;
+
+        try{
+            PreparedStatement pstm = connection.prepareStatement(sqlCommand);
+            pstm.setString(1, playerName);
+
+            ResultSet rs = pstm.executeQuery();
+            totalSeconds = getTotalSessionDuration(rs, "logged_in_at", "logged_out_at");
+        }catch (SQLException e){
+            logger.info("[DatabaseUtils] Failed to load player time from " + playerName);
+        }
+
+        return totalSeconds;
+    }
+
+    //TODO: this only works with already logged sessions -> the current playtime is not included
+    public int LoadTotalServerTimeInSeconds(String serverName){
+        String sqlCommand = "SELECT started_at, shutdown_at FROM server_session WHERE server_name = ? AND shutdown_at IS NOT NULL;";
+        int totalSeconds = 0;
+
+        try{
+            PreparedStatement pstm = connection.prepareStatement(sqlCommand);
+            pstm.setString(1, serverName);
+
+            ResultSet rs = pstm.executeQuery();
+            totalSeconds = getTotalSessionDuration(rs, "started_at", "shutdown_at");
+        }catch (SQLException e){
+            logger.info("[DatabaseUtils] Failed to load total server time.");
+        }
+
+        return totalSeconds;
+    }
+
+    private int getTotalSessionDuration(ResultSet resultSet, String startColum, String endColumn) throws SQLException{
+        int totalSeconds = 0;
+        
+        while(resultSet.next()){
+            String loginTime = resultSet.getString(startColum);
+            String logoutTime = resultSet.getString(endColumn);
+
+            Instant start = Instant.parse(loginTime);
+            Instant end = Instant.parse(logoutTime);
+
+            long sessionSeconds = Duration.between(start, end).getSeconds();
+            totalSeconds += sessionSeconds;
+        }
+
+        return totalSeconds;
     }
 
     private void initQuidditchDatabase() {

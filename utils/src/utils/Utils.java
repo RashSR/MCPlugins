@@ -66,6 +66,7 @@ public class Utils extends EZPlugin{
     return distance;
   }
 
+  //TODO: set [] around pluginName here 
   public static void BroadcastServerMessage(String pluginName, String message){
       String plugin = ChatFormat.DARK_AQUA + pluginName;
       String serverMessage = plugin + " " + ChatFormat.DARK_GREEN + message;
@@ -238,8 +239,7 @@ public class Utils extends EZPlugin{
     double py = point.getY();
     double pz = point.getZ();
     return px >= minX && px <= maxX && py >= minY && py <= maxY && pz >= minZ && pz <= maxZ;
-}
-
+  }
 
   public static void UpdateSignText(Location loc, String[] text){
     World world = loc.getWorld();
@@ -266,6 +266,7 @@ public class Utils extends EZPlugin{
     return new Position((int)loc.getX(), (int)loc.getY(), (int)loc.getZ());
   }
 
+  //This converts passed seoconds to a string like (hh:)mm:ss (hh is optional)
   public static String FormatSecondsPassedIntoString(int passedSeconds){
     String result = "";
 

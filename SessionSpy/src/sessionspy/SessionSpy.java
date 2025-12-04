@@ -1,5 +1,7 @@
 package sessionspy;
 import net.canarymod.Canary;
+import net.canarymod.commandsys.*;
+import net.canarymod.chat.MessageReceiver;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -13,11 +15,14 @@ import net.canarymod.api.entity.living.humanoid.Player;
 import net.canarymod.hook.system.LoadWorldHook;
 import net.canarymod.hook.player.ConnectionHook;
 import net.canarymod.hook.player.DisconnectionHook;
+import net.canarymod.chat.ChatFormat;
 import utils.DatabaseType;
+import utils.Utils;
 
 public class SessionSpy extends EZPlugin implements PluginListener{
   private final String DB_FOLDER = "plugins/SessionSpy";
   private final String DB_FILE = "sessionspy.db";
+  private final String pluginName = "[SessionSpy]";
 
   private String insertedServerName;
   private Instant insertedServerStartTime;
@@ -27,6 +32,32 @@ public class SessionSpy extends EZPlugin implements PluginListener{
   public boolean enable() {
     Canary.hooks().registerListener(this, this);
     return super.enable();
+  }
+
+  @Command(aliases = { "age" },
+            description = "Shows player how long he has played on the server",
+            permissions = { "*" },
+            toolTip = "/age")
+  public void AgeCommand(MessageReceiver caller, String[] args) {
+    if (caller instanceof Player player){
+      int timeInSeconds = database.LoadTotalPlayerTimeInSeconds(player.getDisplayName());
+      String formatedTime = ChatFormat.GOLD + Utils.FormatSecondsPassedIntoString(timeInSeconds);
+      //TODO show first login
+      String serverMessage = "Du spielst schon seit " + formatedTime + ChatFormat.DARK_GREEN + " auf diesem Server.";
+      Utils.BroadcastServerMessage(pluginName, serverMessage);
+    }
+  }
+
+  @Command(aliases = { "serverage" },
+            description = "Shows player how long the server was online",
+            permissions = { "*" },
+            toolTip = "/serverage")
+  public void ServerAgeCommand(MessageReceiver caller, String[] args) {
+    String serverName = Canary.instance().getServer().getHostname();
+    int timeInSeconds = database.LoadTotalServerTimeInSeconds(serverName);
+    String formatedTime = ChatFormat.GOLD + Utils.FormatSecondsPassedIntoString(timeInSeconds);
+    String serverMessage = "Der Server hat eine Betriebszeit von  " + formatedTime + ChatFormat.DARK_GREEN + ".";
+    Utils.BroadcastServerMessage(pluginName, serverMessage);
   }
 
   @HookHandler
