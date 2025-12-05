@@ -201,7 +201,6 @@ public class DatabaseUtils extends EZPlugin{
         return totalSeconds;
     }
 
-    //TODO: this only works with already logged sessions -> the current playtime is not included
     public int LoadTotalServerTimeInSeconds(String serverName){
         String sqlCommand = "SELECT started_at, shutdown_at FROM server_session WHERE server_name = ? AND shutdown_at IS NOT NULL;";
         int totalSeconds = 0;
@@ -212,8 +211,26 @@ public class DatabaseUtils extends EZPlugin{
 
             ResultSet rs = pstm.executeQuery();
             totalSeconds = getTotalSessionDuration(rs, "started_at", "shutdown_at");
+            totalSeconds += loadActiveServerSessionInSeconds(serverName);
         }catch (SQLException e){
-            logger.info("[DatabaseUtils] Failed to load total server time.");
+            logger.info("[DatabaseUtils] Failed to load total server time");
+        }
+
+        return totalSeconds;
+    }
+
+    private int loadActiveServerSessionInSeconds(String serverName){
+        String sqlCommand = "SELECT started_at FROM server_session WHERE server_name = ? AND shutdown_at IS NULL;";
+        int totalSeconds = 0;
+
+        try{
+            PreparedStatement pstm = connection.prepareStatement(sqlCommand);
+            pstm.setString(1, serverName);
+
+            ResultSet rs = pstm.executeQuery();
+            totalSeconds = getTotalSessionDuration(rs, "started_at", null);
+        }catch (SQLException e){
+            logger.info("[DatabaseUtils] Failed to load active server time");
         }
 
         return totalSeconds;
@@ -225,7 +242,7 @@ public class DatabaseUtils extends EZPlugin{
         while(resultSet.next()){
             String loginTime = resultSet.getString(startColum);
             String logoutTime;
-            if(endColumn == null) //Is used to get the active session
+            if(endColumn == null) //Is used to get the active session -> need to be seperate to show the user his active time
                 logoutTime = Instant.now().toString();
             else
                 logoutTime = resultSet.getString(endColumn);
