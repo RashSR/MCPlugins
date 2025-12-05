@@ -166,7 +166,6 @@ public class DatabaseUtils extends EZPlugin{
         }
     }
 
-    //TODO: this only works with already logged sessions -> the current playtime is not included
     public int LoadTotalPlayerTimeInSeconds(String playerName){
         String sqlCommand = "SELECT logged_in_at, logged_out_at FROM player_session WHERE player_name = ? AND logged_out_at IS NOT NULL;";
         int totalSeconds = 0;
@@ -177,8 +176,26 @@ public class DatabaseUtils extends EZPlugin{
 
             ResultSet rs = pstm.executeQuery();
             totalSeconds = getTotalSessionDuration(rs, "logged_in_at", "logged_out_at");
+            totalSeconds += LoadActivePlayerSessionInSeconds(playerName);
         }catch (SQLException e){
             logger.info("[DatabaseUtils] Failed to load player time from " + playerName);
+        }
+
+        return totalSeconds;
+    }
+
+    public int LoadActivePlayerSessionInSeconds(String playerName){
+        String sqlCommand = "SELECT logged_in_at FROM player_session WHERE player_name = ? AND logged_out_at IS NULL;";
+        int totalSeconds = 0;
+
+        try{
+            PreparedStatement pstm = connection.prepareStatement(sqlCommand);
+            pstm.setString(1, playerName);
+
+            ResultSet rs = pstm.executeQuery();
+            totalSeconds = getTotalSessionDuration(rs, "logged_in_at", null);
+        }catch (SQLException e){
+            logger.info("[DatabaseUtils] Failed to load active player time from " + playerName);
         }
 
         return totalSeconds;
@@ -207,7 +224,11 @@ public class DatabaseUtils extends EZPlugin{
         
         while(resultSet.next()){
             String loginTime = resultSet.getString(startColum);
-            String logoutTime = resultSet.getString(endColumn);
+            String logoutTime;
+            if(endColumn == null) //Is used to get the active session
+                logoutTime = Instant.now().toString();
+            else
+                logoutTime = resultSet.getString(endColumn);
 
             Instant start = Instant.parse(loginTime);
             Instant end = Instant.parse(logoutTime);

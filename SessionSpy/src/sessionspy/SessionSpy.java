@@ -40,10 +40,12 @@ public class SessionSpy extends EZPlugin implements PluginListener{
             toolTip = "/age")
   public void AgeCommand(MessageReceiver caller, String[] args) {
     if (caller instanceof Player player){
-      int timeInSeconds = database.LoadTotalPlayerTimeInSeconds(player.getDisplayName());
-      String formatedTime = ChatFormat.GOLD + Utils.FormatSecondsPassedIntoString(timeInSeconds);
+      int totalTimeInSeconds = database.LoadTotalPlayerTimeInSeconds(player.getDisplayName());
+      String formatedTotalTime = ChatFormat.GOLD + Utils.FormatSecondsPassedIntoString(totalTimeInSeconds);
+      int activeTimeInSeconds = database.LoadActivePlayerSessionInSeconds(player.getDisplayName());
+      String formatedActiveTime = ChatFormat.GOLD + Utils.FormatSecondsPassedIntoString(activeTimeInSeconds);
       //TODO show first login
-      String serverMessage = "Du spielst schon seit " + formatedTime + ChatFormat.DARK_GREEN + " auf diesem Server.";
+      String serverMessage = "Deine gesamte Spielzeit beträgt " + formatedTotalTime + ChatFormat.DARK_GREEN + " auf diesem Server. Davon " + formatedActiveTime + ChatFormat.DARK_GREEN + " in deiner aktuellen Session.";
       Utils.BroadcastServerMessage(pluginName, serverMessage);
     }
   }
