@@ -44,8 +44,10 @@ public class SessionSpy extends EZPlugin implements PluginListener{
       String formatedTotalTime = ChatFormat.GOLD + Utils.FormatSecondsPassedIntoString(totalTimeInSeconds);
       int activeTimeInSeconds = database.LoadActivePlayerSessionInSeconds(player.getDisplayName());
       String formatedActiveTime = ChatFormat.GOLD + Utils.FormatSecondsPassedIntoString(activeTimeInSeconds);
-      //TODO show first login
-      String serverMessage = "Deine gesamte Spielzeit beträgt " + formatedTotalTime + ChatFormat.DARK_GREEN + " auf diesem Server. Davon " + formatedActiveTime + ChatFormat.DARK_GREEN + " in deiner aktuellen Session.";
+
+      String serverMessage = "Deine gesamte Spielzeit beträgt " + formatedTotalTime + ChatFormat.DARK_GREEN + " auf diesem Server. Davon " 
+        + formatedActiveTime + ChatFormat.DARK_GREEN + " in deiner aktuellen Session. Dein erster (registrierter) Login war am " 
+        + ChatFormat.GOLD + database.GetEarliestLoginFromPlayer(player.getDisplayName()) + ChatFormat.DARK_GREEN + ".";
       Utils.BroadcastServerMessage(pluginName, serverMessage);
     }
   }

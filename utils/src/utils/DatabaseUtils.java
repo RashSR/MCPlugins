@@ -9,6 +9,8 @@ import java.sql.Statement;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -256,6 +258,31 @@ public class DatabaseUtils extends EZPlugin{
 
         return totalSeconds;
     }
+
+    public String GetEarliestLoginFromPlayer(String playerName) {
+        String sql = "SELECT MIN(logged_in_at) AS first_login FROM player_session WHERE player_name = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, playerName);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String time = rs.getString("first_login");
+
+                    if (time != null) {
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+                        return formatter.withZone(ZoneId.systemDefault()).format(Instant.parse(time));
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            logger.info("[DatabaseUtils] Failed to load earliest login from player " + playerName);
+        }
+
+        return "Failed to load earliest login";
+    }
+
 
     private void initQuidditchDatabase() {
         try {
