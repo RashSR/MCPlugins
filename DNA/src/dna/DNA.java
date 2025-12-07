@@ -37,22 +37,22 @@ public class DNA extends EZPlugin implements PluginListener{
 	public int LEVEL_HEIGHT;
   	public boolean harrypotterevent; // vorsicht 0 fails werden nicht getriggert falls hier false!
 
- 	int jumpFails = 0;
- 	int height;
+ 	private int jumpFails = 0;
+ 	private int height;
 	public static final String pluginName = "[DNA] ";
-	int totalPlayedGames = 0;
- 	int nullfailrunden = 0;
-	int absolviertebloecke = 0;
- 	int gesamtfails = 0;
+	private int totalGamesPlayed = 0;
+ 	private int zeroFailRound = 0;
+	private int totalJumpedBlocks = 0;
+ 	private int totalFails = 0;
 
- 	public static BlockType BlockToJump = BlockType.AcaciaLeaves;
+ 	public static BlockType BlockToJumpType = BlockType.AcaciaLeaves;
  	public static BlockType JumpedBlock = BlockType.AcaciaLog; 
 	public static BlockType DestinationBlock = BlockType.RedstoneBlock;
 	public boolean isEnabled = false;
   	public boolean letzterblock = true;
   	public List<Location> eachblock = new ArrayList<Location>();
-  	public boolean arrayan = false;
-  	public boolean viererb = false;
+  	public boolean isArrayEnabled = false;
+  	public boolean isFourJumpBlock = false;
   
   	@Override 
   	public boolean enable() {
@@ -71,19 +71,22 @@ public class DNA extends EZPlugin implements PluginListener{
            	permissions = {""},
            	toolTip = "/dna")
 	public void dna(MessageReceiver caller, String[] parameters){
-    	if (caller instanceof Player player){
-      		playerteleportvorstart(player);
-      		placeStartBlock();
-      		isEnabled = true;
-      		jumpFails = 0;
-      		loadStats(player);
-    	}
+    	if (caller instanceof Player player)
+      		enableGame(player);
   	}
 
+	private void enableGame(Player player){
+		teleportPlayerBeforeStart(player);
+		placeStartBlock();
+		isEnabled = true;
+		jumpFails = 0;
+		loadStats(player);
+	}
+
   	public static void setBlockType(BlockType jumpedBlock,BlockType jumpingBlock, BlockType finishBlock){
-    	JumpedBlock=jumpedBlock;
-    	BlockToJump=jumpingBlock;
-    	DestinationBlock=finishBlock;
+    	JumpedBlock = jumpedBlock;
+    	BlockToJumpType = jumpingBlock;
+    	DestinationBlock = finishBlock;
   	}
 
  	@Command(aliases = {"statsdna"},
@@ -91,58 +94,56 @@ public class DNA extends EZPlugin implements PluginListener{
           	 permissions = {""},
           	 toolTip = "/statsdna")
 	public void statsdnaCommand(MessageReceiver caller, String[] args){
-    	if(caller instanceof Player){
-    		Player player = (Player)caller;
+    	if(caller instanceof Player player){
     		loadStats(player);
-    		double durchschnitt = (double)gesamtfails/totalPlayedGames;
-    		durchschnitt = durchschnitt * 100;
-    		durchschnitt = Math.round(durchschnitt);
-    		durchschnitt = durchschnitt / 100;
+    		double average = (double)totalFails/totalGamesPlayed;
+    		average = average * 100;
+    		average = Math.round(average);
+    		average = average / 100;
     		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_AQUA + pluginName + ChatFormat.DARK_GREEN + "Das sind die Stats von " + ChatFormat.BLUE + player.getDisplayName() + ChatFormat.DARK_GREEN + ":");
-    		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - Gespielte Spiele: " + ChatFormat.GOLD + totalPlayedGames);
-    		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - Gesprungene Bloecke: " + ChatFormat.GOLD + absolviertebloecke);
-    		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - Fails pro Runde: " + ChatFormat.GOLD + durchschnitt);
-    		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - 0 Fails: " + ChatFormat.GOLD + nullfailrunden + "\n");
+    		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - Gespielte Spiele: " + ChatFormat.GOLD + totalGamesPlayed);
+    		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - Gesprungene Bloecke: " + ChatFormat.GOLD + totalJumpedBlocks);
+    		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - Fails pro Runde: " + ChatFormat.GOLD + average);
+    		Canary.instance().getServer().broadcastMessage(ChatFormat.DARK_GREEN + " - 0 Fails: " + ChatFormat.GOLD + zeroFailRound + "\n");
         }
  	}
 
  	@HookHandler
-  	public void leavesbleiben(LeafDecayHook event){
+  	public void LeafDecayHookEvent(LeafDecayHook event){
     	Block blatt = event.getBlock();
     	Location blattloc = blatt.getLocation();
     	double x = blattloc.getX();
     	double y = blattloc.getY();
     	double z = blattloc.getZ();
-    	if (x >= 267 && x <= 295 && y >= 18 && y <= 53 && z >= 199 && z <= 236){
+    	if (x >= 267 && x <= 295 && y >= 18 && y <= 53 && z >= 199 && z <= 236)
       		event.setCanceled();
-    	}
   	}
 
  	@HookHandler
-  	public void teleportausdnaraum(TeleportHook event){
+  	public void TeleportHookEvent(TeleportHook event){
     	Player player = event.getPlayer();
-    	Location ausgangloc = event.getCurrentLocation();
-    	double xa = ausgangloc.getX();
-    	double ya = ausgangloc.getY();
-    	double za = ausgangloc.getZ();
-    	World world = ausgangloc.getWorld();
-    	Location zielloc = event.getDestination();
-    	double xz = zielloc.getX();
-    	double zz = zielloc.getZ(); 
+    	Location startingLocation = event.getCurrentLocation();
+    	double xa = startingLocation.getX();
+    	double ya = startingLocation.getY();
+    	double za = startingLocation.getZ();
+    	World world = startingLocation.getWorld();
+    	Location destinationLocation = event.getDestination();
+    	double xz = destinationLocation.getX();
+    	double zz = destinationLocation.getZ(); 
     	if (xa >= 267 && xa <= 295 && za >= 199 && za <= 236 && isEnabled == true){
     		if(xz > 295 || xz < 267){
-            	clearbasic(world);
+            	clearAllPlacedBlocks(world);
             	displayLoseMessage(player);
             	eachblock.clear();
-            	arrayan = false;
+            	isArrayEnabled = false;
             	isEnabled = false;
             	return;
       		}
 			if(zz > 236 || zz < 199){
-        		clearbasic(world);
+        		clearAllPlacedBlocks(world);
             	eachblock.clear();
             	displayLoseMessage(player);
-            	arrayan = false;
+            	isArrayEnabled = false;
             	isEnabled = false;
             	return;
       		}
@@ -150,7 +151,7 @@ public class DNA extends EZPlugin implements PluginListener{
   	}
 
 	@HookHandler
-	public void telemitdruckplatte(RedstoneChangeHook event){
+	public void RedstoneChangeHookEvent(RedstoneChangeHook event){
     	Block druckplatte = event.getSourceBlock();
     	Location locdruckplatte = druckplatte.getLocation();
     	double x = locdruckplatte.getX();
@@ -169,104 +170,105 @@ public class DNA extends EZPlugin implements PluginListener{
       		loadStats(player);
    		}
    		if(xdruckplatte == 267 && ydruckplatte == 18 && zdruckplatte == 199 && isEnabled == true){
-    		clearbasic(world);
+    		clearAllPlacedBlocks(world);
     		Player player = world.getClosestPlayer(267, 18, 199, 5);
     		displayLoseMessage(player);
-    		if(arrayan){
+    		if(isArrayEnabled){
       			eachblock.clear();
-      			arrayan = false;
+      			isArrayEnabled = false;
     		}
     	isEnabled = false;
    		}
   	}
 
- @HookHandler
-  public void ichlaufe(PlayerMoveHook event) {
-    if (isEnabled){
-    	Player player = event.getPlayer();
-      	Location loc = player.getLocation();
-      	double x = loc.getX();
-      	double y = loc.getY();
-      	double z = loc.getZ();
-      	World world = loc.getWorld();
-      	Location blockuntermir = new Location(x, y-1, z);
+ 	@HookHandler
+  	public void PlayerMoveHookEvent(PlayerMoveHook event){
+		if(isEnabled){
+			Player player = event.getPlayer();
+			Location loc = player.getLocation();
+			double x = loc.getX();
+			double y = loc.getY();
+			double z = loc.getZ();
+			World world = loc.getWorld();
+			Location locationBelowPlayer = new Location(x, y - 1, z);
 
-      	int x1 = (int)x;
-      	int y1 = (int)y;
-      	int z1 = (int)z;
+			int x1 = (int)x;
+			int y1 = (int)y;
+			int z1 = (int)z;
 
-      	Block b = world.getBlockAt(x1, y1 - 1, z1);
+			Block blockBelowPlayer = world.getBlockAt(x1, y1 - 1, z1);
 
-      	double setof = Math.random() * 10;
-      	int ofset = (int)setof;
-    	if (b.getType() == BlockType.Glass) {
-      		height = y1 + LEVEL_HEIGHT + ofset;
-      		if(height > 51){
-        		height = 51;
-      		}
-      		displayStartMessage(player);
-      		blockuntermir.getWorld().setBlockAt(blockuntermir, BlockType.WhiteGlass);
-      		makerightblocks(player);
-      		arrayan = true;
-      		playSound(blockuntermir, SoundEffect.Type.NOTE_PLING, 2.0f, 3.0f);
-    	}
-    	if (b.getType() == BlockToJump){
-    		blockuntermir.getWorld().setBlockAt(blockuntermir, JumpedBlock);
-      		absolviertebloecke = absolviertebloecke + 1;
-      		saveStats(player);
-      		if (y < height){
-        	double sprungauswahl = Math.random();
-        		if(eachblock.size() > 1 && (eachblock.get(eachblock.size() - 1).getY()  > eachblock.get(eachblock.size() - 2).getY())){
-        			displayCorrectLevel(player);
+			if(blockBelowPlayer.getType() == BlockType.Glass)
+				startGame(player, y1, locationBelowPlayer); //TODO: add a function to Utils that calculates the location below a player
+
+			if(blockBelowPlayer.getType() == BlockToJumpType){
+				locationBelowPlayer.getWorld().setBlockAt(locationBelowPlayer, JumpedBlock);
+				totalJumpedBlocks = totalJumpedBlocks + 1;
+				saveStats(player);
+				if (y < height){
+					double randomJumpSelection = Math.random();
+					if(eachblock.size() > 1 && (eachblock.get(eachblock.size() - 1).getY()  > eachblock.get(eachblock.size() - 2).getY()))
+						displayCorrectLevel(player);
+					if(randomJumpSelection < 0.95)
+						spawnJumpBlock(player);
+					if(randomJumpSelection >= 0.95)
+						spwanFourBlockJumpBlock(player);
 				}
-        		if(sprungauswahl < 0.95){
-        			makerightblocks(player);
-          		}
-        		if(sprungauswahl >= 0.95){
-         			vierersprung(player);
-            	}
-        	}
-      		if (y >= height) {
-        		makelastblock(player);
-        	}
-		}  
-    	if (b.getType() == DestinationBlock && b.getY() > 25){
-      		displayWinMessage(player);
-      		absolviertebloecke = absolviertebloecke + 1;
-      		saveStats(player);
-      		eachblock.clear();
-      		blockuntermir.getWorld().setBlockAt(blockuntermir, BlockType.DiamondBlock);
-      		winteleport(player);
-      		clearbasic(world);
-      		arrayan = false;
-      		isEnabled = false;
-    	}
-    	while(arrayan){
-      		int arraylaenge = eachblock.size();
-        	int letzterarraywert = arraylaenge - 1; 
-        	int vorletzterarraywert = arraylaenge - 2;
-        	double ydarfnichtunter = eachblock.get(letzterarraywert).getY() - 2;
-      		if(y1 < ydarfnichtunter){
-        		double xb = eachblock.get(vorletzterarraywert).getX();
-        		double yb = eachblock.get(vorletzterarraywert).getY() + 1;
-        		double zb = eachblock.get(vorletzterarraywert).getZ();
-        		int xlb = (int)xb;
-        		int ylb = (int)yb;
-        		int zlb = (int)zb;
-        		float richtung = player.getLocation().getRotation();
-        		Location vorletzterblock = new Location(world, xlb, ylb, zlb, 0f, richtung);
-        		player.teleportTo(vorletzterblock);
-        		jumpFails = jumpFails + 1;
-        		playSound(vorletzterblock, SoundEffect.Type.BAT_DEATH, 1.0f, 0.75f);
-        		gesamtfails = gesamtfails + 1;
-        		saveStats(player);
-        		return;
-        	}else{
-       			return;
-        	}
-    	}
+				if (y >= height)
+					makeLastBlock(player);
+			}  
+
+			if (blockBelowPlayer.getType() == DestinationBlock && blockBelowPlayer.getY() > 25){
+				displayWinMessage(player);
+				totalJumpedBlocks = totalJumpedBlocks + 1;
+				saveStats(player);
+				eachblock.clear();
+				locationBelowPlayer.getWorld().setBlockAt(locationBelowPlayer, BlockType.DiamondBlock);
+				teleportAfterWin(player);
+				clearAllPlacedBlocks(world);
+				isArrayEnabled = false;
+				isEnabled = false;
+			}
+
+			while(isArrayEnabled){
+				int arraylaenge = eachblock.size();
+				int letzterarraywert = arraylaenge - 1; 
+				int vorletzterarraywert = arraylaenge - 2;
+				double ydarfnichtunter = eachblock.get(letzterarraywert).getY() - 2;
+				if(y1 < ydarfnichtunter){
+					double xb = eachblock.get(vorletzterarraywert).getX();
+					double yb = eachblock.get(vorletzterarraywert).getY() + 1;
+					double zb = eachblock.get(vorletzterarraywert).getZ();
+					int xlb = (int)xb;
+					int ylb = (int)yb;
+					int zlb = (int)zb;
+					float richtung = player.getLocation().getRotation();
+					Location vorletzterblock = new Location(world, xlb, ylb, zlb, 0f, richtung);
+					player.teleportTo(vorletzterblock);
+					jumpFails = jumpFails + 1;
+					playSound(vorletzterblock, SoundEffect.Type.BAT_DEATH, 1.0f, 0.75f);
+					totalFails = totalFails + 1;
+					saveStats(player);
+					return;
+				}else{
+					return;
+				}
+			}
+		}
 	}
-}
+
+	private void startGame(Player player, int y1, Location locationBelowPlayer){
+		int offset = (int)Math.random() * 10;
+		height = y1 + LEVEL_HEIGHT + offset;
+		if(height > 51){
+			height = 51;
+		}
+		displayStartMessage(player);
+		locationBelowPlayer.getWorld().setBlockAt(locationBelowPlayer, BlockType.WhiteGlass);
+		spawnJumpBlock(player);
+		isArrayEnabled = true;
+		playSound(locationBelowPlayer, SoundEffect.Type.NOTE_PLING, 2.0f, 3.0f);
+	}
 
 	private void placeStartBlock(){
 		FileLoader fl = new FileLoader("C:/Users/R/Desktop/server/config/events.txt");
@@ -277,7 +279,7 @@ public class DNA extends EZPlugin implements PluginListener{
 		eachblock.add(startglas);
 	}
 
-	public void makerightblocks(Player player){
+	public void spawnJumpBlock(Player player){
 		Location loc = player.getLocation();
 		double xp = loc.getX();
 		double yp = loc.getY();
@@ -314,7 +316,7 @@ public class DNA extends EZPlugin implements PluginListener{
 					eachblock.add(validBlockLocation);
 
 					trimJumpedBlocks();
-					validBlockLocation.getWorld().setBlockAt(validBlockLocation, BlockToJump);
+					validBlockLocation.getWorld().setBlockAt(validBlockLocation, BlockToJumpType);
 					playSound(validBlockLocation, SoundEffect.Type.NOTE_HAT, 1.0f, 1.0f);
 					isValidBlock = true;
 				}
@@ -322,7 +324,7 @@ public class DNA extends EZPlugin implements PluginListener{
 		}
 	}
 
-	public void vierersprung(Player player){
+	public void spwanFourBlockJumpBlock(Player player){
 		Location loc = player.getLocation();
 		double xp = loc.getX();
 		double yp = loc.getY();
@@ -331,9 +333,9 @@ public class DNA extends EZPlugin implements PluginListener{
 		int yplayer = (int) yp;
 		int zplayer = (int) zp;
 		World world = loc.getWorld();
-		viererb = true;
+		isFourJumpBlock = true;
 
-		while(viererb){
+		while(isFourJumpBlock){
 			double richtungvierersprung = Math.random();
 			int xanteil = 0;
 			int zanteil = 0;
@@ -360,9 +362,9 @@ public class DNA extends EZPlugin implements PluginListener{
 				eachblock.add(validBlockLocation);
 
 				trimJumpedBlocks();
-				validBlockLocation.getWorld().setBlockAt(validBlockLocation, BlockToJump);
+				validBlockLocation.getWorld().setBlockAt(validBlockLocation, BlockToJumpType);
 				playSound(validBlockLocation, SoundEffect.Type.NOTE_HAT, 1.0f, 1.0f);
-				viererb = false;
+				isFourJumpBlock = false;
 			}
 		}
 	}
@@ -374,7 +376,7 @@ public class DNA extends EZPlugin implements PluginListener{
 		}
 	}
 
-    public void makelastblock(Player player) {
+    private void makeLastBlock(Player player) {
      	Location loc = player.getLocation();
 		double xp = loc.getX();
 		double yp = loc.getY();
@@ -394,9 +396,9 @@ public class DNA extends EZPlugin implements PluginListener{
 			int za = (int) z;
 		
 			double betrag = (xa*xa) + ((ya-1)*(ya-1)) + (za*za);
-			double wurzel = Math.sqrt(betrag);
+			double sqrt = Math.sqrt(betrag);
 
-			if(wurzel > 2.5 && wurzel <= 5){
+			if(sqrt > 2.5 && sqrt <= 5){
 				int xblock = xplayer + xa;
 				int yblock = yplayer + ya;
 				int zblock = zplayer + za;
@@ -416,7 +418,7 @@ public class DNA extends EZPlugin implements PluginListener{
 		}
 	}
 
-	public void displayCorrectLevel(Player player){
+	private void displayCorrectLevel(Player player){
 		int levelzahl = player.getLevel();
 		if(levelzahl < 16)
 			player.addExperience(7 + 2 * levelzahl);
@@ -425,17 +427,16 @@ public class DNA extends EZPlugin implements PluginListener{
 	}
 
 
-	public void clearbasic(World world){
+	private void clearAllPlacedBlocks(World world){
 		for (Location clearblock : eachblock)
-		clearblock.getWorld().setBlockAt(clearblock, BlockType.Air);
+			clearblock.getWorld().setBlockAt(clearblock, BlockType.Air);
 		
-		for (int x = 267; x <= 295; x++) {
-			for(int y = 18; y <= 53; y++) {
-				for (int z = 199; z <= 227; z++) { 
+		for (int x = 267; x <= 295; x++){
+			for(int y = 18; y <= 53; y++){
+				for (int z = 199; z <= 227; z++){ 
 					Block b = world.getBlockAt(x, y, z);
-					if(b.getType() == BlockType.DiamondBlock){
+					if(b.getType() == BlockType.DiamondBlock)
 						b.getLocation().getWorld().setBlockAt(b.getLocation(), BlockType.Air);
-					}
 				}
 			}
 		}    
@@ -459,7 +460,7 @@ public class DNA extends EZPlugin implements PluginListener{
 		Utils.BroadcastServerMessage(pluginName, serverMessage);
 	}
 
-  	public void playerteleportvorstart(Player player){
+  	private void teleportPlayerBeforeStart(Player player){
 		Location whereNow = new Location(281, 18, 235);
 		player.teleportTo(new Location(player.getWorld(), 281, 18, 235, 0f, 180f));
 		player.setModeId(Utils.ADVENTURE_MODE);
@@ -477,32 +478,32 @@ public class DNA extends EZPlugin implements PluginListener{
 			logger.info(playerName + " is not online");
 		}
 
-		totalPlayedGames = sd.playedgames;
-		nullfailrunden = sd.perfectwin;
-		absolviertebloecke = sd.jumpedblocks;
-		gesamtfails = sd.allfails;
+		totalGamesPlayed = sd.playedgames;
+		zeroFailRound = sd.perfectwin;
+		totalJumpedBlocks = sd.jumpedblocks;
+		totalFails = sd.allfails;
   	}
 
-  private void saveStats(Player player){
-    StatsDna sd = new StatsDna();
-    sd.player_name = player.getDisplayName();
-    sd.playedgames = totalPlayedGames;
-    sd.perfectwin = nullfailrunden;
-    sd.jumpedblocks = absolviertebloecke;
-    sd.allfails = gesamtfails;
+  	private void saveStats(Player player){
+		StatsDna sd = new StatsDna();
+		sd.player_name = player.getDisplayName();
+		sd.playedgames = totalGamesPlayed;
+		sd.perfectwin = zeroFailRound;
+		sd.jumpedblocks = totalJumpedBlocks;
+		sd.allfails = totalFails;
 
-    HashMap<String, Object> search = new HashMap<String, Object>();
-    search.put("player_name", player.getDisplayName());
+		HashMap<String, Object> search = new HashMap<String, Object>();
+		search.put("player_name", player.getDisplayName());
 
-    try {
-        Database.get().update(sd, search);//(2) 
-      } catch (DatabaseWriteException e) {
-        logger.error(e);
-        logger.info("error");
-      }
-  }
+		try {
+			Database.get().update(sd, search);//(2) 
+		} catch (DatabaseWriteException e) {
+			logger.error(e);
+			logger.info("error");
+		}
+  	}
 
-  	public void winteleport(Player player){
+  	private void teleportAfterWin(Player player){
 		ItemFactory factory = Canary.factory().getItemFactory();
 		Item backfeder = factory.newItem(ItemType.Feather);
 		backfeder.setDisplayName(ChatFormat.RED + "Hub");
@@ -517,12 +518,12 @@ public class DNA extends EZPlugin implements PluginListener{
   	private void displayStartMessage(Player player) {
 		String msg2 = "Das Spiel beginnt!";
 		Utils.BroadcastServerMessage(pluginName, ChatFormat.DARK_GREEN + msg2);
-		totalPlayedGames = totalPlayedGames + 1;
+		totalGamesPlayed = totalGamesPlayed + 1;
 		saveStats(player);
     }
 
 	private void displayWinMessage(Player player) {
-    	clearbasic(player.getWorld());
+    	clearAllPlacedBlocks(player.getWorld());
     	eachblock.clear();
     	String msg2 = player.getDisplayName();
     	String msg3 = " hat DNA mit ";
@@ -530,7 +531,7 @@ public class DNA extends EZPlugin implements PluginListener{
     	String msg5 = "gewonnen ";
     	if(jumpFails == 1)
       		msg4 = " Fehler ";
-    	if(totalPlayedGames == 20){
+    	if(totalGamesPlayed == 20){
 			String serverMessage = ChatFormat.DARK_GREEN + "Du hast 20 Spiele absolviert. Herzlichen Glueckwunsch!";
 			Utils.BroadcastServerMessage(pluginName, serverMessage);
 		}
@@ -547,7 +548,7 @@ public class DNA extends EZPlugin implements PluginListener{
       			clueShovel.setDisplayName(ChatFormat.YELLOW + "Hinweis..");
       			clueShovel.setDamage(32);
       			player.getInventory().setSlot(7, clueShovel);
-      			nullfailrunden = nullfailrunden + 1;
+      			zeroFailRound = zeroFailRound + 1;
       			saveStats(player);
       			loadStats(player);
       			String msg6 = "Fuer diese gute Leistung bekommst du einen ";
