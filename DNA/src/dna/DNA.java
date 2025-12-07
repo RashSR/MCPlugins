@@ -30,7 +30,9 @@ import net.canarymod.api.inventory.ItemType;
 import net.canarymod.database.Database;
 import net.canarymod.database.DataAccess;
 import net.canarymod.database.exceptions.*;
+import utils.ScoreboardTimerTask;
 import utils.Utils;
+import net.canarymod.api.scoreboard.*;
 
 public class DNA extends EZPlugin implements PluginListener{
 
@@ -202,6 +204,9 @@ public class DNA extends EZPlugin implements PluginListener{
 				startGame(player, y1, locationBelowPlayer); //TODO: add a function to Utils that calculates the location below a player
 
 			if(blockBelowPlayer.getType() == BlockToJumpType){
+				jumpedBlocksInActiveGame++;
+				updateScoreboard();
+				
 				locationBelowPlayer.getWorld().setBlockAt(locationBelowPlayer, JumpedBlock);
 				totalJumpedBlocks = totalJumpedBlocks + 1;
 				saveStats(player);
@@ -250,14 +255,17 @@ public class DNA extends EZPlugin implements PluginListener{
 					totalFails = totalFails + 1;
 					saveStats(player);
 					return;
-				}else{
-					return;
 				}
+				else
+					return;
 			}
 		}
 	}
 
+	private int jumpedBlocksInActiveGame;
+
 	private void startGame(Player player, int y1, Location locationBelowPlayer){
+		jumpedBlocksInActiveGame = 0;
 		int offset = (int)Math.random() * 10;
 		height = y1 + LEVEL_HEIGHT + offset;
 		if(height > 51){
@@ -268,6 +276,37 @@ public class DNA extends EZPlugin implements PluginListener{
 		spawnJumpBlock(player);
 		isArrayEnabled = true;
 		playSound(locationBelowPlayer, SoundEffect.Type.NOTE_PLING, 2.0f, 3.0f);
+		createScoreboard(player);
+	}
+
+	private Scoreboard scoreboard;
+	private ScoreObjective objective;
+	private Score jumpedBlocksScore;
+	private Score timeScore;
+	private ScoreboardTimerTask timerTask;
+
+	private void createScoreboard(Player player){
+		ScoreboardManager manager = Canary.scoreboards();
+
+		this.scoreboard = manager.getScoreboard("gameboard");
+		this.objective = scoreboard.addScoreObjective("dnaJump");
+		this.objective.setDisplayName("§6§lGame Info");
+		this.scoreboard.setScoreboardPosition(ScorePosition.SIDEBAR, this.objective, player);
+
+		// Initialize score entries
+		this.timerTask = new ScoreboardTimerTask(this.scoreboard, this.objective, this.timeScore, 2);
+		Canary.getServer().addSynchronousTask(timerTask);
+
+		this.jumpedBlocksScore = scoreboard.getScore("§cJumpedBlocks: §f" + jumpedBlocksInActiveGame, this.objective);
+		this.jumpedBlocksScore.setScore(1);
+		this.jumpedBlocksScore.update();
+  	}
+
+	private void updateScoreboard(){
+		scoreboard.removeScore(this.jumpedBlocksScore.getName(), this.objective);
+		this.jumpedBlocksScore = scoreboard.getScore("§cJumpedBlocks: §f" + jumpedBlocksInActiveGame, this.objective);
+		this.jumpedBlocksScore.setScore(1);
+		this.jumpedBlocksScore.update();
 	}
 
 	private void placeStartBlock(){
@@ -458,6 +497,7 @@ public class DNA extends EZPlugin implements PluginListener{
 
 		String serverMessage = ChatFormat.BLUE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".";
 		Utils.BroadcastServerMessage(pluginName, serverMessage);
+		Utils.clearScoreboard(scoreboard, timerTask, objective); //create like in quidditch a cleanUp()-Method
 	}
 
   	private void teleportPlayerBeforeStart(Player player){
@@ -513,6 +553,7 @@ public class DNA extends EZPlugin implements PluginListener{
 		playSound(siegerpodest, SoundEffect.Type.LEVEL_UP, 2.0f, 2.0f);
 		player.getInventory().setSlot(8, backfeder);
 		player.removeExperience(player.getExperience());
+		Utils.clearScoreboard(scoreboard, timerTask, objective);
 	}                            
 
   	private void displayStartMessage(Player player) {
