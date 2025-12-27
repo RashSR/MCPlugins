@@ -24,7 +24,7 @@ All plugins are written in **Java**, using the **CanaryMod API**, and were desig
 | **CantDestroy** | Prevents players from breaking blocks. | Complete |
 | **ChatBefehle** | Displays all available custom `/commands` to the player. | Complete |
 | **Countdown** | Starts a countdown (`/countdown <seconds>`) and shuts down the server afterward. | Complete |
-| **DNA** | Minigame: Jump up random-spawned blocks until a target height. *(Scoreboard support could be added.)* | Complete |
+| **DNA** | Minigame: Jump up random-spawned blocks until a target height. | Complete |
 | **Events** | Handles special events like Christmas, Halloween, and New Year. *(Can be expanded with more events.)* | Complete |
 | **FillBlocks** | A simple WorldEdit-style tool to fill selected regions with air or a chosen block. | Complete |
 | **Join** | Handles player join events (sets gamemode, teleports to hub, clears inventory). *(Player session tracking via DB could be added.)* | Complete |
