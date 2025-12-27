@@ -154,24 +154,22 @@ public class DNA extends EZPlugin implements PluginListener{
 
 	@HookHandler
 	public void RedstoneChangeHookEvent(RedstoneChangeHook event){
-    	Block druckplatte = event.getSourceBlock();
-    	Location locdruckplatte = druckplatte.getLocation();
-    	double x = locdruckplatte.getX();
-    	double y = locdruckplatte.getY();
-    	double z = locdruckplatte.getZ();
-    	World world = locdruckplatte.getWorld();
+    	Block pressurePlate = event.getSourceBlock();
+    	Location pressurePlateLocation = pressurePlate.getLocation();
+    	World world = pressurePlateLocation.getWorld();
 
-    	int xdruckplatte = (int)x;
-    	int ydruckplatte = (int)y;
-    	int zdruckplatte = (int)z;
-    	if(xdruckplatte == 244 && ydruckplatte == 71 && zdruckplatte == 258 && isEnabled == false){
+    	int pressurePlateX = (int)pressurePlateLocation.getX();
+    	int pressurePlateY = (int)pressurePlateLocation.getY();
+    	int pressurePlateZ = (int)pressurePlateLocation.getZ();
+
+    	if(!isEnabled && pressurePlateX == 244 && pressurePlateY == 71 && pressurePlateZ == 258){
       		isEnabled = true;
       		placeStartBlock();
       		jumpFails = 0;
       		Player player = world.getClosestPlayer(244, 71, 258, 5);
       		loadStats(player);
    		}
-   		if(xdruckplatte == 267 && ydruckplatte == 18 && zdruckplatte == 199 && isEnabled == true){
+   		if(isEnabled && pressurePlateX == 267 && pressurePlateY == 18 && pressurePlateZ == 199){
     		clearAllPlacedBlocks(world);
     		Player player = world.getClosestPlayer(267, 18, 199, 5);
     		displayLoseMessage(player);
@@ -268,9 +266,9 @@ public class DNA extends EZPlugin implements PluginListener{
 		jumpedBlocksInActiveGame = 0;
 		int offset = (int)Math.random() * 10;
 		height = y1 + LEVEL_HEIGHT + offset;
-		if(height > 51){
+		if(height > 51)
 			height = 51;
-		}
+
 		displayStartMessage(player);
 		locationBelowPlayer.getWorld().setBlockAt(locationBelowPlayer, BlockType.WhiteGlass);
 		spawnJumpBlock(player);

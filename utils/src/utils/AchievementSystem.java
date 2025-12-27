@@ -1,4 +1,6 @@
 package utils;
+import java.util.ArrayList;
+import java.util.List;
 import net.canarymod.Canary;
 import net.canarymod.api.factory.ObjectFactory;
 import net.canarymod.api.inventory.CustomStorageInventory;
@@ -57,7 +59,8 @@ public class AchievementSystem<E extends Enum<E> & IDescriableAchievment>{
             //TODO: generic interface -> hasAchievement()
             if(database.hasPlayerQuidditchAchievement(player.getDisplayName(), achievement.toString())){ 
                 item = itemFactory.newItem(COLLECTED_ACHIEVEMENT_TYPE);
-                item.setDisplayName(ChatFormat.GREEN + achievement.toString() + " - " + achievement.getDescription());
+                item.setDisplayName(ChatFormat.GREEN + achievement.toString());
+                item.setLore(wrapLore(achievement.getDescription(), 35));
             }
             else{
                 item = itemFactory.newItem(UNCOLLECTED_ACHIEVEMENT_TYPE);
@@ -72,6 +75,30 @@ public class AchievementSystem<E extends Enum<E> & IDescriableAchievment>{
 
         database.CloseConnection();
     }
+
+    private static String[] wrapLore(String text, int maxLineLength) {
+        List<String> lines = new ArrayList<>();
+        StringBuilder currentLine = new StringBuilder();
+
+        for (String word : text.split(" ")) {
+            if (currentLine.length() + word.length() + 1 > maxLineLength) {
+                lines.add(currentLine.toString());
+                currentLine = new StringBuilder(word);
+            } else {
+                if (currentLine.length() > 0) {
+                    currentLine.append(" ");
+                }
+                currentLine.append(word);
+            }
+        }
+
+        if (currentLine.length() > 0) {
+            lines.add(currentLine.toString());
+        }
+
+        return lines.toArray(new String[0]);
+    }
+
 
     public void tryEarnAchievement(E achievement, DatabaseUtils database){
         if(!database.hasPlayerQuidditchAchievement(player.getDisplayName(), achievement.toString())){
