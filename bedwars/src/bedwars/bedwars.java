@@ -3,6 +3,9 @@ import net.canarymod.Canary;
 import net.canarymod.commandsys.*;
 import net.canarymod.chat.MessageReceiver;
 import net.canarymod.api.entity.living.humanoid.Player;
+import net.canarymod.api.entity.living.humanoid.Villager;
+import net.canarymod.api.VillagerTrade;
+import net.canarymod.api.entity.EntityType;
 import com.pragprog.ahmine.ez.EZPlugin;
 import net.canarymod.chat.ChatFormat;
 import net.canarymod.api.world.blocks.Block;
@@ -10,6 +13,7 @@ import net.canarymod.api.world.blocks.BlockType;
 import net.canarymod.api.world.position.Location;
 import net.canarymod.api.world.World;
 import net.canarymod.api.factory.ItemFactory;
+import net.canarymod.api.factory.ObjectFactory;
 import net.canarymod.api.inventory.ItemType;
 import net.canarymod.api.inventory.Item;
 import net.canarymod.plugin.PluginListener;
@@ -39,7 +43,7 @@ public class bedwars extends EZPlugin implements PluginListener{
   private final int GOLD_SPAWN_DELAY_IN_SECONDS = 25;
   private Location teamPurpleBedLocation = new Location(321, 228, 396);
   private Location teamYellowBedLocation = new Location(430, 228, 504);
-  private Location teamGreenBedLocation = new Location(536, 228, 394);
+  private Location teamGreenBedLocation = new Location(536, 228, 394);     
   private Location teamRedBedLocation = new Location(427, 228, 287);
 
   @Override
@@ -338,7 +342,8 @@ public class bedwars extends EZPlugin implements PluginListener{
           permissions = { "*" },
           toolTip = "/bwclear")
   public void removeSandStoneBlocks(MessageReceiver caller, String[] parameters) {
-    if (caller instanceof Player player){ 
+    if(caller instanceof Player player){ 
+      spawnVillagerWithCustomTrades();
       Location loc = player.getLocation();
       World world = loc.getWorld();
 
@@ -521,6 +526,25 @@ public class bedwars extends EZPlugin implements PluginListener{
         }
       }
     }
+  }
+
+  private void spawnVillagerWithCustomTrades(){
+    Location villagerLocation = new Location(534, 227, 399);
+    Villager villager = (Villager)spawnEntityLiving(villagerLocation, EntityType.VILLAGER);
+    int tradeCount = villager.getTrades().length;
+    for(int i = tradeCount - 1; i >= 0; i--)
+      villager.removeTrade(i);
+
+    createCustomItems();
+    ObjectFactory objectFactory = Canary.factory().getObjectFactory();
+    ItemFactory factory = Canary.factory().getItemFactory();
+    Item sandStone = factory.newItem(ItemType.SandstoneBlank);
+    sandStone.setAmount(2);
+    VillagerTrade trade = objectFactory.newVillagerTrade(customBronze, sandStone);
+
+    //If set to the max value or near it -> the trade is marked as not possible
+    trade.increaseMaxUses(Integer.MAX_VALUE / 2);
+    villager.addTrade(trade);
   }
 
   private void eliminatePlayer(Player player){
