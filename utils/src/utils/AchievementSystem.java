@@ -99,7 +99,6 @@ public class AchievementSystem<E extends Enum<E> & IDescriableAchievment>{
         return lines.toArray(new String[0]);
     }
 
-
     public void tryEarnAchievement(E achievement, DatabaseUtils database){
         if(!database.hasPlayerQuidditchAchievement(player.getDisplayName(), achievement.toString())){
             database.InsertQuidditchAchievementIntoDbForPlayer(player.getDisplayName(), achievement.toString());

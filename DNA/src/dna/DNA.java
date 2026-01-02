@@ -456,13 +456,12 @@ public class DNA extends EZPlugin implements PluginListener{
 	}
 
 	private void displayCorrectLevel(Player player){
-		int levelzahl = player.getLevel();
-		if(levelzahl < 16)
-			player.addExperience(7 + 2 * levelzahl);
-		else if(levelzahl >= 16)
-			player.addExperience(37 + 5 * (levelzahl - 15));
+		int playerLevel = player.getLevel();
+		if(playerLevel < 16)
+			player.addExperience(7 + 2 * playerLevel);
+		else if(playerLevel >= 16)
+			player.addExperience(37 + 5 * (playerLevel - 15));
 	}
-
 
 	private void clearAllPlacedBlocks(World world){
 		for (Location clearblock : eachblock)
@@ -543,13 +542,13 @@ public class DNA extends EZPlugin implements PluginListener{
 
   	private void teleportAfterWin(Player player){
 		ItemFactory factory = Canary.factory().getItemFactory();
-		Item backfeder = factory.newItem(ItemType.Feather);
-		backfeder.setDisplayName(ChatFormat.RED + "Hub");
+		Item backFeather = factory.newItem(ItemType.Feather);
+		backFeather.setDisplayName(ChatFormat.RED + "Hub");
 
-		Location siegerpodest = new Location(277, 72, 214);
-		player.teleportTo(siegerpodest);
-		playSound(siegerpodest, SoundEffect.Type.LEVEL_UP, 2.0f, 2.0f);
-		player.getInventory().setSlot(8, backfeder);
+		Location winPedastalLocation = new Location(277, 72, 214);
+		player.teleportTo(winPedastalLocation);
+		playSound(winPedastalLocation, SoundEffect.Type.LEVEL_UP, 2.0f, 2.0f);
+		player.getInventory().setSlot(8, backFeather);
 		player.removeExperience(player.getExperience());
 		Utils.clearScoreboard(scoreboard, timerTask, objective);
 	}                            
