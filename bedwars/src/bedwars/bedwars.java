@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import utils.SpawnItemsTask;
 import utils.Utils;
+import net.canarymod.hook.entity.VillagerTradeUnlockHook;
 
 public class bedwars extends EZPlugin implements PluginListener{
 
@@ -528,7 +529,19 @@ public class bedwars extends EZPlugin implements PluginListener{
     }
   }
 
+  @HookHandler
+  public void VillagerTradeUnlockHookEvent(VillagerTradeUnlockHook event){
+    if(hasSpawnedCustomVillager){
+      //TODO: keep track of all villagers for bedwars and check in this hook with event.getVillager() if it is the correct one
+      logger.info("Villager unlocked trade! -> " + event.getTrade().toString());
+      event.setCanceled();
+    }
+  }
+
+  private boolean hasSpawnedCustomVillager = false;
+
   private void spawnVillagerWithCustomTrades(){
+    hasSpawnedCustomVillager = true;
     Location villagerLocation = new Location(534, 227, 399);
     Villager villager = (Villager)spawnEntityLiving(villagerLocation, EntityType.VILLAGER);
     int tradeCount = villager.getTrades().length;
@@ -545,6 +558,8 @@ public class bedwars extends EZPlugin implements PluginListener{
     //If set to the max value or near it -> the trade is marked as not possible
     trade.increaseMaxUses(Integer.MAX_VALUE / 2);
     villager.addTrade(trade);
+
+    //TODO: XPs are dropped -> could be removed with EntitySpawnHook EntityType.XPORB 
   }
 
   private void eliminatePlayer(Player player){
