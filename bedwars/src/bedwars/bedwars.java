@@ -557,23 +557,24 @@ public class bedwars extends EZPlugin implements PluginListener{
     ObjectFactory objectFactory = Canary.factory().getObjectFactory();
     ItemFactory itemFactory = Canary.factory().getItemFactory();
     
-    //first Trade
+    //first trade
     Item sandStone = itemFactory.newItem(ItemType.SandstoneBlank);
-    sandStone.setAmount(2);
-    VillagerTrade blocksTrade = objectFactory.newVillagerTrade(customBronze, sandStone);
-    //If set to the max value or near it -> the trade is marked as not possible
-    blocksTrade.increaseMaxUses(Integer.MAX_VALUE / 2);
-    villager.addTrade(blocksTrade);
-
+    addTradeToVillager(villager, objectFactory, customBronze, 1, sandStone, 2);
+    
     //second trade
-    Item pickAxe = itemFactory.newItem(ItemType.WoodPickaxe);
-    //needs its own Item instance to modify the amount needed for the trade
     Item tradeBronze = itemFactory.newItem(ItemType.ClayBrick);
     tradeBronze.setDisplayName(ChatFormat.GRAY + "Bronze");
-    tradeBronze.setAmount(4);
-    VillagerTrade pickaxeTrade = objectFactory.newVillagerTrade(tradeBronze, pickAxe);
-    pickaxeTrade.increaseMaxUses(Integer.MAX_VALUE / 2);
-    villager.addTrade(pickaxeTrade);
+    Item pickAxe = itemFactory.newItem(ItemType.WoodPickaxe);
+    addTradeToVillager(villager, objectFactory, tradeBronze, 4, pickAxe, 1);
+  }
+
+  private void addTradeToVillager(Villager villager, ObjectFactory objectFactory, Item buyingItem, int amountBuyingItem, Item sellingItem, int amountSellingItem){
+    buyingItem.setAmount(amountBuyingItem);
+    sellingItem.setAmount(amountSellingItem);
+    VillagerTrade trade = objectFactory.newVillagerTrade(buyingItem, sellingItem);
+    //If set to the max value or near it -> the trade is marked as not possible
+    trade.increaseMaxUses(Integer.MAX_VALUE / 2);
+    villager.addTrade(trade);
   }
 
   private void eliminatePlayer(Player player){
