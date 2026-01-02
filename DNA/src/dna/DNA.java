@@ -249,6 +249,7 @@ public class DNA extends EZPlugin implements PluginListener{
 					Location vorletzterblock = new Location(world, xlb, ylb, zlb, 0f, richtung);
 					player.teleportTo(vorletzterblock);
 					jumpFails = jumpFails + 1;
+					updateScoreboard();
 					playSound(vorletzterblock, SoundEffect.Type.BAT_DEATH, 1.0f, 0.75f);
 					totalFails = totalFails + 1;
 					saveStats(player);
@@ -280,6 +281,7 @@ public class DNA extends EZPlugin implements PluginListener{
 	private Scoreboard scoreboard;
 	private ScoreObjective objective;
 	private Score jumpedBlocksScore;
+	private Score jumpFailsScore;
 	private Score timeScore;
 	private ScoreboardTimerTask timerTask;
 
@@ -292,17 +294,26 @@ public class DNA extends EZPlugin implements PluginListener{
 		this.scoreboard.setScoreboardPosition(ScorePosition.SIDEBAR, this.objective, player);
 
 		// Initialize score entries
-		this.timerTask = new ScoreboardTimerTask(this.scoreboard, this.objective, this.timeScore, 2);
+		this.timerTask = new ScoreboardTimerTask(this.scoreboard, this.objective, this.timeScore, 3);
 		Canary.getServer().addSynchronousTask(timerTask);
 
-		this.jumpedBlocksScore = scoreboard.getScore("§cJumpedBlocks: §f" + jumpedBlocksInActiveGame, this.objective);
+		this.jumpFailsScore = scoreboard.getScore("§cFails: §f" + jumpFails, this.objective);
+		this.jumpFailsScore.setScore(2);
+		this.jumpFailsScore.update();
+
+		this.jumpedBlocksScore = scoreboard.getScore("§aJumpedBlocks: §f" + jumpedBlocksInActiveGame, this.objective);
 		this.jumpedBlocksScore.setScore(1);
 		this.jumpedBlocksScore.update();
   	}
 
 	private void updateScoreboard(){
+		scoreboard.removeScore(this.jumpFailsScore.getName(), this.objective);
+		this.jumpFailsScore = scoreboard.getScore("§cFails: §f" + jumpFails, this.objective);
+		this.jumpFailsScore.setScore(2);
+		this.jumpFailsScore.update();
+
 		scoreboard.removeScore(this.jumpedBlocksScore.getName(), this.objective);
-		this.jumpedBlocksScore = scoreboard.getScore("§cJumpedBlocks: §f" + jumpedBlocksInActiveGame, this.objective);
+		this.jumpedBlocksScore = scoreboard.getScore("§aJumpedBlocks: §f" + jumpedBlocksInActiveGame, this.objective);
 		this.jumpedBlocksScore.setScore(1);
 		this.jumpedBlocksScore.update();
 	}
