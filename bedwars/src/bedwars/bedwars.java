@@ -29,6 +29,7 @@ import java.util.List;
 import utils.SpawnItemsTask;
 import utils.Utils;
 import net.canarymod.hook.entity.VillagerTradeUnlockHook;
+import net.canarymod.hook.entity.EntitySpawnHook;
 
 public class bedwars extends EZPlugin implements PluginListener{
 
@@ -531,11 +532,15 @@ public class bedwars extends EZPlugin implements PluginListener{
 
   @HookHandler
   public void VillagerTradeUnlockHookEvent(VillagerTradeUnlockHook event){
-    if(hasSpawnedCustomVillager){
-      //TODO: keep track of all villagers for bedwars and check in this hook with event.getVillager() if it is the correct one
-      logger.info("Villager unlocked trade! -> " + event.getTrade().toString());
+    //TODO: keep track of all villagers for bedwars and check in this hook with event.getVillager() if it is the correct one
+    if(hasSpawnedCustomVillager)
       event.setCanceled();
-    }
+  }
+
+  @HookHandler
+  public void EntitySpawnHookEvent(EntitySpawnHook event){
+    if(hasSpawnedCustomVillager && event.getEntity().getEntityType() == EntityType.XPORB)
+      event.setCanceled();
   }
 
   private boolean hasSpawnedCustomVillager = false;
@@ -550,16 +555,25 @@ public class bedwars extends EZPlugin implements PluginListener{
 
     createCustomItems();
     ObjectFactory objectFactory = Canary.factory().getObjectFactory();
-    ItemFactory factory = Canary.factory().getItemFactory();
-    Item sandStone = factory.newItem(ItemType.SandstoneBlank);
+    ItemFactory itemFactory = Canary.factory().getItemFactory();
+    
+    //first Trade
+    Item sandStone = itemFactory.newItem(ItemType.SandstoneBlank);
     sandStone.setAmount(2);
-    VillagerTrade trade = objectFactory.newVillagerTrade(customBronze, sandStone);
-
+    VillagerTrade blocksTrade = objectFactory.newVillagerTrade(customBronze, sandStone);
     //If set to the max value or near it -> the trade is marked as not possible
-    trade.increaseMaxUses(Integer.MAX_VALUE / 2);
-    villager.addTrade(trade);
+    blocksTrade.increaseMaxUses(Integer.MAX_VALUE / 2);
+    villager.addTrade(blocksTrade);
 
-    //TODO: XPs are dropped -> could be removed with EntitySpawnHook EntityType.XPORB 
+    //second trade
+    Item pickAxe = itemFactory.newItem(ItemType.WoodPickaxe);
+    //needs its own Item instance to modify the amount needed for the trade
+    Item tradeBronze = itemFactory.newItem(ItemType.ClayBrick);
+    tradeBronze.setDisplayName(ChatFormat.GRAY + "Bronze");
+    tradeBronze.setAmount(4);
+    VillagerTrade pickaxeTrade = objectFactory.newVillagerTrade(tradeBronze, pickAxe);
+    pickaxeTrade.increaseMaxUses(Integer.MAX_VALUE / 2);
+    villager.addTrade(pickaxeTrade);
   }
 
   private void eliminatePlayer(Player player){
