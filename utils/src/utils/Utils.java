@@ -399,4 +399,10 @@ public class Utils extends EZPlugin{
 
     return prideBlockTypes;
   }
+
+  public static Location GetLocationBelowPlayer(Player player){
+    Location location = player.getLocation();
+    Location locationBelowPlayer = new Location(location.getX(), location.getY() - 1, location.getZ());
+    return locationBelowPlayer;
+  }
 }

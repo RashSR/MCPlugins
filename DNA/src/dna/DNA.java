@@ -187,30 +187,24 @@ public class DNA extends EZPlugin implements PluginListener{
 		if(isEnabled){
 			Player player = event.getPlayer();
 			Location loc = player.getLocation();
-			double x = loc.getX();
 			double y = loc.getY();
-			double z = loc.getZ();
 			World world = loc.getWorld();
-			Location locationBelowPlayer = new Location(x, y - 1, z);
 
-			int x1 = (int)x;
 			int y1 = (int)y;
-			int z1 = (int)z;
-
-			Block blockBelowPlayer = world.getBlockAt(x1, y1 - 1, z1);
+			Block blockBelowPlayer = world.getBlockAt((int)loc.getX(), y1 - 1, (int)loc.getZ());
 
 			if(blockBelowPlayer.getType() == BlockType.Glass)
-				startGame(player, y1, locationBelowPlayer); //TODO: add a function to Utils that calculates the location below a player
+				startGame(player, y1, Utils.GetLocationBelowPlayer(player));
 
 			if(blockBelowPlayer.getType() == BlockToJumpType)
-				handleBlockSpawning(player, locationBelowPlayer, y);
+				handleBlockSpawning(player, y);
 
 			if(blockBelowPlayer.getType() == DestinationBlock && blockBelowPlayer.getY() > 25){
 				displayWinMessage(player);
 				totalJumpedBlocks = totalJumpedBlocks + 1;
 				saveStats(player);
 				jumpedBlockLocations.clear();
-				locationBelowPlayer.getWorld().setBlockAt(locationBelowPlayer, BlockType.DiamondBlock);
+				world.setBlockAt(Utils.GetLocationBelowPlayer(player), BlockType.DiamondBlock);
 				teleportAfterWin(player);
 				clearAllPlacedBlocks(world);
 				isArrayEnabled = false;
@@ -218,10 +212,10 @@ public class DNA extends EZPlugin implements PluginListener{
 			}
 
 			while(isArrayEnabled){
-				int arraylaenge = jumpedBlockLocations.size();
-				int letzterarraywert = arraylaenge - 1; 
-				int vorletzterarraywert = arraylaenge - 2;
-				double ydarfnichtunter = jumpedBlockLocations.get(letzterarraywert).getY() - 2;
+				int arrayLength = jumpedBlockLocations.size();
+				int lastArrayIndex = arrayLength - 1; 
+				int vorletzterarraywert = arrayLength - 2;
+				double ydarfnichtunter = jumpedBlockLocations.get(lastArrayIndex).getY() - 2;
 				if(y1 < ydarfnichtunter){
 					double xb = jumpedBlockLocations.get(vorletzterarraywert).getX();
 					double yb = jumpedBlockLocations.get(vorletzterarraywert).getY() + 1;
@@ -229,8 +223,8 @@ public class DNA extends EZPlugin implements PluginListener{
 					int xlb = (int)xb;
 					int ylb = (int)yb;
 					int zlb = (int)zb;
-					float richtung = player.getLocation().getRotation();
-					Location vorletzterblock = new Location(world, xlb, ylb, zlb, 0f, richtung);
+					float playerDirection = player.getLocation().getRotation();
+					Location vorletzterblock = new Location(world, xlb, ylb, zlb, 0f, playerDirection);
 					player.teleportTo(vorletzterblock);
 					jumpFails = jumpFails + 1;
 					updateScoreboard();
@@ -247,7 +241,7 @@ public class DNA extends EZPlugin implements PluginListener{
 
 	private double currentFourJumpProbabilityInPercent;
 
-	private void handleBlockSpawning(Player player, Location locationBelowPlayer, double y){			
+	private void handleBlockSpawning(Player player, double y){			
 		jumpedBlocksInActiveGame++;
 		updateScoreboard();
 
@@ -255,7 +249,7 @@ public class DNA extends EZPlugin implements PluginListener{
 		if(hasPlayerIncreasedHeight())
 			currentFourJumpProbabilityInPercent += 0.5;
 		
-		locationBelowPlayer.getWorld().setBlockAt(locationBelowPlayer, JumpedBlock);
+		Utils.GetLocationBelowPlayer(player).getWorld().setBlockAt(Utils.GetLocationBelowPlayer(player), JumpedBlock);
 		totalJumpedBlocks = totalJumpedBlocks + 1;
 		saveStats(player);
 		if(y < height){
