@@ -35,7 +35,7 @@ import utils.Utils;
 import net.canarymod.api.scoreboard.*;
 
 public class DNA extends EZPlugin implements PluginListener{
-	//TODO: after 10 fails in a row the player could get another jump, item to help the player
+	//TODO: after 10 fails in a row the player could get another jump, item to help the player e.g. jump boost after 3 fourblock jump
 	public int LEVEL_HEIGHT;
   	public boolean harrypotterevent; // vorsicht 0 fails werden nicht getriggert falls hier false!
 	private static final int DEFAULT_FOUR_BLOCK_JUMP_POSSIBILITY_IN_PERCENT = 5;
@@ -582,7 +582,7 @@ public class DNA extends EZPlugin implements PluginListener{
 		player.teleportTo(winPedastalLocation);
 		playSound(winPedastalLocation, SoundEffect.Type.LEVEL_UP, 2.0f, 2.0f);
 		player.getInventory().setSlot(8, backFeather);
-		//TODO: Needs fixing -> sometimes around 1 level is left over -> move xp clean into utils
+		//TODO: Needs fixing -> sometimes around 1 level is left over (if not fixable in code use command "/xp -1L" to force removal) -> move xp clean into utils 
 		player.removeExperience(player.getExperience());	
 		Utils.clearScoreboard(scoreboard, timerTask, objective);
 	}                            
