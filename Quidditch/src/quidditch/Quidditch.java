@@ -85,7 +85,7 @@ public class Quidditch extends EZPlugin implements PluginListener, IServerTaskCa
   private AchievementSystem achievementSystem;
   private boolean isEnabled = false;
 
-  //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, load chunk to prevent wrong lighting, improve bow hit e.g. extrapolate direction
+  //TODO Click on e.g. /quidditch stats in the displayUsageMessage to execute it, load chunk to prevent wrong lighting, improve bow hit e.g. extrapolate direction, Achievementidea: break bow
   @Override 
   public boolean enable() {
     Canary.hooks().registerListener(this, this);
