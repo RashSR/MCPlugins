@@ -582,7 +582,8 @@ public class DNA extends EZPlugin implements PluginListener{
 		player.teleportTo(winPedastalLocation);
 		playSound(winPedastalLocation, SoundEffect.Type.LEVEL_UP, 2.0f, 2.0f);
 		player.getInventory().setSlot(8, backFeather);
-		player.removeExperience(player.getExperience());
+		//TODO: Needs fixing -> sometimes around 1 level is left over -> move xp clean into utils
+		player.removeExperience(player.getExperience());	
 		Utils.clearScoreboard(scoreboard, timerTask, objective);
 	}                            
 
