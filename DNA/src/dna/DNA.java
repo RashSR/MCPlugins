@@ -190,28 +190,28 @@ public class DNA extends EZPlugin implements PluginListener{
 			double playerY = playerLocation.getY();
 			World world = playerLocation.getWorld();
 			Block blockBelowPlayer = world.getBlockAt(Utils.GetLocationBelowPlayer(player));
-
+			//TODO: ensure it is the correct block -> use location additonally to blocktype
 			if(blockBelowPlayer.getType() == BlockType.Glass)
 				startGame(player);
-
-			if(blockBelowPlayer.getType() == BlockToJumpType)
+			else if(blockBelowPlayer.getType() == BlockToJumpType)
 				handleBlockSpawning(player);
-w
-			if(blockBelowPlayer.getType() == DestinationBlock && blockBelowPlayer.getY() > 25){
-				displayWinMessage(player);
-				totalJumpedBlocks++;
-				saveStats(player);
-				jumpedBlockLocations.clear();
-				world.setBlockAt(Utils.GetLocationBelowPlayer(player), BlockType.DiamondBlock);
-				teleportAfterWin(player);
-				clearAllPlacedBlocks(world);
-				hasGameStarted = false;
-				isEnabled = false;
-			}
-
-			if(hasGameStarted)
+			else if(blockBelowPlayer.getType() == DestinationBlock)
+				handleWinJump(player);
+			else if(hasGameStarted)
 				checkForPlayerFalling(player);
 		}
+	}
+
+	private void handleWinJump(Player player){
+		displayWinMessage(player);
+		totalJumpedBlocks++;
+		saveStats(player);
+		jumpedBlockLocations.clear();
+		player.getWorld().setBlockAt(Utils.GetLocationBelowPlayer(player), BlockType.DiamondBlock);
+		teleportAfterWin(player);
+		clearAllPlacedBlocks(player.getWorld());
+		hasGameStarted = false;
+		isEnabled = false;
 	}
 
 	private void checkForPlayerFalling(Player player){
