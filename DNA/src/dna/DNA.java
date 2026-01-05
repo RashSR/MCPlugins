@@ -55,7 +55,7 @@ public class DNA extends EZPlugin implements PluginListener{
 	public boolean isEnabled = false;
   	public boolean lastBlock = true;
   	public List<Location> jumpedBlockLocations = new ArrayList<Location>();
-  	public boolean isArrayEnabled = false;
+  	public boolean hasGameStarted = false;
   
   	@Override 
   	public boolean enable() {
@@ -138,7 +138,7 @@ public class DNA extends EZPlugin implements PluginListener{
             	clearAllPlacedBlocks(world);
             	displayLoseMessage(player);
             	jumpedBlockLocations.clear();
-            	isArrayEnabled = false;
+            	hasGameStarted = false;
             	isEnabled = false;
             	return;
       		}
@@ -146,7 +146,7 @@ public class DNA extends EZPlugin implements PluginListener{
         		clearAllPlacedBlocks(world);
             	jumpedBlockLocations.clear();
             	displayLoseMessage(player);
-            	isArrayEnabled = false;
+            	hasGameStarted = false;
             	isEnabled = false;
             	return;
       		}
@@ -174,9 +174,9 @@ public class DNA extends EZPlugin implements PluginListener{
     		clearAllPlacedBlocks(world);
     		Player player = world.getClosestPlayer(267, 18, 199, 5);
     		displayLoseMessage(player);
-    		if(isArrayEnabled){
+    		if(hasGameStarted){
       			jumpedBlockLocations.clear();
-      			isArrayEnabled = false;
+      			hasGameStarted = false;
     		}
     	isEnabled = false;
    		}
@@ -186,61 +186,59 @@ public class DNA extends EZPlugin implements PluginListener{
   	public void PlayerMoveHookEvent(PlayerMoveHook event){
 		if(isEnabled){
 			Player player = event.getPlayer();
-			Location loc = player.getLocation();
-			double y = loc.getY();
-			World world = loc.getWorld();
-
-			int y1 = (int)y;
-			Block blockBelowPlayer = world.getBlockAt((int)loc.getX(), y1 - 1, (int)loc.getZ());
+			Location playerLocation = player.getLocation();
+			double playerY = playerLocation.getY();
+			World world = playerLocation.getWorld();
+			Block blockBelowPlayer = world.getBlockAt(Utils.GetLocationBelowPlayer(player));
 
 			if(blockBelowPlayer.getType() == BlockType.Glass)
-				startGame(player, y1);
+				startGame(player);
 
 			if(blockBelowPlayer.getType() == BlockToJumpType)
-				handleBlockSpawning(player, y);
-
+				handleBlockSpawning(player);
+w
 			if(blockBelowPlayer.getType() == DestinationBlock && blockBelowPlayer.getY() > 25){
 				displayWinMessage(player);
-				totalJumpedBlocks = totalJumpedBlocks + 1;
+				totalJumpedBlocks++;
 				saveStats(player);
 				jumpedBlockLocations.clear();
 				world.setBlockAt(Utils.GetLocationBelowPlayer(player), BlockType.DiamondBlock);
 				teleportAfterWin(player);
 				clearAllPlacedBlocks(world);
-				isArrayEnabled = false;
+				hasGameStarted = false;
 				isEnabled = false;
 			}
 
-			while(isArrayEnabled){
-				int arrayLength = jumpedBlockLocations.size();
-				int lastArrayIndex = arrayLength - 1; 
-				int penultimateArrayIndex = arrayLength - 2;
-				double ydarfnichtunter = jumpedBlockLocations.get(lastArrayIndex).getY() - 2;
-				if(y1 < ydarfnichtunter){
-					int xlb = jumpedBlockLocations.get(penultimateArrayIndex).getX();
-					int ylb = jumpedBlockLocations.get(penultimateArrayIndex).getY() + 1;
-					int zlb = jumpedBlockLocations.get(penultimateArrayIndex).getZ();
-					
-					float playerDirection = player.getLocation().getRotation();
-					Location penultimateBlock = new Location(world, xlb, ylb, zlb, 0f, playerDirection);
-					player.teleportTo(penultimateBlock);
-					playSound(penultimateBlock, SoundEffect.Type.BAT_DEATH, 1.0f, 0.75f);
-					
-					jumpFails++;
-					updateScoreboard();
-					totalFails++;
-					saveStats(player);
-					return;
-				}
-				else
-					return;
-			}
+			if(hasGameStarted)
+				checkForPlayerFalling(player);
+		}
+	}
+
+	private void checkForPlayerFalling(Player player){
+		int arrayLength = jumpedBlockLocations.size();
+		int lastArrayIndex = arrayLength - 1; 
+		int penultimateArrayIndex = arrayLength - 2;
+		double fallThreshold = jumpedBlockLocations.get(lastArrayIndex).getY() - 2;
+		if(player.getY() < fallThreshold){
+			int xlb = (int)jumpedBlockLocations.get(penultimateArrayIndex).getX();
+			int ylb = (int)jumpedBlockLocations.get(penultimateArrayIndex).getY() + 1;
+			int zlb = (int)jumpedBlockLocations.get(penultimateArrayIndex).getZ();
+
+			float playerDirection = player.getLocation().getRotation();
+			Location penultimateBlock = new Location(player.getWorld(), xlb, ylb, zlb, 0f, playerDirection);
+			player.teleportTo(penultimateBlock);
+			playSound(penultimateBlock, SoundEffect.Type.BAT_DEATH, 1.0f, 0.75f);
+			
+			jumpFails++;
+			updateScoreboard();
+			totalFails++;
+			saveStats(player);
 		}
 	}
 
 	private double currentFourJumpProbabilityInPercent;
 
-	private void handleBlockSpawning(Player player, double y){			
+	private void handleBlockSpawning(Player player){			
 		jumpedBlocksInActiveGame++;
 		updateScoreboard();
 
@@ -251,7 +249,7 @@ public class DNA extends EZPlugin implements PluginListener{
 		Utils.GetLocationBelowPlayer(player).getWorld().setBlockAt(Utils.GetLocationBelowPlayer(player), JumpedBlock);
 		totalJumpedBlocks++;
 		saveStats(player);
-		if(y < height){
+		if(player.getY() < height){
 			double randomJumpSelection = Math.random();
 			if(jumpedBlockLocations.size() > 1 && (jumpedBlockLocations.get(jumpedBlockLocations.size() - 1).getY()  > jumpedBlockLocations.get(jumpedBlockLocations.size() - 2).getY()))
 				displayCorrectLevel(player);
@@ -262,7 +260,7 @@ public class DNA extends EZPlugin implements PluginListener{
 			else
 				spwanFourBlockJumpBlock(player);
 		}
-		if(y >= height)
+		else
 			makeLastBlock(player);
 	}
 
@@ -279,13 +277,13 @@ public class DNA extends EZPlugin implements PluginListener{
 
 	private int jumpedBlocksInActiveGame;
 
-	private void startGame(Player player, int y1){
+	private void startGame(Player player){
 		int difficultyBonus = (int)(Math.random() * RANDOM_BONUS_FOUR_BLOCK_JUMP_POSSIBILITY_IN_PERCENT);;
 		currentFourJumpProbabilityInPercent = DEFAULT_FOUR_BLOCK_JUMP_POSSIBILITY_IN_PERCENT + difficultyBonus; 
 		jumpedBlocksInActiveGame = 0;
 
 		int offset = (int)(Math.random() * 10);
-		height = y1 + LEVEL_HEIGHT_FROM_CONFIG + offset;
+		height = (int)player.getY() + LEVEL_HEIGHT_FROM_CONFIG + offset;
 		logger.info(offset);
 		if(height > MAX_LEVEL_HEIGHT)
 			height = MAX_LEVEL_HEIGHT;
@@ -293,7 +291,7 @@ public class DNA extends EZPlugin implements PluginListener{
 		displayStartMessage(player);
 		Utils.GetLocationBelowPlayer(player).getWorld().setBlockAt(Utils.GetLocationBelowPlayer(player), BlockType.WhiteGlass);
 		spawnJumpBlock(player);
-		isArrayEnabled = true;
+		hasGameStarted = true;
 		playSound(Utils.GetLocationBelowPlayer(player), SoundEffect.Type.NOTE_PLING, 2.0f, 3.0f);
 		createScoreboard(player);
 	}
