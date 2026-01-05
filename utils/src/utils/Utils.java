@@ -53,6 +53,8 @@ public class Utils extends EZPlugin{
   public static Location SnowMapLocation = new Location(29, 108, 232);
   public static Location PressurePlate1vs1SoupKitLocation = new Location(107, 151, 303);
   public static Location PressurePlateHubTo1vs1Location = new Location(243, 71, 266);
+  public static Location PressurePlateHubToDNALocation = new Location(244, 71, 258);
+  public static Location PressurePlateDNAToHubLocation = new Location(267, 18, 199);
 
   public static Integer CalculateDistanceBetweenPlayers(Player sir, Player butler){
     double xs = sir.getX();
