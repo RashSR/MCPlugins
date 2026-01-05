@@ -36,9 +36,10 @@ import net.canarymod.api.scoreboard.*;
 
 public class DNA extends EZPlugin implements PluginListener{
 	//TODO: after 10 fails in a row the player could get another jump, item to help the player e.g. jump boost after 3 fourblock jump
-	public int LEVEL_HEIGHT;
+	public int LEVEL_HEIGHT_FROM_CONFIG;
   	public boolean harrypotterevent; // vorsicht 0 fails werden nicht getriggert falls hier false!
 	private static final int DEFAULT_FOUR_BLOCK_JUMP_POSSIBILITY_IN_PERCENT = 5;
+	private static final int RANDOM_BONUS_FOUR_BLOCK_JUMP_POSSIBILITY_IN_PERCENT = 3;
 	private static final int MAX_LEVEL_HEIGHT = 51;
  	private int jumpFails = 0;
  	private int height;
@@ -63,7 +64,7 @@ public class DNA extends EZPlugin implements PluginListener{
     	super.enable();
     	logger.info(pluginName + "Getting config data.");
     	PropertiesFile config = getConfig();
-    	LEVEL_HEIGHT = config.getInt("levelhoehe", 16);
+    	LEVEL_HEIGHT_FROM_CONFIG = config.getInt("levelhoehe", 16);
     	harrypotterevent = config.getBoolean("harrypotter", false);
     	config.save();
     	return true;
@@ -163,14 +164,14 @@ public class DNA extends EZPlugin implements PluginListener{
     	int pressurePlateY = (int)pressurePlateLocation.getY();
     	int pressurePlateZ = (int)pressurePlateLocation.getZ();
 
-    	if(!isEnabled && pressurePlateX == 244 && pressurePlateY == 71 && pressurePlateZ == 258){
+    	if(!isEnabled && EZPlugin.locEqual(pressurePlateLocation, Utils.PressurePlateHubToDNALocation)){
       		isEnabled = true;
       		placeStartBlock();
       		jumpFails = 0;
       		Player player = world.getClosestPlayer(244, 71, 258, 5);
       		loadStats(player);
    		}
-   		if(isEnabled && pressurePlateX == 267 && pressurePlateY == 18 && pressurePlateZ == 199){
+   		if(isEnabled && EZPlugin.locEqual(pressurePlateLocation, Utils.PressurePlateDNAToHubLocation)){
     		clearAllPlacedBlocks(world);
     		Player player = world.getClosestPlayer(267, 18, 199, 5);
     		displayLoseMessage(player);
@@ -194,7 +195,7 @@ public class DNA extends EZPlugin implements PluginListener{
 			Block blockBelowPlayer = world.getBlockAt((int)loc.getX(), y1 - 1, (int)loc.getZ());
 
 			if(blockBelowPlayer.getType() == BlockType.Glass)
-				startGame(player, y1, Utils.GetLocationBelowPlayer(player));
+				startGame(player, y1);
 
 			if(blockBelowPlayer.getType() == BlockToJumpType)
 				handleBlockSpawning(player, y);
@@ -214,22 +215,23 @@ public class DNA extends EZPlugin implements PluginListener{
 			while(isArrayEnabled){
 				int arrayLength = jumpedBlockLocations.size();
 				int lastArrayIndex = arrayLength - 1; 
-				int vorletzterarraywert = arrayLength - 2;
+				int penultimateArrayIndex = arrayLength - 2;
 				double ydarfnichtunter = jumpedBlockLocations.get(lastArrayIndex).getY() - 2;
 				if(y1 < ydarfnichtunter){
-					double xb = jumpedBlockLocations.get(vorletzterarraywert).getX();
-					double yb = jumpedBlockLocations.get(vorletzterarraywert).getY() + 1;
-					double zb = jumpedBlockLocations.get(vorletzterarraywert).getZ();
+					double xb = jumpedBlockLocations.get(penultimateArrayIndex).getX();
+					double yb = jumpedBlockLocations.get(penultimateArrayIndex).getY() + 1;
+					double zb = jumpedBlockLocations.get(penultimateArrayIndex).getZ();
 					int xlb = (int)xb;
 					int ylb = (int)yb;
 					int zlb = (int)zb;
 					float playerDirection = player.getLocation().getRotation();
-					Location vorletzterblock = new Location(world, xlb, ylb, zlb, 0f, playerDirection);
-					player.teleportTo(vorletzterblock);
-					jumpFails = jumpFails + 1;
+					Location penultimateBlock = new Location(world, xlb, ylb, zlb, 0f, playerDirection);
+					player.teleportTo(penultimateBlock);
+					playSound(penultimateBlock, SoundEffect.Type.BAT_DEATH, 1.0f, 0.75f);
+					
+					jumpFails++;
 					updateScoreboard();
-					playSound(vorletzterblock, SoundEffect.Type.BAT_DEATH, 1.0f, 0.75f);
-					totalFails = totalFails + 1;
+					totalFails++;
 					saveStats(player);
 					return;
 				}
@@ -245,12 +247,12 @@ public class DNA extends EZPlugin implements PluginListener{
 		jumpedBlocksInActiveGame++;
 		updateScoreboard();
 
-		//For each jumped block the possibilty to get a difficult block to jump is increased
+		//For each height increasethe probability to get a difficult jump is increased
 		if(hasPlayerIncreasedHeight())
 			currentFourJumpProbabilityInPercent += 0.5;
 		
 		Utils.GetLocationBelowPlayer(player).getWorld().setBlockAt(Utils.GetLocationBelowPlayer(player), JumpedBlock);
-		totalJumpedBlocks = totalJumpedBlocks + 1;
+		totalJumpedBlocks++;
 		saveStats(player);
 		if(y < height){
 			double randomJumpSelection = Math.random();
@@ -280,23 +282,22 @@ public class DNA extends EZPlugin implements PluginListener{
 
 	private int jumpedBlocksInActiveGame;
 
-	private void startGame(Player player, int y1, Location locationBelowPlayer){
-		int difficultyBonus = (int)(Math.random() * 3);;
+	private void startGame(Player player, int y1){
+		int difficultyBonus = (int)(Math.random() * RANDOM_BONUS_FOUR_BLOCK_JUMP_POSSIBILITY_IN_PERCENT);;
 		currentFourJumpProbabilityInPercent = DEFAULT_FOUR_BLOCK_JUMP_POSSIBILITY_IN_PERCENT + difficultyBonus; 
 		jumpedBlocksInActiveGame = 0;
 
-		//TODO: not clear what height, LEVEL_height does
 		int offset = (int)(Math.random() * 10);
-		height = y1 + LEVEL_HEIGHT + offset;
+		height = y1 + LEVEL_HEIGHT_FROM_CONFIG + offset;
 		logger.info(offset);
 		if(height > MAX_LEVEL_HEIGHT)
 			height = MAX_LEVEL_HEIGHT;
 
 		displayStartMessage(player);
-		locationBelowPlayer.getWorld().setBlockAt(locationBelowPlayer, BlockType.WhiteGlass);
+		Utils.GetLocationBelowPlayer(player).getWorld().setBlockAt(Utils.GetLocationBelowPlayer(player), BlockType.WhiteGlass);
 		spawnJumpBlock(player);
 		isArrayEnabled = true;
-		playSound(locationBelowPlayer, SoundEffect.Type.NOTE_PLING, 2.0f, 3.0f);
+		playSound(Utils.GetLocationBelowPlayer(player), SoundEffect.Type.NOTE_PLING, 2.0f, 3.0f);
 		createScoreboard(player);
 	}
 
@@ -527,7 +528,8 @@ public class DNA extends EZPlugin implements PluginListener{
 
 		String serverMessage = ChatFormat.BLUE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".";
 		Utils.BroadcastServerMessage(pluginName, serverMessage);
-		Utils.clearScoreboard(scoreboard, timerTask, objective); //create like in quidditch a cleanUp()-Method
+		if(scoreboard != null)
+			Utils.clearScoreboard(scoreboard, timerTask, objective); //create like in quidditch a cleanUp()-Method
 	}
 
   	private void teleportPlayerBeforeStart(Player player){
