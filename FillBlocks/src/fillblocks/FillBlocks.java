@@ -123,7 +123,9 @@ public class FillBlocks extends EZPlugin implements PluginListener{
   public void ItemUseHookEvent(ItemUseHook event){
     Player player = event.getPlayer();
     Item heldItem = player.getItemHeld();
-
+    if(heldItem == null)
+      return;
+    
     if(heldItem.getType() == ItemType.Stick && heldItem.getDisplayName().equalsIgnoreCase(ChatFormat.GREEN + "Neustart") && this.state == PluginState.NOT_ENABLED && this.invokingPlayer == null)
         startPlugin(player);
     else if(this.state != PluginState.NOT_ENABLED){
