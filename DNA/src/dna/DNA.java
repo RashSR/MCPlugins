@@ -56,7 +56,6 @@ public class DNA extends EZPlugin implements PluginListener{
   	public boolean lastBlock = true;
   	public List<Location> jumpedBlockLocations = new ArrayList<Location>();
   	public boolean isArrayEnabled = false;
-  	public boolean isFourJumpBlock = false;
   
   	@Override 
   	public boolean enable() {
@@ -218,12 +217,10 @@ public class DNA extends EZPlugin implements PluginListener{
 				int penultimateArrayIndex = arrayLength - 2;
 				double ydarfnichtunter = jumpedBlockLocations.get(lastArrayIndex).getY() - 2;
 				if(y1 < ydarfnichtunter){
-					double xb = jumpedBlockLocations.get(penultimateArrayIndex).getX();
-					double yb = jumpedBlockLocations.get(penultimateArrayIndex).getY() + 1;
-					double zb = jumpedBlockLocations.get(penultimateArrayIndex).getZ();
-					int xlb = (int)xb;
-					int ylb = (int)yb;
-					int zlb = (int)zb;
+					int xlb = jumpedBlockLocations.get(penultimateArrayIndex).getX();
+					int ylb = jumpedBlockLocations.get(penultimateArrayIndex).getY() + 1;
+					int zlb = jumpedBlockLocations.get(penultimateArrayIndex).getZ();
+					
 					float playerDirection = player.getLocation().getRotation();
 					Location penultimateBlock = new Location(world, xlb, ylb, zlb, 0f, playerDirection);
 					player.teleportTo(penultimateBlock);
@@ -404,9 +401,9 @@ public class DNA extends EZPlugin implements PluginListener{
 		int yplayer = (int) yp;
 		int zplayer = (int) zp;
 		World world = loc.getWorld();
-		isFourJumpBlock = true;
+		boolean isFourJumpBlock = false;
 
-		while(isFourJumpBlock){
+		while(!isFourJumpBlock){
 			double directionFourJump = Math.random();
 			int xanteil = 0;
 			int zanteil = 0;
@@ -435,7 +432,7 @@ public class DNA extends EZPlugin implements PluginListener{
 				trimJumpedBlocks();
 				validBlockLocation.getWorld().setBlockAt(validBlockLocation, BlockToJumpType);
 				playSound(validBlockLocation, SoundEffect.Type.NOTE_HAT, 1.0f, 1.0f);
-				isFourJumpBlock = false;
+				isFourJumpBlock = true;
 			}
 		}
 	}
@@ -449,12 +446,9 @@ public class DNA extends EZPlugin implements PluginListener{
 
     private void makeLastBlock(Player player) {
      	Location loc = player.getLocation();
-		double xp = loc.getX();
-		double yp = loc.getY();
-		double zp = loc.getZ();
-		int xplayer = (int) xp;
-		int yplayer = (int) yp;
-		int zplayer = (int) zp;
+		int playerX = (int) loc.getX();
+		int playerY = (int) loc.getY();
+		int playerZ = (int) loc.getZ();
 		World world = loc.getWorld();
 		lastBlock = true;
 
@@ -466,13 +460,13 @@ public class DNA extends EZPlugin implements PluginListener{
 			int ya = (int) y;
 			int za = (int) z;
 		
-			double betrag = (xa*xa) + ((ya-1)*(ya-1)) + (za*za);
-			double sqrt = Math.sqrt(betrag);
+			double magnitude = (xa*xa) + ((ya-1)*(ya-1)) + (za*za);
+			double sqrt = Math.sqrt(magnitude);
 
 			if(sqrt > 2.5 && sqrt <= 5){
-				int xblock = xplayer + xa;
-				int yblock = yplayer + ya;
-				int zblock = zplayer + za;
+				int xblock = playerX + xa;
+				int yblock = playerY + ya;
+				int zblock = playerZ + za;
 
 				Block a = world.getBlockAt(xblock, yblock, zblock);
 				Block b = world.getBlockAt(xblock, yblock + 1, zblock);
