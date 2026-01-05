@@ -405,4 +405,10 @@ public class Utils extends EZPlugin{
     Location locationBelowPlayer = new Location(location.getX(), location.getY() - 1, location.getZ());
     return locationBelowPlayer;
   }
+
+  public static void RemoveExperienceFromPlayer(Player player){
+    player.removeExperience(player.getExperience());
+    //Sometimes all experience except for one level is removed -> Canary bug
+    Canary.getServer().consoleCommand("xp -1L " + player.getDisplayName());
+  }
 }

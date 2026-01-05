@@ -523,7 +523,7 @@ public class DNA extends EZPlugin implements PluginListener{
 		String msg2 = player.getDisplayName();
 		String msg3 = " hat ";
 		String msg4 = "aufgegeben";
-		player.removeExperience(player.getExperience());
+		Utils.RemoveExperienceFromPlayer(player);
 
 		String serverMessage = ChatFormat.BLUE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".";
 		Utils.BroadcastServerMessage(pluginName, serverMessage);
@@ -582,8 +582,7 @@ public class DNA extends EZPlugin implements PluginListener{
 		player.teleportTo(winPedastalLocation);
 		playSound(winPedastalLocation, SoundEffect.Type.LEVEL_UP, 2.0f, 2.0f);
 		player.getInventory().setSlot(8, backFeather);
-		//TODO: Needs fixing -> sometimes around 1 level is left over (if not fixable in code use command "/xp -1L" to force removal) -> move xp clean into utils 
-		player.removeExperience(player.getExperience());	
+		Utils.RemoveExperienceFromPlayer(player);
 		Utils.clearScoreboard(scoreboard, timerTask, objective);
 	}                            
 
