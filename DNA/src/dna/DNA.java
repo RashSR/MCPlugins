@@ -237,6 +237,7 @@ public class DNA extends EZPlugin implements PluginListener{
 	}
 
 	private double currentFourJumpProbabilityInPercent;
+	private int sucessfulFourBlockJumpCount;
 
 	private void handleBlockSpawning(Player player){			
 		jumpedBlocksInActiveGame++;
@@ -245,6 +246,9 @@ public class DNA extends EZPlugin implements PluginListener{
 		//For each height increasethe probability to get a difficult jump is increased
 		if(hasPlayerIncreasedHeight())
 			currentFourJumpProbabilityInPercent += 0.5;
+
+		if(hasPlayerJumpedFourBlocks())
+			sucessfulFourBlockJumpCount++;
 		
 		Utils.GetLocationBelowPlayer(player).getWorld().setBlockAt(Utils.GetLocationBelowPlayer(player), JumpedBlock);
 		totalJumpedBlocks++;
@@ -275,16 +279,28 @@ public class DNA extends EZPlugin implements PluginListener{
 		return false;
 	}
 
+	private boolean hasPlayerJumpedFourBlocks(){
+		if(jumpedBlockLocations.size() > 2){
+			Location predecessorJumpLocation = jumpedBlockLocations.get(jumpedBlockLocations.size() - 2);
+			Location currentJumpLocation = jumpedBlockLocations.get(jumpedBlockLocations.size() - 1);
+			
+			double distance = Utils.CalculateDistanceBetweenLocations(predecessorJumpLocation, currentJumpLocation);
+			if(distance >= 5)
+				return true;
+		}
+		return false;
+	}
+
 	private int jumpedBlocksInActiveGame;
 
 	private void startGame(Player player){
 		int difficultyBonus = (int)(Math.random() * RANDOM_BONUS_FOUR_BLOCK_JUMP_POSSIBILITY_IN_PERCENT);;
 		currentFourJumpProbabilityInPercent = DEFAULT_FOUR_BLOCK_JUMP_POSSIBILITY_IN_PERCENT + difficultyBonus; 
 		jumpedBlocksInActiveGame = 0;
+		sucessfulFourBlockJumpCount = 0;
 
 		int offset = (int)(Math.random() * 10);
 		height = (int)player.getY() + LEVEL_HEIGHT_FROM_CONFIG + offset;
-		logger.info(offset);
 		if(height > MAX_LEVEL_HEIGHT)
 			height = MAX_LEVEL_HEIGHT;
 
@@ -392,33 +408,27 @@ public class DNA extends EZPlugin implements PluginListener{
 
 	public void spwanFourBlockJumpBlock(Player player){
 		Location loc = player.getLocation();
-		double xp = loc.getX();
-		double yp = loc.getY();
-		double zp = loc.getZ();
-		int xplayer = (int) xp;
-		int yplayer = (int) yp;
-		int zplayer = (int) zp;
+		int playerX = (int)loc.getX();
+		int playerY = (int)loc.getY();
+		int playerZ = (int)loc.getZ();
 		World world = loc.getWorld();
 		boolean isFourJumpBlock = false;
 
 		while(!isFourJumpBlock){
 			double directionFourJump = Math.random();
-			int xanteil = 0;
-			int zanteil = 0;
+			int xValue = 0;
+			int zValue = 0;
 
 			if(directionFourJump <= 0.25)
-				xanteil = 5;
-
-			if(directionFourJump > 0.25 && directionFourJump <= 0.5)
-				xanteil = -5;
-
-			if(directionFourJump > 0.5 && directionFourJump <= 0.75)
-				zanteil = 5;
-
-			if(directionFourJump > 0.75 && directionFourJump <= 1)
-				zanteil = - 5;
+				xValue = 5;
+			else if(directionFourJump > 0.25 && directionFourJump <= 0.5)
+				xValue = -5;
+			else if(directionFourJump > 0.5 && directionFourJump <= 0.75)
+				zValue = 5;
+			else
+				zValue = -5;
 			
-			Location validBlockLocation = new Location(xp + xanteil, yplayer - 1, zp + zanteil);
+			Location validBlockLocation = new Location(playerX + xValue, playerY - 1, playerZ + zValue);
 
 			Block a = world.getBlockAt((int)validBlockLocation.getX(), (int)validBlockLocation.getY(), (int)validBlockLocation.getZ());
 			Block b = world.getBlockAt((int)validBlockLocation.getX(), (int)validBlockLocation.getY() + 1, (int)validBlockLocation.getZ());
