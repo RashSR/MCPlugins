@@ -33,9 +33,14 @@ import net.canarymod.database.exceptions.*;
 import utils.ScoreboardTimerTask;
 import utils.Utils;
 import net.canarymod.api.scoreboard.*;
+import net.canarymod.api.inventory.Enchantment;
+import net.canarymod.api.inventory.Enchantment.Type;
+import net.canarymod.api.factory.PotionFactory;
+import net.canarymod.api.potion.PotionEffect;
+import net.canarymod.api.potion.PotionEffectType;
 
 public class DNA extends EZPlugin implements PluginListener{
-	//TODO: after 10 fails in a row the player could get another jump, item to help the player e.g. jump boost after 3 fourblock jump
+	//TODO: after 10 fails in a row the player could get another jump, more bonus items
 	public int LEVEL_HEIGHT_FROM_CONFIG;
   	public boolean harrypotterevent; // vorsicht 0 fails werden nicht getriggert falls hier false!
 	private static final int DEFAULT_FOUR_BLOCK_JUMP_POSSIBILITY_IN_PERCENT = 5;
@@ -237,18 +242,23 @@ public class DNA extends EZPlugin implements PluginListener{
 	}
 
 	private double currentFourJumpProbabilityInPercent;
-	private int sucessfulFourBlockJumpCount;
+	private int sucessfulFourBlockJumpCountStreak;
 
 	private void handleBlockSpawning(Player player){			
 		jumpedBlocksInActiveGame++;
 		updateScoreboard();
 
-		//For each height increasethe probability to get a difficult jump is increased
+		//For each height increase the probability to get a difficult jump is increased
 		if(hasPlayerIncreasedHeight())
 			currentFourJumpProbabilityInPercent += 0.5;
 
 		if(hasPlayerJumpedFourBlocks())
-			sucessfulFourBlockJumpCount++;
+			sucessfulFourBlockJumpCountStreak++;
+		if(sucessfulFourBlockJumpCountStreak == 3){
+			sucessfulFourBlockJumpCountStreak = 0;
+			givePlayerBonusItem(player);
+		}
+			
 		
 		Utils.GetLocationBelowPlayer(player).getWorld().setBlockAt(Utils.GetLocationBelowPlayer(player), JumpedBlock);
 		totalJumpedBlocks++;
@@ -268,6 +278,17 @@ public class DNA extends EZPlugin implements PluginListener{
 			makeLastBlock(player);
 	}
 
+	private void givePlayerBonusItem(Player player){
+		ItemFactory factory = Canary.factory().getItemFactory();
+		Item rabbitJumpBoost = factory.newItem(ItemType.RabbitFoot);
+		rabbitJumpBoost.setDisplayName(ChatFormat.GOLD + "Jump-Boost!");
+
+		short enchantmentLevel = 1;
+		Enchantment fortune = factory.newEnchantment(Enchantment.Type.Fortune, enchantmentLevel);
+		rabbitJumpBoost.addEnchantments(fortune);
+		player.getInventory().setSlot(1, rabbitJumpBoost);
+	}
+
 	private boolean hasPlayerIncreasedHeight(){
 		if(jumpedBlockLocations.size() > 2){
 			Location predecessorJumpLocation = jumpedBlockLocations.get(jumpedBlockLocations.size() - 2);
@@ -283,7 +304,6 @@ public class DNA extends EZPlugin implements PluginListener{
 		if(jumpedBlockLocations.size() > 2){
 			Location predecessorJumpLocation = jumpedBlockLocations.get(jumpedBlockLocations.size() - 2);
 			Location currentJumpLocation = jumpedBlockLocations.get(jumpedBlockLocations.size() - 1);
-			
 			double distance = Utils.CalculateDistanceBetweenLocations(predecessorJumpLocation, currentJumpLocation);
 			if(distance >= 5)
 				return true;
@@ -297,7 +317,7 @@ public class DNA extends EZPlugin implements PluginListener{
 		int difficultyBonus = (int)(Math.random() * RANDOM_BONUS_FOUR_BLOCK_JUMP_POSSIBILITY_IN_PERCENT);;
 		currentFourJumpProbabilityInPercent = DEFAULT_FOUR_BLOCK_JUMP_POSSIBILITY_IN_PERCENT + difficultyBonus; 
 		jumpedBlocksInActiveGame = 0;
-		sucessfulFourBlockJumpCount = 0;
+		sucessfulFourBlockJumpCountStreak = 0;
 
 		int offset = (int)(Math.random() * 10);
 		height = (int)player.getY() + LEVEL_HEIGHT_FROM_CONFIG + offset;
@@ -517,9 +537,21 @@ public class DNA extends EZPlugin implements PluginListener{
 	@HookHandler
 	public void ItemUseHookEvent(ItemUseHook event) {
 		Player player = event.getPlayer();
-		Item heldItem = player.getItemHeld();
-		if(heldItem.getType() == ItemType.Feather && heldItem.getDisplayName().equalsIgnoreCase(ChatFormat.RED + "Hub"))
+		Item usedItem = player.getItemHeld();
+		ItemType itemType = usedItem.getType();
+		if(itemType == ItemType.Feather && usedItem.getDisplayName().equalsIgnoreCase(ChatFormat.RED + "Hub"))
 			player.teleportTo(Utils.HubLocation); 
+
+		if(hasGameStarted && itemType == ItemType.RabbitFoot){
+			player.getInventory().removeItem(usedItem);
+			Utils.RefreshInventroyFromPlayer(player);
+				
+			PotionFactory factory = Canary.factory().getPotionFactory();
+			int durationInSeconds = 3;
+			int effectLevel = 0;
+    		PotionEffect jumpBoostEffect = factory.newPotionEffect(PotionEffectType.JUMP, durationInSeconds * 20, effectLevel);
+			player.addPotionEffect(jumpBoostEffect);
+		}
   	}
 
   	private void displayLoseMessage(Player player){
@@ -530,6 +562,7 @@ public class DNA extends EZPlugin implements PluginListener{
 
 		String serverMessage = ChatFormat.BLUE + msg2 + ChatFormat.DARK_GREEN + msg3 + ChatFormat.GOLD + msg4 + ChatFormat.DARK_GREEN + ".";
 		Utils.BroadcastServerMessage(pluginName, serverMessage);
+		hasGameStarted = false;
 		if(scoreboard != null)
 			Utils.clearScoreboard(scoreboard, timerTask, objective); //create like in quidditch a cleanUp()-Method
 	}
@@ -581,6 +614,7 @@ public class DNA extends EZPlugin implements PluginListener{
 		ItemFactory factory = Canary.factory().getItemFactory();
 		Item backFeather = factory.newItem(ItemType.Feather);
 		backFeather.setDisplayName(ChatFormat.RED + "Hub");
+		hasGameStarted = false;
 
 		Location winPedastalLocation = new Location(277, 72, 214);
 		player.teleportTo(winPedastalLocation);
