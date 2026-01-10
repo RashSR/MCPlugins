@@ -225,14 +225,14 @@ public class DNA extends EZPlugin implements PluginListener{
 		int penultimateArrayIndex = arrayLength - 2;
 		double fallThreshold = jumpedBlockLocations.get(lastArrayIndex).getY() - 2;
 		if(player.getY() < fallThreshold){
-			int xlb = (int)jumpedBlockLocations.get(penultimateArrayIndex).getX();
-			int ylb = (int)jumpedBlockLocations.get(penultimateArrayIndex).getY() + 1;
-			int zlb = (int)jumpedBlockLocations.get(penultimateArrayIndex).getZ();
+			double lastBlockX = jumpedBlockLocations.get(penultimateArrayIndex).getX();
+			double lastBlockY = jumpedBlockLocations.get(penultimateArrayIndex).getY();
+			double lastBlockZ = jumpedBlockLocations.get(penultimateArrayIndex).getZ();
 
-			float playerDirection = player.getLocation().getRotation();
-			Location penultimateBlock = new Location(player.getWorld(), xlb, ylb, zlb, 0f, playerDirection);
-			player.teleportTo(penultimateBlock);
-			playSound(penultimateBlock, SoundEffect.Type.BAT_DEATH, 1.0f, 0.75f);
+			float playerFacingDirection = player.getLocation().getRotation();
+			Location playerJumpedFromBlockLocation = new Location(player.getWorld(), lastBlockX + 0.5, lastBlockY + 1, lastBlockZ + 0.5, 0f, playerFacingDirection);
+			player.teleportTo(playerJumpedFromBlockLocation);
+			playSound(playerJumpedFromBlockLocation, SoundEffect.Type.BAT_DEATH, 1.0f, 0.75f);
 			
 			jumpFails++;
 			updateScoreboard();
